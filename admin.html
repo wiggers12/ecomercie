@@ -12,7 +12,7 @@
             --dark1: #2c3e50; --dark2: #34495e; --light1: #ecf0f1; --light2: #bdc3c7;
         }
         body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1); font-size: 16px; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background-color: var(--dark1); color: var(--light1); display: flex; flex-direction: column; padding: 20px; }
+        .sidebar { width: 250px; background-color: var(--dark1); color: var(--light1); display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 100; }
         .sidebar h2 { text-align: center; color: var(--light1); margin-bottom: 30px; }
         .sidebar nav a { display: block; color: var(--light2); text-decoration: none; padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s; }
         .sidebar nav a:hover, .sidebar nav a.active { background-color: var(--dark2); color: var(--light1); }
@@ -27,13 +27,29 @@
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: #2980b9; }
         .btn-danger { background-color: var(--danger); color: white; }
+        .btn-secondary { background-color: var(--light2); color: var(--dark1); }
+        .btn-secondary:hover { background-color: #aaa; }
         .table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
         .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
         .table th { background-color: var(--dark2); color: var(--light1); }
         .table img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
         .actions a { margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px; }
-        .modal { /* ... estilos do modal ... */ }
-        input, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--light2); border-radius: 6px; box-sizing: border-box; }
+        .actions a:hover { color: var(--primary); }
+
+        /* Modal Styles */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 550px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: zoomIn 0.3s ease-out; }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-content h2 { color: var(--dark1); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--light2); padding-bottom: 10px; }
+        .modal-content label { display: block; margin-bottom: 5px; color: var(--dark1); font-weight: 500; }
+        .modal-content input[type="text"], .modal-content textarea, .modal-content input[type="number"], .modal-content input[type="url"] {
+            width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid var(--light2); border-radius: 6px; box-sizing: border-box;
+        }
+        .modal-content input[type="file"] { margin-bottom: 15px; }
+        .modal-content .file-upload-section { margin-bottom: 15px; border: 1px dashed var(--light2); padding: 15px; border-radius: 8px; background-color: #f9f9f9; }
+        .modal-content .file-upload-section label { margin-bottom: 10px; font-weight: 600; }
+        .modal-content .preview-image, .modal-content .preview-video { max-width: 150px; max-height: 100px; display: block; margin-top: 10px; border-radius: 4px; object-fit: cover; background-color: #eee; }
+        .modal-content .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -59,8 +75,10 @@
     <div id="view-clients" class="view">
         <div class="header">
             <h1>Clientes Cadastrados</h1>
+            <button class="btn btn-primary" onclick="openClientModal()"><i class="fas fa-user-plus"></i> Novo Cliente</button>
         </div>
-        </div>
+        <div id="clients-table-container"></div>
+    </div>
 </main>
 
 <script>
@@ -73,15 +91,22 @@
         localStorage.setItem("catalogoDigital", JSON.stringify(db));
     }
 
+    // --- VARIÁVEIS TEMPORÁRIAS PARA UPLOAD ---
+    let currentImageBase64 = null;
+    let currentVideoObjectUrl = null; // Para upload de vídeo temporário
+
     // --- NAVEGAÇÃO ---
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
         document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`.sidebar nav a[onclick="showView('${viewId}')"]`).classList.add('active');
+        
+        if (viewId === 'view-products') renderProductsTable();
+        if (viewId === 'view-clients') renderClientsTable();
     }
 
-    // --- LÓGICA DE PRODUTOS (CRUD) ---
+    // --- FUNÇÕES DE PRODUTOS (CRUD) ---
     function renderProductsTable() {
         const container = document.getElementById('products-table-container');
         if (db.products.length === 0) {
@@ -112,47 +137,166 @@
         const isEditing = !!product.id;
         const modalTitle = isEditing ? 'Editar Produto' : 'Adicionar Novo Produto';
 
+        // Resetar variáveis de upload ao abrir o modal
+        currentImageBase64 = product.imagemUrl || null;
+        currentVideoObjectUrl = null; // Vídeos upados não persistem, então não carregamos aqui
+
         const modalHtml = `
-            <div class="modal" id="product-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
-                <div class="modal-content" style="background:white;padding:30px;border-radius:8px;width:500px;">
+            <div class="modal" id="product-modal">
+                <div class="modal-content">
                     <h2>${modalTitle}</h2>
                     <input type="hidden" id="productId" value="${product.id || ''}">
-                    <input type="text" id="productName" placeholder="Nome do Produto" value="${product.nome || ''}">
-                    <textarea id="productDesc" placeholder="Descrição do Produto">${product.descricao || ''}</textarea>
-                    <input type="number" id="productPrice" placeholder="Preço (Ex: 99.90)" value="${product.valor || ''}">
-                    <label>Imagem do Produto (URL)</label>
-                    <input type="url" id="productImage" placeholder="https://..." value="${product.imagemUrl || ''}">
-                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-                        <button class="btn" onclick="closeModal('product-modal')">Cancelar</button>
+                    
+                    <label for="productName">Nome do Produto:</label>
+                    <input type="text" id="productName" placeholder="Ex: Camiseta Básica" value="${product.nome || ''}">
+                    
+                    <label for="productDesc">Descrição:</label>
+                    <textarea id="productDesc" placeholder="Detalhes do produto...">${product.descricao || ''}</textarea>
+                    
+                    <label for="productPrice">Preço (R$):</label>
+                    <input type="number" id="productPrice" placeholder="Ex: 99.90" value="${product.valor || ''}" step="0.01">
+                    
+                    <div class="file-upload-section">
+                        <label for="productImageInput">Imagem do Produto (Max 2MB):</label>
+                        <input type="file" id="productImageInput" accept="image/*">
+                        <img id="previewImage" class="preview-image" src="${product.imagemUrl || ''}" style="${product.imagemUrl ? 'display:block;' : 'display:none;'}">
+                    </div>
+
+                    <div class="file-upload-section">
+                        <label>Vídeo do Produto (Upload ou YouTube URL):</label>
+                        <input type="file" id="productVideoInput" accept="video/*">
+                        <input type="url" id="productVideoUrl" placeholder="Ou cole a URL do YouTube" value="${product.videoUrl && !product.videoUrl.startsWith('blob:') ? product.videoUrl : ''}">
+                        <video id="previewVideo" class="preview-video" controls style="display:none;"></video>
+                        <p style="font-size:12px;color:#888;margin-top:5px;">Atenção: Vídeos enviados por upload são temporários e serão perdidos ao recarregar a página. Use URLs do YouTube para persistência.</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="closeModal('product-modal')">Cancelar</button>
                         <button class="btn btn-primary" onclick="saveProduct()">Salvar</button>
                     </div>
                 </div>
             </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Adiciona event listeners para os campos de upload
+        setupImageUpload('productImageInput', 'previewImage');
+        setupVideoUpload('productVideoInput', 'productVideoUrl', 'previewVideo');
+
+        // Se estiver editando e já tiver URL de vídeo, ajusta o campo
+        if (isEditing && product.videoUrl && product.videoUrl.startsWith('blob:')) {
+            document.getElementById('productVideoInput').value = null; // Clear file input
+            document.getElementById('productVideoUrl').value = "Vídeo enviado por upload (temporário)";
+            document.getElementById('productVideoUrl').disabled = true;
+
+            const videoPrev = document.getElementById('previewVideo');
+            videoPrev.src = product.videoUrl;
+            videoPrev.style.display = 'block';
+            currentVideoObjectUrl = product.videoUrl; // Reatribui para o caso de não mudar
+        } else if (isEditing && product.videoUrl) {
+            document.getElementById('productVideoInput').disabled = true;
+        }
     }
 
-    function closeModal(modalId) {
-        document.getElementById(modalId)?.remove();
+    function setupImageUpload(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        input.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                preview.style.display = 'none';
+                currentImageBase64 = null;
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
+                alert("Erro: A imagem é muito grande! O limite é de 2MB.");
+                event.target.value = null; preview.style.display = 'none'; currentImageBase64 = null;
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImageBase64 = e.target.result;
+                preview.src = currentImageBase64;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
     }
+
+    function setupVideoUpload(fileInputId, urlInputId, previewId) {
+        const fileInput = document.getElementById(fileInputId);
+        const urlInput = document.getElementById(urlInputId);
+        const preview = document.getElementById(previewId);
+
+        // Listener para upload de arquivo
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (currentVideoObjectUrl) {
+                URL.revokeObjectURL(currentVideoObjectUrl); // Libera memória da URL anterior
+            }
+            if (file) {
+                currentVideoObjectUrl = URL.createObjectURL(file);
+                preview.src = currentVideoObjectUrl;
+                preview.style.display = 'block';
+                urlInput.disabled = true;
+                urlInput.value = "Vídeo enviado por upload (temporário)";
+            } else {
+                currentVideoObjectUrl = null;
+                preview.style.display = 'none';
+                preview.src = '';
+                urlInput.disabled = false;
+                urlInput.value = '';
+            }
+        });
+
+        // Listener para URL do YouTube
+        urlInput.addEventListener('input', function() {
+            if (urlInput.value.trim() !== '') {
+                fileInput.disabled = true;
+                fileInput.value = null; // Limpa o input de arquivo
+                if (currentVideoObjectUrl) { // Se tinha um vídeo local, libera
+                    URL.revokeObjectURL(currentVideoObjectUrl);
+                    currentVideoObjectUrl = null;
+                }
+                preview.style.display = 'none';
+                preview.src = '';
+            } else {
+                fileInput.disabled = false;
+            }
+        });
+    }
+
 
     function saveProduct() {
         const id = document.getElementById('productId').value;
-        const product = {
-            id: id || Date.now().toString(),
-            nome: document.getElementById('productName').value,
-            descricao: document.getElementById('productDesc').value,
-            valor: parseFloat(document.getElementById('productPrice').value) || 0,
-            imagemUrl: document.getElementById('productImage').value,
-        };
+        const productName = document.getElementById('productName').value.trim();
+        const productDesc = document.getElementById('productDesc').value.trim();
+        const productPrice = parseFloat(document.getElementById('productPrice').value) || 0;
+        const productVideoUrl = document.getElementById('productVideoUrl').value.trim();
 
-        if (!product.nome || product.valor <= 0 || !product.imagemUrl) {
-            alert("Por favor, preencha todos os campos obrigatórios.");
+        // Determina a URL final da imagem
+        const finalImageUrl = currentImageBase64;
+
+        // Determina a URL final do vídeo (prioriza upload temporário, senão YouTube URL)
+        const finalVideoUrl = currentVideoObjectUrl || (productVideoUrl.startsWith("Vídeo enviado por upload") ? null : productVideoUrl);
+
+        if (!productName || productPrice <= 0 || !finalImageUrl) {
+            alert("Por favor, preencha Nome, Preço e selecione uma Imagem para o produto.");
             return;
         }
 
+        const product = {
+            id: id || Date.now().toString(),
+            nome: productName,
+            descricao: productDesc,
+            valor: productPrice,
+            imagemUrl: finalImageUrl,
+            videoUrl: finalVideoUrl || '', // Garante que seja string vazia se não houver vídeo
+        };
+
         if (id) { // Editando
             const index = db.products.findIndex(p => p.id === id);
-            db.products[index] = product;
+            if (index !== -1) db.products[index] = product;
         } else { // Criando
             db.products.push(product);
         }
@@ -170,9 +314,105 @@
         }
     }
 
+    // --- FUNÇÕES DE CLIENTES (CRUD BÁSICO) ---
+    function renderClientsTable() {
+        const container = document.getElementById('clients-table-container');
+        if (db.clients.length === 0) {
+            container.innerHTML = "<p>Nenhum cliente cadastrado. Clique em 'Novo Cliente' para começar.</p>";
+            return;
+        }
+        let tableHtml = `<table class="table">
+            <tr><th>Nome</th><th>Contato</th><th>Ações</th></tr>`;
+        db.clients.forEach(c => {
+            tableHtml += `
+                <tr>
+                    <td>${c.nome}</td>
+                    <td>${c.contato || 'N/A'}</td>
+                    <td class="actions">
+                        <a onclick="openClientModal('${c.id}')" title="Editar"><i class="fas fa-edit"></i></a>
+                        <a onclick="deleteClient('${c.id}')" title="Excluir"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+            `;
+        });
+        tableHtml += `</table>`;
+        container.innerHTML = tableHtml;
+    }
+
+    function openClientModal(clientId = null) {
+        const client = db.clients.find(c => c.id === clientId) || {};
+        const isEditing = !!client.id;
+        const modalTitle = isEditing ? 'Editar Cliente' : 'Adicionar Novo Cliente';
+
+        const modalHtml = `
+            <div class="modal" id="client-modal">
+                <div class="modal-content">
+                    <h2>${modalTitle}</h2>
+                    <input type="hidden" id="clientId" value="${client.id || ''}">
+                    <label for="clientName">Nome do Cliente:</label>
+                    <input type="text" id="clientName" placeholder="Nome Completo" value="${client.nome || ''}">
+                    <label for="clientContact">Contato (Telefone/Email):</label>
+                    <input type="text" id="clientContact" placeholder="Ex: (51) 99999-9999 ou email@exemplo.com" value="${client.contato || ''}">
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="closeModal('client-modal')">Cancelar</button>
+                        <button class="btn btn-primary" onclick="saveClient()">Salvar</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function saveClient() {
+        const id = document.getElementById('clientId').value;
+        const client = {
+            id: id || Date.now().toString(),
+            nome: document.getElementById('clientName').value.trim(),
+            contato: document.getElementById('clientContact').value.trim(),
+        };
+
+        if (!client.nome) {
+            alert("O nome do cliente é obrigatório!");
+            return;
+        }
+
+        if (id) {
+            const index = db.clients.findIndex(c => c.id === id);
+            if (index !== -1) db.clients[index] = client;
+        } else {
+            db.clients.push(client);
+        }
+
+        saveDB();
+        renderClientsTable();
+        closeModal('client-modal');
+    }
+
+    function deleteClient(clientId) {
+        if (confirm("Tem certeza que deseja excluir este cliente?")) {
+            db.clients = db.clients.filter(c => c.id !== clientId);
+            saveDB();
+            renderClientsTable();
+        }
+    }
+
+    // --- FUNÇÕES GERAIS ---
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.remove();
+            // Limpar URL de objeto de vídeo quando o modal é fechado
+            if (currentVideoObjectUrl) {
+                URL.revokeObjectURL(currentVideoObjectUrl);
+                currentVideoObjectUrl = null;
+            }
+            currentImageBase64 = null; // Limpa também a imagem
+        }
+    }
+
+
     // --- INICIALIZAÇÃO ---
     window.onload = () => {
-        renderProductsTable();
+        showView('view-products'); // Inicia na aba de produtos
     };
 </script>
 
