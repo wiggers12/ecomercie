@@ -18,6 +18,15 @@
     section { display:none; padding:20px; max-width:1200px; margin:auto; }
     h2 { color:var(--accent); margin:15px 0; border-bottom: 2px solid var(--dark3); padding-bottom: 10px;}
     input, select { padding:12px; border:none; border-radius:6px; width:100%; box-sizing: border-box; margin:8px 0; background:var(--dark3); color:var(--text); font-size:16px; }
+    
+    /* Estilo customizado para o input de arquivo */
+    input[type="file"] { background: var(--dark3); padding: 8px; }
+    input[type="file"]::file-selector-button {
+        background-color: var(--primary); color: var(--text); border: none;
+        padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+    }
+    input[type="file"]::file-selector-button:hover { background-color: var(--secondary); }
+    
     .btn { background:var(--primary); display:block; width:100%; text-align:center; padding:12px; margin:15px 0; border-radius:6px; cursor:pointer; border:none; color:var(--text); font-weight:bold; font-size:16px; transition: background 0.2s; }
     .btn:hover { background:var(--secondary); }
     .list { background:var(--dark2); border-radius:8px; padding:15px; margin-top:10px; }
@@ -25,7 +34,6 @@
     .list div:last-child { border-bottom: none; }
     .list small { color: #aaa; }
 
-    /* Estilos Catálogo de Produtos */
     #catalogoContainer { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
     .prod-card { background:var(--dark2); border-radius:10px; overflow:hidden; text-align:center; transition:transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;}
     .prod-card:hover { transform:scale(1.03); box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
@@ -36,7 +44,6 @@
     .prod-card-actions { padding:0 15px 15px 15px; }
     .prod-card-actions .btn { font-size:14px; padding:10px; margin:0; }
 
-    /* Modal */
     .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
     .modal-content { background:var(--dark2); margin:10% auto; padding:20px; border-radius:10px; max-width:700px; animation: slide-down 0.3s ease-out; }
     @keyframes slide-down { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -44,6 +51,8 @@
     .modal-header h2 { margin-top:0; }
     .close-btn { color:#aaa; font-size:32px; font-weight:bold; cursor:pointer; }
     .modal-body iframe { width:100%; height:350px; border:none; border-radius:8px; margin-top:15px; }
+
+    #previewImagem { border-radius: 8px; border: 2px solid var(--dark3); }
   </style>
 </head>
 <body>
@@ -74,7 +83,11 @@
   <h2>⚙️ Painel de Administração</h2>
   <h3>📦 Adicionar Novo Produto ao Catálogo</h3>
   <input type="text" id="prodNome" placeholder="Nome do Produto">
-  <input type="url" id="prodImagem" placeholder="URL da Imagem (Ex: https://site.com/imagem.jpg)">
+  
+  <label for="prodImagemInput">Imagem do Produto (Máx 2MB)</label>
+  <input type="file" id="prodImagemInput" accept="image/*">
+  <img id="previewImagem" src="" alt="Prévia da imagem" style="max-width: 150px; display: none; margin-top: 10px;">
+  
   <input type="url" id="prodVideo" placeholder="URL do Vídeo do YouTube (Opcional)">
   <input type="number" id="prodValor" placeholder="Preço do Produto (Ex: 129.90)">
   <button class="btn" onclick="addProduto()">➕ Adicionar Produto</button>
@@ -100,15 +113,12 @@
 <script>
 // --- BANCO DE DADOS LOCAL (SALVO NO NAVEGADOR) ---
 let dados = JSON.parse(localStorage.getItem("catalogoDigital")) || {
-  clientes: [
-    {id: 1, nome: "João da Silva", tel: "51 99999-8888", email: "joao.silva@email.com"}
-  ],
-  catalogo: [
-    {id: 1, nome:"Notebook Ultra Fino", imagemUrl:"https://source.unsplash.com/random/400x300?laptop", videoUrl:"https://www.youtube.com/watch?v=dQw4w9WgXcQ", valor: 4599.90},
-    {id: 2, nome:"Fone de Ouvido Bluetooth", imagemUrl:"https://source.unsplash.com/random/400x300?headphones", videoUrl:"", valor: 299.00},
-    {id: 3, nome:"Smartwatch Esportivo", imagemUrl:"https://source.unsplash.com/random/400x300?smartwatch", videoUrl:"", valor: 780.50}
-  ]
+  clientes: [],
+  catalogo: []
 };
+
+// Variável temporária para guardar a imagem antes de salvar
+let imagemBase64 = null;
 
 // --- FUNÇÕES GERAIS ---
 function save(){ 
@@ -145,7 +155,7 @@ function addCliente() {
 }
 function renderClientes() {
     let html = "";
-    [...dados.clientes].reverse().forEach(c => { // Mostra os mais recentes primeiro
+    [...dados.clientes].reverse().forEach(c => {
         html += `<div><b>${c.nome}</b><br><small>${c.email || 'Sem e-mail'} | ${c.tel || 'Sem telefone'}</small></div>`;
     });
     document.getElementById("listaClientes").innerHTML = html || "<p>Nenhum cliente cadastrado.</p>";
@@ -154,22 +164,24 @@ function renderClientes() {
 // --- SEÇÃO ADMIN (GERENCIAR CATÁLOGO) ---
 function addProduto(){
   const nome = document.getElementById("prodNome").value.trim();
-  const imagemUrl = document.getElementById("prodImagem").value.trim();
   const videoUrl = document.getElementById("prodVideo").value.trim();
   const valor = parseFloat(document.getElementById("prodValor").value) || 0;
 
-  if(!nome || !imagemUrl || valor <= 0){
-    alert("Preencha Nome, URL da Imagem e Preço do produto!");
+  if(!nome || !imagemBase64 || valor <= 0){
+    alert("Preencha Nome, selecione uma Imagem e defina um Preço para o produto!");
     return;
   }
-  dados.catalogo.push({id: Date.now(), nome, imagemUrl, videoUrl, valor});
+  dados.catalogo.push({id: Date.now(), nome, imagemUrl: imagemBase64, videoUrl, valor});
   save();
   renderAdminListaProdutos();
   beep();
   alert("✅ Produto adicionado ao catálogo!");
+  
   // Limpa o formulário
   document.getElementById("prodNome").value = '';
-  document.getElementById("prodImagem").value = '';
+  document.getElementById("prodImagemInput").value = null;
+  document.getElementById("previewImagem").style.display = 'none';
+  imagemBase64 = null; // Limpa a variável da imagem
   document.getElementById("prodVideo").value = '';
   document.getElementById("prodValor").value = '';
 }
@@ -188,7 +200,7 @@ function renderCatalogo(){
     dados.catalogo.forEach((p, index) => {
         container.innerHTML += `
             <div class="prod-card">
-                <img src="${p.imagemUrl}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/400x300.png?text=Imagem+Inválida'">
+                <img src="${p.imagemUrl}" alt="${p.nome}">
                 <div class="prod-card-info">
                     <h4>${p.nome}</h4>
                     <p>R$ ${p.valor.toFixed(2)}</p>
@@ -217,7 +229,7 @@ function showProductDetail(index) {
 }
 function closeModal() {
     document.getElementById("productModal").style.display = "none";
-    document.getElementById("modalVideoContainer").innerHTML = ""; // Para o vídeo ao fechar
+    document.getElementById("modalVideoContainer").innerHTML = "";
 }
 function convertToEmbedUrl(url) {
     let videoId = '';
@@ -236,8 +248,37 @@ window.onclick = function(event) {
     }
 }
 
+// --- SETUP DE EVENTOS ---
+document.getElementById('prodImagemInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('previewImagem');
+    
+    if (!file) {
+        preview.style.display = 'none';
+        imagemBase64 = null;
+        return;
+    }
+
+    // Validação de tamanho (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        alert("Erro: A imagem é muito grande! O limite é de 2MB.");
+        event.target.value = null; // Limpa o input
+        preview.style.display = 'none';
+        imagemBase64 = null;
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        imagemBase64 = e.target.result;
+        preview.src = imagemBase64;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
 // --- INICIALIZAÇÃO ---
-showTab("catalogo"); // Começa mostrando a aba do catálogo
+showTab("catalogo");
 </script>
 </body>
 </html>
