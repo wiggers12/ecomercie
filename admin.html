@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c;
+            --dark1: #2c3e50; --dark2: #34495e; --light1: #ecf0f1; --light2: #bdc3c7;
+        }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1); font-size: 16px; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background-color: var(--dark1); color: var(--light1); display: flex; flex-direction: column; padding: 20px; }
+        .sidebar h2 { text-align: center; color: var(--light1); margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: var(--light2); text-decoration: none; padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s; }
+        .sidebar nav a:hover, .sidebar nav a.active { background-color: var(--dark2); color: var(--light1); }
+        .sidebar nav a i { margin-right: 10px; }
+        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; color: var(--dark1); }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background-color 0.3s; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
+        .table th { background-color: var(--dark2); color: var(--light1); }
+        .table img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
+        .actions a { margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px; }
+        .modal { /* ... estilos do modal ... */ }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--light2); border-radius: 6px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <h2>Meu Catálogo</h2>
+    <nav>
+        <a href="#" onclick="showView('view-products')" class="active"><i class="fas fa-box-open"></i> Produtos</a>
+        <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
+        <a href="catalogo.html" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
+    </nav>
+</aside>
+
+<main class="main-content">
+    <div id="view-products" class="view active">
+        <div class="header">
+            <h1>Gerenciar Produtos</h1>
+            <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button>
+        </div>
+        <div id="products-table-container"></div>
+    </div>
+
+    <div id="view-clients" class="view">
+        <div class="header">
+            <h1>Clientes Cadastrados</h1>
+        </div>
+        </div>
+</main>
+
+<script>
+    // --- BANCO DE DADOS LOCAL ---
+    let db = JSON.parse(localStorage.getItem("catalogoDigital")) || {
+        products: [],
+        clients: []
+    };
+    function saveDB() {
+        localStorage.setItem("catalogoDigital", JSON.stringify(db));
+    }
+
+    // --- NAVEGAÇÃO ---
+    function showView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+        document.querySelector(`.sidebar nav a[onclick="showView('${viewId}')"]`).classList.add('active');
+    }
+
+    // --- LÓGICA DE PRODUTOS (CRUD) ---
+    function renderProductsTable() {
+        const container = document.getElementById('products-table-container');
+        if (db.products.length === 0) {
+            container.innerHTML = "<p>Nenhum produto cadastrado. Clique em 'Novo Produto' para começar.</p>";
+            return;
+        }
+        let tableHtml = `<table class="table">
+            <tr><th>Imagem</th><th>Nome</th><th>Preço</th><th>Ações</th></tr>`;
+        db.products.forEach(p => {
+            tableHtml += `
+                <tr>
+                    <td><img src="${p.imagemUrl}" alt="${p.nome}"></td>
+                    <td>${p.nome}</td>
+                    <td>R$ ${p.valor.toFixed(2)}</td>
+                    <td class="actions">
+                        <a onclick="openProductModal('${p.id}')" title="Editar"><i class="fas fa-edit"></i></a>
+                        <a onclick="deleteProduct('${p.id}')" title="Excluir"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+            `;
+        });
+        tableHtml += `</table>`;
+        container.innerHTML = tableHtml;
+    }
+
+    function openProductModal(productId = null) {
+        const product = db.products.find(p => p.id === productId) || {};
+        const isEditing = !!product.id;
+        const modalTitle = isEditing ? 'Editar Produto' : 'Adicionar Novo Produto';
+
+        const modalHtml = `
+            <div class="modal" id="product-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+                <div class="modal-content" style="background:white;padding:30px;border-radius:8px;width:500px;">
+                    <h2>${modalTitle}</h2>
+                    <input type="hidden" id="productId" value="${product.id || ''}">
+                    <input type="text" id="productName" placeholder="Nome do Produto" value="${product.nome || ''}">
+                    <textarea id="productDesc" placeholder="Descrição do Produto">${product.descricao || ''}</textarea>
+                    <input type="number" id="productPrice" placeholder="Preço (Ex: 99.90)" value="${product.valor || ''}">
+                    <label>Imagem do Produto (URL)</label>
+                    <input type="url" id="productImage" placeholder="https://..." value="${product.imagemUrl || ''}">
+                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                        <button class="btn" onclick="closeModal('product-modal')">Cancelar</button>
+                        <button class="btn btn-primary" onclick="saveProduct()">Salvar</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId)?.remove();
+    }
+
+    function saveProduct() {
+        const id = document.getElementById('productId').value;
+        const product = {
+            id: id || Date.now().toString(),
+            nome: document.getElementById('productName').value,
+            descricao: document.getElementById('productDesc').value,
+            valor: parseFloat(document.getElementById('productPrice').value) || 0,
+            imagemUrl: document.getElementById('productImage').value,
+        };
+
+        if (!product.nome || product.valor <= 0 || !product.imagemUrl) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
+        }
+
+        if (id) { // Editando
+            const index = db.products.findIndex(p => p.id === id);
+            db.products[index] = product;
+        } else { // Criando
+            db.products.push(product);
+        }
+
+        saveDB();
+        renderProductsTable();
+        closeModal('product-modal');
+    }
+
+    function deleteProduct(productId) {
+        if (confirm("Tem certeza que deseja excluir este produto?")) {
+            db.products = db.products.filter(p => p.id !== productId);
+            saveDB();
+            renderProductsTable();
+        }
+    }
+
+    // --- INICIALIZAÇÃO ---
+    window.onload = () => {
+        renderProductsTable();
+    };
+</script>
+
+</body>
+</html>
