@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛒 DashControl Vendas Premium</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; font-family:'Poppins',sans-serif; background:#0d0d0d; color:white; }
+    header { background:linear-gradient(90deg,#2980b9,#16a085); padding:15px; font-size:22px; font-weight:700; text-align:center; }
+    nav { display:flex; justify-content:center; flex-wrap:wrap; background:#1e1e1e; }
+    nav button { background:#2980b9; border:none; margin:5px; padding:10px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer; }
+    nav button:hover { background:#16a085; }
+    section { display:none; padding:20px; max-width:1000px; margin:auto; }
+    h2 { color:#1abc9c; margin:15px 0; }
+    input, select { padding:10px; border:none; border-radius:6px; width:100%; margin:5px 0; background:#2c2c2c; color:white; }
+    .btn { background:#2980b9; padding:10px; margin:5px; border-radius:6px; cursor:pointer; border:none; color:white; font-weight:bold; }
+    .btn:hover { background:#16a085; }
+    .list { background:#1a1a1a; border-radius:8px; padding:10px; margin-top:10px; }
+    .list div { padding:6px 0; border-bottom:1px solid #333; }
+    .chart-card { background:#1a1a1a; border-radius:12px; padding:15px; margin:20px auto; box-shadow:0 4px 20px rgba(0,0,0,0.6); max-width:1200px; }
+    .chart { width:100%; height:400px; }
+    .prod-btn { font-size:18px; padding:10px; margin:10px; border:none; border-radius:10px; background:#2c2c2c; color:white; cursor:pointer; width:140px; height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .prod-btn:hover { background:#2980b9; transform:scale(1.05); }
+    .pay-btn { font-size:18px; padding:15px; margin:8px; border:none; border-radius:10px; cursor:pointer; width:130px; color:white; }
+    .pay-pix { background:#27ae60; } .pay-debito { background:#2980b9; } .pay-credito { background:#8e44ad; } .pay-dinheiro { background:#f39c12; }
+    .pay-btn:hover { opacity:0.9; transform:scale(1.05); }
+    .kpi { background:#1a1a1a; display:inline-block; padding:15px; border-radius:10px; margin:10px; min-width:150px; font-size:14px; }
+    .low-stock { color:#e74c3c; font-weight:bold; }
+  </style>
+</head>
+<body>
+<header>🛒 DashControl Vendas Premium</header>
+<nav>
+  <button onclick="showTab('vendedor')">👨‍💼 Vendedor</button>
+  <button onclick="showTab('caixa')">💰 Caixa</button>
+  <button onclick="showTab('admin')">⚙️ Admin</button>
+  <button onclick="showTab('dashboard')">📊 Dashboard</button>
+</nav>
+
+<section id="vendedor">
+  <h2>👨‍💼 Área do Vendedor</h2>
+  <select id="vendedorNome"></select>
+  <input type="text" id="clienteNome" placeholder="Nome do Cliente">
+  <div id="produtosBtns" style="display:flex;flex-wrap:wrap;"></div>
+  <div class="list" id="listaVendas"></div>
+</section>
+
+<section id="caixa">
+  <h2>💰 Caixa</h2>
+  <div class="list" id="vendasAbertas"></div>
+</section>
+
+<section id="admin">
+  <h2>⚙️ Administração</h2>
+  <h3>📦 Estoque</h3>
+  <input type="text" id="estNome" placeholder="Nome do Produto">
+  <input type="text" id="estIcone" placeholder="Ícone/Emoji (💻, 🖱️)">
+  <input type="number" id="estValor" placeholder="Valor de Venda (R$)">
+  <input type="number" id="estCusto" placeholder="Valor de Custo (R$)">
+  <input type="number" id="estQtd" placeholder="Quantidade">
+  <button class="btn" onclick="addEstoque()">➕ Adicionar Produto</button>
+  <div class="list" id="listaEstoque"></div>
+
+  <h3>👨‍💼 Gerenciar Vendedores</h3>
+  <input type="text" id="novoVendedor" placeholder="Nome do Vendedor">
+  <button class="btn" onclick="addVendedor()">➕ Adicionar Vendedor</button>
+  <div class="list" id="listaVendedores"></div>
+</section>
+
+<section id="dashboard">
+  <h2>📊 Dashboard</h2>
+  <div class="kpi">Receita Total: R$ <span id="kpiReceita">0</span></div>
+  <div class="kpi">Lucro Total: R$ <span id="kpiLucro">0</span></div>
+  <div class="kpi">Ticket Médio: R$ <span id="kpiTicket">0</span></div>
+  <div class="kpi">Itens em Estoque: <span id="kpiEstoque">0</span></div>
+  <div class="chart-card"><div id="chartClientes" class="chart"></div></div>
+  <div class="chart-card"><div id="chartVendedores" class="chart"></div></div>
+  <div class="chart-card"><div id="chartPagamentos" class="chart"></div></div>
+  <div class="chart-card"><div id="chartLinha" class="chart"></div></div>
+  <div class="chart-card"><div id="chartEstoque" class="chart"></div></div>
+</section>
+
+<script>
+let dados = JSON.parse(localStorage.getItem("loja")) || {
+  vendedores:["Carlos","Ana"], 
+  vendasEmAberto:[], 
+  estoque:[{nome:"Notebook",icone:"💻",valor:4500,qtd:10,custo:3000},
+           {nome:"Mouse",icone:"🖱️",valor:120,qtd:30,custo:50},
+           {nome:"Teclado",icone:"⌨️",valor:250,qtd:20,custo:110}],
+  vendasFechadas:[], 
+  financeiro:{entradas:0,saidas:0,saldo:0,lucro:0}
+};
+function save(){ localStorage.setItem("loja",JSON.stringify(dados)); }
+function beep(){ new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play(); }
+
+// Navegação
+function showTab(tab){
+  document.querySelectorAll("section").forEach(s=>s.style.display="none");
+  document.getElementById(tab).style.display="block";
+  if(tab==="vendedor"){renderVendas();renderVendedorSelect();renderProdutosBtns();}
+  if(tab==="caixa") renderCaixa();
+  if(tab==="admin"){renderEstoque();renderVendedores();}
+  if(tab==="dashboard") renderDashboard();
+}
+
+// 👨‍💼 Vendedor
+function iniciarVenda(vendedor,cliente){
+  if(!vendedor||!cliente){alert("Preencha vendedor e cliente!");return;}
+  if(dados.vendasEmAberto.find(v=>v.cliente.toLowerCase()===cliente.toLowerCase()&&v.aberta)){alert("Já existe uma venda aberta para este cliente!");return;}
+  dados.vendasEmAberto.push({cliente,vendedor,itens:[],aberta:true});
+  save();renderVendas();beep();
+}
+function addItem(idx){
+  let vendedor=document.getElementById("vendedorNome").value;
+  let cliente=document.getElementById("clienteNome").value;
+  if(!vendedor||!cliente){alert("Preencha vendedor e cliente!");return;}
+  let vendaObj=dados.vendasEmAberto.find(v=>v.cliente.toLowerCase()===cliente.toLowerCase()&&v.aberta);
+  if(!vendaObj){iniciarVenda(vendedor,cliente); vendaObj=dados.vendasEmAberto.find(v=>v.cliente.toLowerCase()===cliente.toLowerCase()&&v.aberta);}
+  let produto=dados.estoque[idx];
+  if(produto.qtd<=0){alert("Estoque insuficiente!");return;}
+  vendaObj.itens.push({produto:produto.nome,valor:produto.valor,qtd:1,custo:produto.custo});
+  produto.qtd--;
+  save();renderVendas();beep();
+}
+function renderVendas(){
+  let html=""; dados.vendasEmAberto.filter(v=>v.aberta).forEach(v=>{
+    let total=v.itens.reduce((s,i)=>s+i.valor*i.qtd,0);
+    html+=`<div><b>Cliente: ${v.cliente}</b> - Vendedor: ${v.vendedor} - Total Parcial R$${total.toFixed(2)}<br>
+      Itens: ${v.itens.map(i=>`${i.qtd}x ${i.produto}`).join(", ")||"Nenhum"}</div>`;
+  });
+  document.getElementById("listaVendas").innerHTML=html||"<p>Nenhuma venda aberta.</p>";
+}
+function renderVendedorSelect(){
+  let sel=document.getElementById("vendedorNome"); sel.innerHTML="";
+  dados.vendedores.forEach(v=>{let opt=document.createElement("option"); opt.value=v; opt.textContent=v; sel.appendChild(opt);});
+}
+function renderProdutosBtns(){
+  let div=document.getElementById("produtosBtns"); div.innerHTML="";
+  dados.estoque.forEach((p,i)=>{div.innerHTML+=`<button class="prod-btn" onclick="addItem(${i})">${p.icone||"📦"}<br>${p.nome}<br>R$${p.valor.toFixed(2)}</button>`;});
+}
+
+// 💰 Caixa
+function renderCaixa(){
+  let html=""; dados.vendasEmAberto.filter(v=>v.aberta).forEach((v,i)=>{
+    let total=v.itens.reduce((s,p)=>s+p.valor*p.qtd,0);
+    html+=`<div><b>Cliente: ${v.cliente}</b> - Vendedor: ${v.vendedor}<br>Itens: ${v.itens.map(p=>`${p.qtd}x ${p.produto}`).join(", ")}
+      <br><b>Total: R$${total.toFixed(2)}</b><br>
+      <button class="pay-btn pay-pix" onclick="finalizarVenda(${i},'Pix')">⚡ Pix</button>
+      <button class="pay-btn pay-debito" onclick="finalizarVenda(${i},'Débito')">💳 Débito</button>
+      <button class="pay-btn pay-credito" onclick="finalizarVenda(${i},'Crédito')">💳 Crédito</button>
+      <button class="pay-btn pay-dinheiro" onclick="finalizarVenda(${i},'Dinheiro')">💵 Dinheiro</button></div><hr>`;
+  });
+  document.getElementById("vendasAbertas").innerHTML=html||"<p>Nenhuma venda para finalizar.</p>";
+}
+function finalizarVenda(idx,pagamento){
+  let venda=dados.vendasEmAberto[idx];
+  let total=venda.itens.reduce((s,p)=>s+p.valor*p.qtd,0);
+  let lucro=venda.itens.reduce((s,p)=>s+(p.valor-p.custo)*p.qtd,0);
+  dados.vendasFechadas.push({cliente:venda.cliente,vendedor:venda.vendedor,total,pagamento,data:new Date().toLocaleDateString('pt-BR'),lucro});
+  dados.financeiro.entradas+=total; dados.financeiro.lucro+=lucro; dados.financeiro.saldo+=total;
+  venda.aberta=false;
+  dados.vendasEmAberto.splice(idx, 1); // Remove a venda da lista de abertas
+  save();renderCaixa();beep();alert("✅ Venda finalizada com sucesso!");
+}
+
+// ⚙️ Admin
+function addEstoque(){
+  let nome=document.getElementById("estNome").value;
+  let icone=document.getElementById("estIcone").value;
+  let valor=parseFloat(document.getElementById("estValor").value)||0;
+  let custo=parseFloat(document.getElementById("estCusto").value)||0;
+  let qtd=parseInt(document.getElementById("estQtd").value)||0;
+  if(!nome||valor<=0||custo<=0){alert("Preencha nome, valor e custo do produto!");return;}
+  dados.estoque.push({nome,icone,valor,qtd,custo});
+  save();renderEstoque();alert("✅ Produto adicionado!");
+  document.getElementById("estNome").value = '';
+  document.getElementById("estIcone").value = '';
+  document.getElementById("estValor").value = '';
+  document.getElementById("estCusto").value = '';
+  document.getElementById("estQtd").value = '';
+}
+function renderEstoque(){
+  let html=""; dados.estoque.forEach((e,i)=>{html+=`<div>${e.icone||"📦"} ${e.nome} - R$${e.valor.toFixed(2)} | Custo R$${e.custo.toFixed(2)} | Qtd:${e.qtd} ${e.qtd<5?'<span class="low-stock">(baixo estoque)</span>':''}</div>`;});
+  document.getElementById("listaEstoque").innerHTML=html||"<p>Sem produtos.</p>";
+  renderProdutosBtns();
+}
+function addVendedor(){
+  let nome=document.getElementById("novoVendedor").value;
+  if(!nome){alert("Digite o nome do vendedor!");return;}
+  dados.vendedores.push(nome);
+  save();renderVendedores();alert("✅ Vendedor adicionado!");
+  document.getElementById("novoVendedor").value = '';
+}
+function renderVendedores(){
+  let html=""; dados.vendedores.forEach(v=>{html+=`<div>${v}</div>`;});
+  document.getElementById("listaVendedores").innerHTML=html||"<p>Nenhum vendedor cadastrado.</p>";
+}
+
+// 📊 Dashboard
+function renderDashboard(){
+  document.getElementById("kpiReceita").innerText=dados.financeiro.entradas.toFixed(2);
+  document.getElementById("kpiLucro").innerText=dados.financeiro.lucro.toFixed(2);
+  document.getElementById("kpiTicket").innerText=(dados.financeiro.entradas/(dados.vendasFechadas.length||1)).toFixed(2);
+  document.getElementById("kpiEstoque").innerText=dados.estoque.reduce((s,p)=>s+p.qtd,0);
+
+  // Vendas por Cliente
+  let porCliente={}; dados.vendasFechadas.forEach(v=>{porCliente[v.cliente]=(porCliente[v.cliente]||0)+v.total;});
+  echarts.init(document.getElementById("chartClientes")).setOption({
+    title:{text:"Vendas por Cliente",textStyle:{color:"#1abc9c"}},
+    tooltip:{trigger:'axis'},
+    xAxis:{type:"category",data:Object.keys(porCliente),axisLabel:{color:"#fff"}},
+    yAxis:{type:"value",axisLabel:{color:"#fff"}},
+    series:[{type:"bar",data:Object.values(porCliente),label:{show:true,color:"#fff", position: 'top'}}]
+  });
+
+  // Vendas por Vendedor
+  let porVendedor={}; dados.vendasFechadas.forEach(v=>{porVendedor[v.vendedor]=(porVendedor[v.vendedor]||0)+v.total;});
+  echarts.init(document.getElementById("chartVendedores")).setOption({
+    title:{text:"Vendas por Vendedor",textStyle:{color:"#1abc9c"}},
+    tooltip:{trigger:'axis'},
+    xAxis:{type:"category",data:Object.keys(porVendedor),axisLabel:{color:"#fff"}},
+    yAxis:{type:"value",axisLabel:{color:"#fff"}},
+    series:[{type:"bar",data:Object.values(porVendedor),label:{show:true,color:"#fff", position: 'top'}}]
+  });
+
+  // Formas de Pagamento
+  let formas={}; dados.vendasFechadas.forEach(v=>{formas[v.pagamento]=(formas[v.pagamento]||0)+v.total;});
+  echarts.init(document.getElementById("chartPagamentos")).setOption({
+    title:{text:"Formas de Pagamento",textStyle:{color:"#1abc9c"}},
+    tooltip:{trigger:'item'},
+    series:[{type:"pie",radius:["40%","70%"],data:Object.entries(formas).map(([k,v])=>({name:k,value:v})),label:{show:true,color:"#fff", formatter: '{b}: R${c} ({d}%)'}}]
+  });
+
+  // Receita no Tempo
+  let porData={}; dados.vendasFechadas.forEach(v=>{porData[v.data]=(porData[v.data]||0)+v.total;});
+  echarts.init(document.getElementById("chartLinha")).setOption({
+    title:{text:"Receita no Tempo",textStyle:{color:"#1abc9c"}},
+    tooltip:{trigger:'axis'},
+    xAxis:{type:"category",boundaryGap: false,data:Object.keys(porData),axisLabel:{color:"#fff"}},
+    yAxis:{type:"value",axisLabel:{color:"#fff"}},
+    series:[{type:"line",data:Object.values(porData),smooth:true,areaStyle:{color:"rgba(26,188,156,0.3)"},label:{show:true,color:"#fff"}}]
+  });
+
+  // Estoque Atual
+  echarts.init(document.getElementById("chartEstoque")).setOption({
+    title:{text:"Estoque Atual",textStyle:{color:"#1abc9c"}},
+    tooltip:{trigger:'axis'},
+    xAxis:{type:"category",data:dados.estoque.map(p=>p.nome),axisLabel:{color:"#fff"}},
+    yAxis:{type:"value",axisLabel:{color:"#fff"}},
+    series:[{type:"bar",data:dados.estoque.map(p=>p.qtd),label:{show:true,color:"#fff", position: 'top'}}]
+  });
+}
+
+// Inicialização
+showTab("vendedor");
+</script>
+</body>
+</html>
