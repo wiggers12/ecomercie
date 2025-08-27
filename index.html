@@ -1,281 +1,90 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Catálogo Digital</title>
-  <link href="https://fonts.googleapis.comcom/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #2980b9; --secondary: #16a085; --dark1: #0d0d0d;
-      --dark2: #1a1a1a; --dark3: #2c2c2c; --text: #ffffff; --accent: #1abc9c;
-    }
-    body { margin:0; font-family:'Poppins',sans-serif; background:var(--dark1); color:var(--text); }
-    header { background:linear-gradient(90deg, var(--primary), var(--secondary)); padding:15px; font-size:22px; font-weight:700; text-align:center; }
-    nav { display:flex; justify-content:center; flex-wrap:wrap; background:#1e1e1e; padding:5px 0; }
-    nav button { background:var(--primary); border:none; margin:5px; padding:10px 15px; border-radius:8px; color:var(--text); font-weight:bold; cursor:pointer; transition: all 0.2s; }
-    nav button:hover { background:var(--secondary); transform: translateY(-2px); }
-    section { display:none; padding:20px; max-width:1200px; margin:auto; }
-    h2 { color:var(--accent); margin:15px 0; border-bottom: 2px solid var(--dark3); padding-bottom: 10px;}
-    h3 { color: #ccc; }
-    label { font-size: 14px; color: #aaa; margin-top: 10px; display: block; }
-    input, select { padding:12px; border:none; border-radius:6px; width:100%; box-sizing: border-box; margin:8px 0; background:var(--dark3); color:var(--text); font-size:16px; }
-    input[type="file"] { background: var(--dark3); padding: 8px; }
-    input[type="file"]::file-selector-button {
-        background-color: var(--primary); color: var(--text); border: none;
-        padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
-    }
-    input[type="file"]::file-selector-button:hover { background-color: var(--secondary); }
-    .btn { background:var(--primary); display:block; width:100%; text-align:center; padding:12px; margin:15px 0; border-radius:6px; cursor:pointer; border:none; color:var(--text); font-weight:bold; font-size:16px; transition: background 0.2s; }
-    .btn:hover { background:var(--secondary); }
-    .list { background:var(--dark2); border-radius:8px; padding:15px; margin-top:10px; }
-    .list div { padding:10px; border-bottom:1px solid #333; }
-    #catalogoContainer { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-    .prod-card { background:var(--dark2); border-radius:10px; overflow:hidden; text-align:center; transition:transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;}
-    .prod-card:hover { transform:scale(1.03); box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
-    .prod-card img { width:100%; height:180px; object-fit:cover; background-color: #555;}
-    .prod-card-info { padding:15px; flex-grow: 1; }
-    .prod-card-info h4 { margin:5px 0; font-size: 18px; }
-    .prod-card-info p { margin:10px 0; color:var(--accent); font-weight:bold; font-size:20px; }
-    .prod-card-actions { padding:0 15px 15px 15px; }
-    .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
-    .modal-content { background:var(--dark2); margin:10% auto; padding:20px; border-radius:10px; max-width:700px; animation: slide-down 0.3s ease-out; }
-    @keyframes slide-down { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--accent); }
-    .modal-header h2 { margin-top:0; }
-    .close-btn { color:#aaa; font-size:32px; font-weight:bold; cursor:pointer; }
-    .modal-body iframe, .modal-body video { width:100%; height:350px; border:none; border-radius:8px; margin-top:15px; background-color: #000; }
-    #previewImagem { border-radius: 8px; border: 2px solid var(--dark3); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Catálogo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db; --dark1: #2c3e50; --light1: #ecf0f1;
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--light1); margin: 0; }
+        .header { background: var(--dark1); color: white; padding: 20px 50px; text-align: center; }
+        .header h1 { margin: 0; font-weight: 600; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .search-bar { width: 100%; padding: 15px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 30px; box-sizing: border-box; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; }
+        .product-info { padding: 20px; }
+        .product-info h3 { margin: 0 0 10px 0; color: var(--dark1); }
+        .product-info p { font-size: 20px; font-weight: 600; color: var(--primary); margin: 0 0 15px 0; }
+        .product-info button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .modal-video { width: 100%; height: 350px; border: none; }
+    </style>
 </head>
 <body>
-<header> Meu Catálogo Digital </header>
-<nav>
-  <button onclick="showTab('catalogo')">🛍️ Catálogo</button>
-  <button onclick="showTab('clientes')">👥 Clientes</button>
-  <button onclick="showTab('admin')">⚙️ Admin</button>
-</nav>
 
-<section id="catalogo">
-  <h2>Nossos Produtos</h2>
-  <div id="catalogoContainer"></div>
-</section>
+<header class="header">
+    <h1>Conheça Nossos Produtos</h1>
+</header>
 
-<section id="clientes">
-    <h2>Gestão de Clientes</h2>
-    <h3>➕ Novo Cliente</h3>
-    <input type="text" id="cliNome" placeholder="Nome Completo">
-    <button class="btn" onclick="addCliente()">Adicionar Cliente</button>
-    <h3>📋 Clientes Cadastrados</h3>
-    <div class="list" id="listaClientes"></div>
-</section>
-
-<section id="admin">
-  <h2>⚙️ Painel de Administração</h2>
-  <h3>📦 Adicionar Novo Produto ao Catálogo</h3>
-  <input type="text" id="prodNome" placeholder="Nome do Produto">
-  
-  <label for="prodImagemInput">Imagem do Produto (Máx 2MB)</label>
-  <input type="file" id="prodImagemInput" accept="image/*">
-  <img id="previewImagem" src="" alt="Prévia da imagem" style="max-width: 150px; display: none; margin: 10px 0;">
-  
-  <label for="prodVideoUrl">Vídeo (escolha UMA opção)</label>
-  <input type="url" id="prodVideoUrl" placeholder="Opção 1: Cole a URL do YouTube aqui">
-  <input type="file" id="prodVideoInput" accept="video/*" style="margin-top:5px;">
-  
-  <input type="number" id="prodValor" placeholder="Preço do Produto (Ex: 129.90)">
-  <button class="btn" onclick="addProduto()">➕ Adicionar Produto</button>
-  
-  <h3>📋 Produtos no Catálogo</h3>
-  <div class="list" id="listaAdminProdutos"></div>
-</section>
-
-<div id="productModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2 id="modalTitle"></h2>
-      <span class="close-btn" onclick="closeModal()">&times;</span>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:22px; color:var(--accent); font-weight:bold;">Preço: R$ <span id="modalPrice"></span></p>
-      <div id="modalVideoContainer"></div>
-    </div>
-  </div>
-</div>
+<main class="container">
+    <input type="text" id="search-input" class="search-bar" placeholder="🔎 O que você procura?">
+    <div id="product-grid" class="product-grid">
+        </div>
+</main>
 
 <script>
-let dados = JSON.parse(localStorage.getItem("catalogoDigital")) || {
-  clientes: [],
-  catalogo: []
-};
+    const db = JSON.parse(localStorage.getItem("catalogoDigital")) || { products: [] };
 
-let imagemBase64 = null;
-let videoObjectURL = null; // Guardará a URL temporária do vídeo
-
-// --- FUNÇÕES GERAIS ---
-function save(){ 
-  // ATENÇÃO: URLs de vídeo local (videoObjectURL) não são salvas de forma persistente.
-  // Elas são perdidas ao recarregar a página. O que é salvo é apenas o texto da URL.
-  localStorage.setItem("catalogoDigital", JSON.stringify(dados)); 
-}
-function showTab(tabId){
-  document.querySelectorAll("section").forEach(s => s.style.display = "none");
-  document.getElementById(tabId).style.display = "block";
-  if(tabId === "catalogo") renderCatalogo();
-  if(tabId === "clientes") renderClientes();
-  if(tabId === "admin") renderAdminListaProdutos();
-}
-
-// --- SEÇÃO DE CLIENTES ---
-function addCliente() {
-    const nome = document.getElementById("cliNome").value.trim();
-    if (!nome) { alert("O nome do cliente é obrigatório!"); return; }
-    dados.clientes.push({ id: Date.now(), nome });
-    save(); 
-    renderClientes(); 
-    document.getElementById("cliNome").value = '';
-}
-function renderClientes() {
-    let html = [...dados.clientes].reverse().map(c => `<div><b>${c.nome}</b></div>`).join('');
-    document.getElementById("listaClientes").innerHTML = html || "<p>Nenhum cliente cadastrado.</p>";
-}
-
-// --- SEÇÃO ADMIN ---
-function addProduto(){
-  const nome = document.getElementById("prodNome").value.trim();
-  const videoUrl = document.getElementById("prodVideoUrl").value.trim();
-  const valor = parseFloat(document.getElementById("prodValor").value) || 0;
-
-  // Prioriza o vídeo de upload se ambos forem fornecidos
-  const finalVideoUrl = videoObjectURL || videoUrl;
-
-  if(!nome || !imagemBase64 || valor <= 0){
-    alert("Preencha Nome, selecione uma Imagem e defina um Preço!");
-    return;
-  }
-  dados.catalogo.push({id: Date.now(), nome, imagemUrl: imagemBase64, videoUrl: finalVideoUrl, valor});
-  save();
-  renderAdminListaProdutos();
-  alert("✅ Produto adicionado ao catálogo!");
-  
-  // Limpa o formulário
-  document.getElementById("prodNome").value = '';
-  document.getElementById("prodImagemInput").value = null;
-  document.getElementById("previewImagem").style.display = 'none';
-  document.getElementById("prodVideoUrl").value = '';
-  document.getElementById("prodVideoInput").value = null;
-  document.getElementById("prodValor").value = '';
-  imagemBase64 = null;
-  videoObjectURL = null;
-}
-function renderAdminListaProdutos(){
-  let html = [...dados.catalogo].reverse().map(p => `<div><b>${p.nome}</b> - R$ ${p.valor.toFixed(2)}</div>`).join('');
-  document.getElementById("listaAdminProdutos").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
-}
-
-// --- SEÇÃO CATÁLOGO ---
-function renderCatalogo(){
-    const container = document.getElementById("catalogoContainer");
-    container.innerHTML = dados.catalogo.map((p, index) => `
-        <div class="prod-card">
-            <img src="${p.imagemUrl}" alt="${p.nome}">
-            <div class="prod-card-info">
-                <h4>${p.nome}</h4>
-                <p>R$ ${p.valor.toFixed(2)}</p>
-            </div>
-            <div class="prod-card-actions">
-                <button class="btn" onclick="showProductDetail(${index})">Ver Detalhes</button>
-            </div>
-        </div>`).join('');
-}
-
-// --- MODAL DE DETALHES ---
-function showProductDetail(index) {
-    const produto = dados.catalogo[index];
-    document.getElementById("modalTitle").innerText = produto.nome;
-    document.getElementById("modalPrice").innerText = produto.valor.toFixed(2);
-    
-    const videoContainer = document.getElementById("modalVideoContainer");
-    videoContainer.innerHTML = ''; // Limpa antes de adicionar
-
-    if (produto.videoUrl) {
-        if (produto.videoUrl.startsWith('blob:')) {
-            // É um vídeo de upload (URL temporária)
-            const videoElement = document.createElement('video');
-            videoElement.src = produto.videoUrl;
-            videoElement.controls = true;
-            videoContainer.appendChild(videoElement);
-        } else if (produto.videoUrl.includes('youtube.com') || produto.videoUrl.includes('youtu.be')) {
-            // É um link do YouTube
-            const embedUrl = convertToEmbedUrl(produto.videoUrl);
-            const iframe = document.createElement('iframe');
-            iframe.src = embedUrl;
-            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            iframe.allowFullscreen = true;
-            videoContainer.appendChild(iframe);
-        } else {
-             videoContainer.innerHTML = "<p>Nenhum vídeo válido fornecido.</p>";
+    function renderCatalog(productsToRender) {
+        const grid = document.getElementById('product-grid');
+        if (productsToRender.length === 0) {
+            grid.innerHTML = "<p>Nenhum produto encontrado.</p>";
+            return;
         }
-    } else {
-        videoContainer.innerHTML = "<p>Nenhum vídeo disponível para este produto.</p>";
+        grid.innerHTML = productsToRender.map(p => `
+            <div class="product-card">
+                <img src="${p.imagemUrl}" alt="${p.nome}">
+                <div class="product-info">
+                    <h3>${p.nome}</h3>
+                    <p>R$ ${p.valor.toFixed(2)}</p>
+                    <button onclick="showProductDetail('${p.id}')">Ver Detalhes</button>
+                </div>
+            </div>
+        `).join('');
     }
-    document.getElementById("productModal").style.display = "block";
-}
-function closeModal() {
-    document.getElementById("productModal").style.display = "none";
-    document.getElementById("modalVideoContainer").innerHTML = ""; // Para o vídeo
-}
-function convertToEmbedUrl(url) {
-    let videoId = '';
-    try {
-        if (url.includes("youtu.be/")) videoId = new URL(url).pathname.substring(1);
-        else if (url.includes("watch?v=")) videoId = new URL(url).searchParams.get("v");
-    } catch (e) { return ''; }
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-}
-window.onclick = function(event) {
-    if (event.target == document.getElementById("productModal")) closeModal();
-}
 
-// --- SETUP DE EVENTOS PARA UPLOADS ---
-document.getElementById('prodImagemInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById('previewImagem');
-    if (!file) { preview.style.display = 'none'; imagemBase64 = null; return; }
-    if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
-        alert("Erro: A imagem é muito grande! O limite é de 2MB.");
-        event.target.value = null; preview.style.display = 'none'; imagemBase64 = null; return;
+    function showProductDetail(productId) {
+        const product = db.products.find(p => p.id === productId);
+        if (!product) return;
+        
+        const modalHtml = `
+            <div class="modal" id="detail-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;" onclick="this.remove()">
+                <div class="modal-content" style="background:white;padding:30px;border-radius:8px;max-width:600px;width:90%;" onclick="event.stopPropagation()">
+                    <img src="${product.imagemUrl}" style="width:100%;height:300px;object-fit:cover;border-radius:8px;">
+                    <h2 style="color:var(--dark1);">${product.nome}</h2>
+                    <p style="font-size:24px;font-weight:bold;color:var(--primary);">R$ ${product.valor.toFixed(2)}</p>
+                    <p>${product.descricao || 'Nenhuma descrição disponível.'}</p>
+                    <button onclick="document.getElementById('detail-modal').remove()" style="background:var(--dark1);color:white;padding:10px 15px;border:none;border-radius:6px;cursor:pointer;float:right;">Fechar</button>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        imagemBase64 = e.target.result;
-        preview.src = imagemBase64;
-        preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-});
 
-document.getElementById('prodVideoInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (videoObjectURL) {
-        // Limpa a URL anterior para não ocupar memória
-        URL.revokeObjectURL(videoObjectURL);
-        videoObjectURL = null;
-    }
-    if (file) {
-        videoObjectURL = URL.createObjectURL(file);
-        // Desabilita o campo de URL para evitar confusão
-        document.getElementById('prodVideoUrl').disabled = true;
-        document.getElementById('prodVideoUrl').value = "Upload de arquivo selecionado.";
-    } else {
-        document.getElementById('prodVideoUrl').disabled = false;
-        document.getElementById('prodVideoUrl').value = "";
-    }
-});
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredProducts = db.products.filter(p => p.nome.toLowerCase().includes(searchTerm));
+        renderCatalog(filteredProducts);
+    });
 
-
-// --- INICIALIZAÇÃO ---
-showTab("catalogo");
+    // --- INICIALIZAÇÃO ---
+    renderCatalog(db.products);
 </script>
+
 </body>
 </html>
