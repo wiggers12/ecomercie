@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meu Catálogo Digital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.comcom/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #2980b9; --secondary: #16a085; --dark1: #0d0d0d;
@@ -17,23 +17,19 @@
     nav button:hover { background:var(--secondary); transform: translateY(-2px); }
     section { display:none; padding:20px; max-width:1200px; margin:auto; }
     h2 { color:var(--accent); margin:15px 0; border-bottom: 2px solid var(--dark3); padding-bottom: 10px;}
+    h3 { color: #ccc; }
+    label { font-size: 14px; color: #aaa; margin-top: 10px; display: block; }
     input, select { padding:12px; border:none; border-radius:6px; width:100%; box-sizing: border-box; margin:8px 0; background:var(--dark3); color:var(--text); font-size:16px; }
-    
-    /* Estilo customizado para o input de arquivo */
     input[type="file"] { background: var(--dark3); padding: 8px; }
     input[type="file"]::file-selector-button {
         background-color: var(--primary); color: var(--text); border: none;
         padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
     }
     input[type="file"]::file-selector-button:hover { background-color: var(--secondary); }
-    
     .btn { background:var(--primary); display:block; width:100%; text-align:center; padding:12px; margin:15px 0; border-radius:6px; cursor:pointer; border:none; color:var(--text); font-weight:bold; font-size:16px; transition: background 0.2s; }
     .btn:hover { background:var(--secondary); }
     .list { background:var(--dark2); border-radius:8px; padding:15px; margin-top:10px; }
     .list div { padding:10px; border-bottom:1px solid #333; }
-    .list div:last-child { border-bottom: none; }
-    .list small { color: #aaa; }
-
     #catalogoContainer { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
     .prod-card { background:var(--dark2); border-radius:10px; overflow:hidden; text-align:center; transition:transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;}
     .prod-card:hover { transform:scale(1.03); box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
@@ -42,16 +38,13 @@
     .prod-card-info h4 { margin:5px 0; font-size: 18px; }
     .prod-card-info p { margin:10px 0; color:var(--accent); font-weight:bold; font-size:20px; }
     .prod-card-actions { padding:0 15px 15px 15px; }
-    .prod-card-actions .btn { font-size:14px; padding:10px; margin:0; }
-
     .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
     .modal-content { background:var(--dark2); margin:10% auto; padding:20px; border-radius:10px; max-width:700px; animation: slide-down 0.3s ease-out; }
     @keyframes slide-down { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .modal-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--accent); }
     .modal-header h2 { margin-top:0; }
     .close-btn { color:#aaa; font-size:32px; font-weight:bold; cursor:pointer; }
-    .modal-body iframe { width:100%; height:350px; border:none; border-radius:8px; margin-top:15px; }
-
+    .modal-body iframe, .modal-body video { width:100%; height:350px; border:none; border-radius:8px; margin-top:15px; background-color: #000; }
     #previewImagem { border-radius: 8px; border: 2px solid var(--dark3); }
   </style>
 </head>
@@ -72,8 +65,6 @@
     <h2>Gestão de Clientes</h2>
     <h3>➕ Novo Cliente</h3>
     <input type="text" id="cliNome" placeholder="Nome Completo">
-    <input type="tel" id="cliTel" placeholder="Telefone (Opcional)">
-    <input type="email" id="cliEmail" placeholder="E-mail (Opcional)">
     <button class="btn" onclick="addCliente()">Adicionar Cliente</button>
     <h3>📋 Clientes Cadastrados</h3>
     <div class="list" id="listaClientes"></div>
@@ -86,9 +77,12 @@
   
   <label for="prodImagemInput">Imagem do Produto (Máx 2MB)</label>
   <input type="file" id="prodImagemInput" accept="image/*">
-  <img id="previewImagem" src="" alt="Prévia da imagem" style="max-width: 150px; display: none; margin-top: 10px;">
+  <img id="previewImagem" src="" alt="Prévia da imagem" style="max-width: 150px; display: none; margin: 10px 0;">
   
-  <input type="url" id="prodVideo" placeholder="URL do Vídeo do YouTube (Opcional)">
+  <label for="prodVideoUrl">Vídeo (escolha UMA opção)</label>
+  <input type="url" id="prodVideoUrl" placeholder="Opção 1: Cole a URL do YouTube aqui">
+  <input type="file" id="prodVideoInput" accept="video/*" style="margin-top:5px;">
+  
   <input type="number" id="prodValor" placeholder="Preço do Produto (Ex: 129.90)">
   <button class="btn" onclick="addProduto()">➕ Adicionar Produto</button>
   
@@ -109,26 +103,21 @@
   </div>
 </div>
 
-
 <script>
-// --- BANCO DE DADOS LOCAL (SALVO NO NAVEGADOR) ---
 let dados = JSON.parse(localStorage.getItem("catalogoDigital")) || {
   clientes: [],
   catalogo: []
 };
 
-// Variável temporária para guardar a imagem antes de salvar
 let imagemBase64 = null;
+let videoObjectURL = null; // Guardará a URL temporária do vídeo
 
 // --- FUNÇÕES GERAIS ---
 function save(){ 
+  // ATENÇÃO: URLs de vídeo local (videoObjectURL) não são salvas de forma persistente.
+  // Elas são perdidas ao recarregar a página. O que é salvo é apenas o texto da URL.
   localStorage.setItem("catalogoDigital", JSON.stringify(dados)); 
 }
-function beep(){ 
-  new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play(); 
-}
-
-// --- NAVEGAÇÃO ENTRE ABAS ---
 function showTab(tabId){
   document.querySelectorAll("section").forEach(s => s.style.display = "none");
   document.getElementById(tabId).style.display = "block";
@@ -140,88 +129,93 @@ function showTab(tabId){
 // --- SEÇÃO DE CLIENTES ---
 function addCliente() {
     const nome = document.getElementById("cliNome").value.trim();
-    const tel = document.getElementById("cliTel").value;
-    const email = document.getElementById("cliEmail").value;
     if (!nome) { alert("O nome do cliente é obrigatório!"); return; }
-
-    dados.clientes.push({ id: Date.now(), nome, tel, email });
+    dados.clientes.push({ id: Date.now(), nome });
     save(); 
     renderClientes(); 
-    beep();
-    alert("✅ Cliente adicionado com sucesso!");
     document.getElementById("cliNome").value = '';
-    document.getElementById("cliTel").value = '';
-    document.getElementById("cliEmail").value = '';
 }
 function renderClientes() {
-    let html = "";
-    [...dados.clientes].reverse().forEach(c => {
-        html += `<div><b>${c.nome}</b><br><small>${c.email || 'Sem e-mail'} | ${c.tel || 'Sem telefone'}</small></div>`;
-    });
+    let html = [...dados.clientes].reverse().map(c => `<div><b>${c.nome}</b></div>`).join('');
     document.getElementById("listaClientes").innerHTML = html || "<p>Nenhum cliente cadastrado.</p>";
 }
 
-// --- SEÇÃO ADMIN (GERENCIAR CATÁLOGO) ---
+// --- SEÇÃO ADMIN ---
 function addProduto(){
   const nome = document.getElementById("prodNome").value.trim();
-  const videoUrl = document.getElementById("prodVideo").value.trim();
+  const videoUrl = document.getElementById("prodVideoUrl").value.trim();
   const valor = parseFloat(document.getElementById("prodValor").value) || 0;
 
+  // Prioriza o vídeo de upload se ambos forem fornecidos
+  const finalVideoUrl = videoObjectURL || videoUrl;
+
   if(!nome || !imagemBase64 || valor <= 0){
-    alert("Preencha Nome, selecione uma Imagem e defina um Preço para o produto!");
+    alert("Preencha Nome, selecione uma Imagem e defina um Preço!");
     return;
   }
-  dados.catalogo.push({id: Date.now(), nome, imagemUrl: imagemBase64, videoUrl, valor});
+  dados.catalogo.push({id: Date.now(), nome, imagemUrl: imagemBase64, videoUrl: finalVideoUrl, valor});
   save();
   renderAdminListaProdutos();
-  beep();
   alert("✅ Produto adicionado ao catálogo!");
   
   // Limpa o formulário
   document.getElementById("prodNome").value = '';
   document.getElementById("prodImagemInput").value = null;
   document.getElementById("previewImagem").style.display = 'none';
-  imagemBase64 = null; // Limpa a variável da imagem
-  document.getElementById("prodVideo").value = '';
+  document.getElementById("prodVideoUrl").value = '';
+  document.getElementById("prodVideoInput").value = null;
   document.getElementById("prodValor").value = '';
+  imagemBase64 = null;
+  videoObjectURL = null;
 }
 function renderAdminListaProdutos(){
-  let html=""; 
-  [...dados.catalogo].reverse().forEach(p => {
-    html += `<div><b>${p.nome}</b> - R$ ${p.valor.toFixed(2)}</div>`;
-  });
+  let html = [...dados.catalogo].reverse().map(p => `<div><b>${p.nome}</b> - R$ ${p.valor.toFixed(2)}</div>`).join('');
   document.getElementById("listaAdminProdutos").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
 }
 
-// --- SEÇÃO CATÁLOGO (VISUALIZAÇÃO PÚBLICA) ---
+// --- SEÇÃO CATÁLOGO ---
 function renderCatalogo(){
     const container = document.getElementById("catalogoContainer");
-    container.innerHTML = "";
-    dados.catalogo.forEach((p, index) => {
-        container.innerHTML += `
-            <div class="prod-card">
-                <img src="${p.imagemUrl}" alt="${p.nome}">
-                <div class="prod-card-info">
-                    <h4>${p.nome}</h4>
-                    <p>R$ ${p.valor.toFixed(2)}</p>
-                </div>
-                <div class="prod-card-actions">
-                    <button class="btn" onclick="showProductDetail(${index})">Ver Detalhes</button>
-                </div>
-            </div>`;
-    });
+    container.innerHTML = dados.catalogo.map((p, index) => `
+        <div class="prod-card">
+            <img src="${p.imagemUrl}" alt="${p.nome}">
+            <div class="prod-card-info">
+                <h4>${p.nome}</h4>
+                <p>R$ ${p.valor.toFixed(2)}</p>
+            </div>
+            <div class="prod-card-actions">
+                <button class="btn" onclick="showProductDetail(${index})">Ver Detalhes</button>
+            </div>
+        </div>`).join('');
 }
 
-// --- MODAL DE DETALHES DO PRODUTO ---
+// --- MODAL DE DETALHES ---
 function showProductDetail(index) {
     const produto = dados.catalogo[index];
     document.getElementById("modalTitle").innerText = produto.nome;
     document.getElementById("modalPrice").innerText = produto.valor.toFixed(2);
     
-    let videoContainer = document.getElementById("modalVideoContainer");
-    if(produto.videoUrl) {
-        let embedUrl = convertToEmbedUrl(produto.videoUrl);
-        videoContainer.innerHTML = `<iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    const videoContainer = document.getElementById("modalVideoContainer");
+    videoContainer.innerHTML = ''; // Limpa antes de adicionar
+
+    if (produto.videoUrl) {
+        if (produto.videoUrl.startsWith('blob:')) {
+            // É um vídeo de upload (URL temporária)
+            const videoElement = document.createElement('video');
+            videoElement.src = produto.videoUrl;
+            videoElement.controls = true;
+            videoContainer.appendChild(videoElement);
+        } else if (produto.videoUrl.includes('youtube.com') || produto.videoUrl.includes('youtu.be')) {
+            // É um link do YouTube
+            const embedUrl = convertToEmbedUrl(produto.videoUrl);
+            const iframe = document.createElement('iframe');
+            iframe.src = embedUrl;
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            iframe.allowFullscreen = true;
+            videoContainer.appendChild(iframe);
+        } else {
+             videoContainer.innerHTML = "<p>Nenhum vídeo válido fornecido.</p>";
+        }
     } else {
         videoContainer.innerHTML = "<p>Nenhum vídeo disponível para este produto.</p>";
     }
@@ -229,53 +223,56 @@ function showProductDetail(index) {
 }
 function closeModal() {
     document.getElementById("productModal").style.display = "none";
-    document.getElementById("modalVideoContainer").innerHTML = "";
+    document.getElementById("modalVideoContainer").innerHTML = ""; // Para o vídeo
 }
 function convertToEmbedUrl(url) {
     let videoId = '';
     try {
-        if (url.includes("youtu.be/")) {
-            videoId = new URL(url).pathname.substring(1);
-        } else if (url.includes("watch?v=")) {
-            videoId = new URL(url).searchParams.get("v");
-        }
-    } catch (e) { console.error("URL de vídeo inválida:", e); return ''; }
+        if (url.includes("youtu.be/")) videoId = new URL(url).pathname.substring(1);
+        else if (url.includes("watch?v=")) videoId = new URL(url).searchParams.get("v");
+    } catch (e) { return ''; }
     return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
 }
 window.onclick = function(event) {
-    if (event.target == document.getElementById("productModal")) {
-        closeModal();
-    }
+    if (event.target == document.getElementById("productModal")) closeModal();
 }
 
-// --- SETUP DE EVENTOS ---
+// --- SETUP DE EVENTOS PARA UPLOADS ---
 document.getElementById('prodImagemInput').addEventListener('change', function(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('previewImagem');
-    
-    if (!file) {
-        preview.style.display = 'none';
-        imagemBase64 = null;
-        return;
-    }
-
-    // Validação de tamanho (2MB)
-    if (file.size > 2 * 1024 * 1024) {
+    if (!file) { preview.style.display = 'none'; imagemBase64 = null; return; }
+    if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
         alert("Erro: A imagem é muito grande! O limite é de 2MB.");
-        event.target.value = null; // Limpa o input
-        preview.style.display = 'none';
-        imagemBase64 = null;
-        return;
+        event.target.value = null; preview.style.display = 'none'; imagemBase64 = null; return;
     }
-    
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
         imagemBase64 = e.target.result;
         preview.src = imagemBase64;
         preview.style.display = 'block';
     };
     reader.readAsDataURL(file);
 });
+
+document.getElementById('prodVideoInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (videoObjectURL) {
+        // Limpa a URL anterior para não ocupar memória
+        URL.revokeObjectURL(videoObjectURL);
+        videoObjectURL = null;
+    }
+    if (file) {
+        videoObjectURL = URL.createObjectURL(file);
+        // Desabilita o campo de URL para evitar confusão
+        document.getElementById('prodVideoUrl').disabled = true;
+        document.getElementById('prodVideoUrl').value = "Upload de arquivo selecionado.";
+    } else {
+        document.getElementById('prodVideoUrl').disabled = false;
+        document.getElementById('prodVideoUrl').value = "";
+    }
+});
+
 
 // --- INICIALIZAÇÃO ---
 showTab("catalogo");
