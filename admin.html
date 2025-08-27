@@ -18,8 +18,7 @@
 
         /* --- Header para Mobile --- */
         .mobile-header {
-            display: none; /* Escondido por padrão, visível em mobile */
-            background-color: var(--dark1); color: var(--light1); padding: 15px 20px;
+            display: none; background-color: var(--dark1); color: var(--light1); padding: 15px 20px;
             justify-content: space-between; align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             position: sticky; top: 0; z-index: 1100;
@@ -44,7 +43,7 @@
         .sidebar nav a i { margin-right: 12px; font-size: 18px; }
 
         /* --- Conteúdo Principal --- */
-        .app-container { display: flex; flex-grow: 1; } /* Nova div para envolver sidebar + main */
+        .app-container { display: flex; flex-grow: 1; }
         .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.5s; }
@@ -70,11 +69,11 @@
         .btn-secondary:hover { background-color: #aaa; transform: translateY(-1px); }
 
         /* --- Tabelas --- */
-        .table-responsive { overflow-x: auto; margin-top: 20px; } /* Para tabelas em mobile */
+        .table-responsive { overflow-x: auto; margin-top: 20px; }
         .table {
             width: 100%; border-collapse: collapse; background-color: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden;
-            min-width: 600px; /* Garante que a tabela não fique muito estreita */
+            min-width: 600px; 
         }
         .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
         .table th { background-color: var(--dark2); color: var(--light1); font-weight: 600; }
@@ -90,7 +89,7 @@
         .modal-content input[type="text"], .modal-content textarea,
         .modal-content input[type="number"], .modal-content input[type="url"],
         .modal-content input[type="file"] {
-            width: calc(100% - 22px); /* Ajusta para padding */
+            width: 100%; 
             padding: 12px; margin-bottom: 15px; border: 1px solid var(--light2);
             border-radius: 6px; box-sizing: border-box; font-size: 15px;
             background-color: #ffffff; color: var(--dark1);
@@ -118,6 +117,10 @@
             background: white; padding: 30px; border-radius: 8px; max-width: 600px;
             width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transform: translateY(-20px);
             transition: transform 0.3s ease-out;
+            
+            /* ---- CORREÇÃO APLICADA AQUI ---- */
+            max-height: 90vh; /* Limita a altura máxima do modal */
+            overflow-y: auto; /* Adiciona a barra de rolagem vertical se necessário */
         }
         .modal.active .modal-content { transform: translateY(0); }
         .modal-content h2 {
@@ -136,15 +139,11 @@
             .main-content { padding: 20px; }
             .mobile-header { display: flex; }
             .header h1 { font-size: 24px; }
-            .btn { padding: 8px 12px; font-size: 14px; }
+            .btn { padding: 10px 15px; font-size: 15px; }
             .btn i { margin-right: 5px; }
-            .table { min-width: unset; } /* Remove min-width para tabelas em mobile */
+            .table { min-width: unset; } 
             .table th, .table td { padding: 12px; font-size: 14px; }
-            /* Esconde colunas menos importantes em mobile */
-            .table th:nth-child(1), .table td:nth-child(1) { width: 80px; } /* Imagem */
-            .table th:nth-child(3), .table td:nth-child(3) { width: 100px; } /* Preço */
             
-            /* Ajusta a tabela para empilhar conteúdo em telas muito pequenas */
             .table.products th:nth-child(1), .table.products td:nth-child(1),
             .table.products th:nth-child(3), .table.products td:nth-child(3) { display: none; }
             .table.products th:nth-child(2), .table.products td:nth-child(2) { width: 70%; } /* Nome */
@@ -154,7 +153,7 @@
             .table.clients th:nth-child(2), .table.clients td:nth-child(2) { display: none; } /* Contato */
             .table.clients th:nth-child(3), .table.clients td:nth-child(3) { width: 40%; text-align: right; } /* Ações */
             
-            .modal-content { padding: 20px; width: 95%; }
+            .modal-content { padding: 20px; }
             .modal-content h2 { font-size: 20px; }
         }
 
@@ -171,7 +170,8 @@
 <div class="mobile-header" id="mobile-header">
     <i class="fas fa-bars menu-icon" onclick="toggleSidebar()"></i>
     <h2>Painel Admin</h2>
-    <div style="width: 24px;"></div> </div>
+    <div style="width: 24px;"></div>
+</div>
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
@@ -220,14 +220,12 @@
 
     // --- VARIÁVEIS TEMPORÁRIAS PARA UPLOAD ---
     let currentImageBase64 = null;
-    let currentVideoObjectUrl = null; // Para upload de vídeo temporário
+    let currentVideoObjectUrl = null; 
 
     // --- NAVEGAÇÃO E RESPONSIVIDADE ---
     function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebar-overlay').classList.toggle('active');
     }
 
     function showView(viewId) {
@@ -239,7 +237,6 @@
         if (viewId === 'view-products') renderProductsTable();
         if (viewId === 'view-clients') renderClientsTable();
 
-        // Fecha sidebar em mobile após seleção
         if (window.innerWidth <= 768) {
             toggleSidebar();
         }
@@ -253,14 +250,7 @@
             return;
         }
         let tableHtml = `<table class="table products">
-            <thead>
-                <tr>
-                    <th>Imagem</th>
-                    <th>Nome</th>
-                    <th>Preço</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Imagem</th><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead>
             <tbody>`;
         db.products.forEach(p => {
             tableHtml += `
@@ -284,7 +274,6 @@
         const isEditing = !!product.id;
         const modalTitle = isEditing ? 'Editar Produto' : 'Adicionar Novo Produto';
 
-        // Resetar variáveis de upload ao abrir o modal
         currentImageBase64 = product.imagemUrl || null;
         currentVideoObjectUrl = null; 
 
@@ -324,17 +313,15 @@
                 </div>
             </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-        document.getElementById('product-modal').classList.add('active'); // Ativa o modal
+        document.getElementById('product-modal').classList.add('active'); 
         
-        // Adiciona event listeners para os campos de upload
         setupImageUpload('productImageInput', 'previewImage');
         setupVideoUpload('productVideoInput', 'productVideoUrl', 'previewVideo');
 
-        // Se estiver editando e já tiver URL de vídeo, ajusta o campo
         if (isEditing) {
              const videoPrev = document.getElementById('previewVideo');
             if (product.videoUrl && product.videoUrl.startsWith('blob:')) {
-                document.getElementById('productVideoInput').value = null; // Clear file input
+                document.getElementById('productVideoInput').value = null; 
                 document.getElementById('productVideoUrl').value = "Vídeo enviado por upload (temporário)";
                 document.getElementById('productVideoUrl').disabled = true;
                 videoPrev.src = product.videoUrl;
@@ -342,10 +329,10 @@
                 currentVideoObjectUrl = product.videoUrl; 
             } else if (product.videoUrl) {
                 document.getElementById('productVideoInput').disabled = true;
-                // Exibe o vídeo do YouTube se for o caso
                 const embedUrl = convertToEmbedUrl(product.videoUrl);
                 if (embedUrl) {
                     videoPrev.outerHTML = `<iframe id="previewVideo" class="preview-video" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+                    document.getElementById('previewVideo').style.display = 'block';
                 }
             }
         }
@@ -362,7 +349,7 @@
                 currentImageBase64 = null;
                 return;
             }
-            if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
+            if (file.size > 2 * 1024 * 1024) { 
                 alert("Erro: A imagem é muito grande! O limite é de 2MB.");
                 event.target.value = null; preview.style.display = 'none'; currentImageBase64 = null;
                 return;
@@ -380,9 +367,8 @@
     function setupVideoUpload(fileInputId, urlInputId, previewId) {
         const fileInput = document.getElementById(fileInputId);
         const urlInput = document.getElementById(urlInputId);
-        let preview = document.getElementById(previewId); // Pode ser <video> ou <iframe>
+        let preview = document.getElementById(previewId);
 
-        // Listener para upload de arquivo
         fileInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (currentVideoObjectUrl) {
@@ -390,13 +376,10 @@
             }
             if (file) {
                 currentVideoObjectUrl = URL.createObjectURL(file);
-                // Substitui iframe por video se era YouTube antes
                 if (preview.tagName === 'IFRAME') {
                     const newVideo = document.createElement('video');
-                    newVideo.id = previewId;
-                    newVideo.className = preview.className;
-                    preview.replaceWith(newVideo);
-                    preview = newVideo;
+                    newVideo.id = previewId; newVideo.className = preview.className;
+                    preview.replaceWith(newVideo); preview = newVideo;
                 }
                 preview.src = currentVideoObjectUrl;
                 preview.controls = true;
@@ -405,42 +388,31 @@
                 urlInput.value = "Vídeo enviado por upload (temporário)";
             } else {
                 currentVideoObjectUrl = null;
-                preview.style.display = 'none';
-                preview.src = '';
-                urlInput.disabled = false;
-                urlInput.value = '';
+                preview.style.display = 'none'; preview.src = '';
+                urlInput.disabled = false; urlInput.value = '';
             }
         });
 
-        // Listener para URL do YouTube
         urlInput.addEventListener('input', function() {
             if (urlInput.value.trim() !== '') {
-                fileInput.disabled = true;
-                fileInput.value = null; 
+                fileInput.disabled = true; fileInput.value = null; 
                 if (currentVideoObjectUrl) { 
-                    URL.revokeObjectURL(currentVideoObjectUrl);
-                    currentVideoObjectUrl = null;
+                    URL.revokeObjectURL(currentVideoObjectUrl); currentVideoObjectUrl = null;
                 }
-                // Substitui video por iframe se era upload local antes
                 if (preview.tagName === 'VIDEO') {
                     const newIframe = document.createElement('iframe');
-                    newIframe.id = previewId;
-                    newIframe.className = preview.className;
-                    preview.replaceWith(newIframe);
-                    preview = newIframe;
+                    newIframe.id = previewId; newIframe.className = preview.className;
+                    preview.replaceWith(newIframe); preview = newIframe;
                 }
                 const embedUrl = convertToEmbedUrl(urlInput.value);
                 if (embedUrl) {
-                    preview.src = embedUrl;
-                    preview.style.display = 'block';
+                    preview.src = embedUrl; preview.style.display = 'block';
                 } else {
-                    preview.style.display = 'none';
-                    preview.src = '';
+                    preview.style.display = 'none'; preview.src = '';
                 }
             } else {
                 fileInput.disabled = false;
-                preview.style.display = 'none';
-                preview.src = '';
+                preview.style.display = 'none'; preview.src = '';
             }
         });
     }
@@ -471,10 +443,8 @@
 
         const product = {
             id: id || Date.now().toString(),
-            nome: productName,
-            descricao: productDesc,
-            valor: productPrice,
-            imagemUrl: finalImageUrl,
+            nome: productName, descricao: productDesc,
+            valor: productPrice, imagemUrl: finalImageUrl,
             videoUrl: finalVideoUrl || '', 
         };
 
@@ -498,7 +468,7 @@
         }
     }
 
-    // --- FUNÇÕES DE CLIENTES (CRUD BÁSICO) ---
+    // --- FUNÇÕES DE CLIENTES ---
     function renderClientsTable() {
         const container = document.getElementById('clients-table-container');
         if (db.clients.length === 0) {
@@ -506,13 +476,7 @@
             return;
         }
         let tableHtml = `<table class="table clients">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Contato</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Nome</th><th>Contato</th><th>Ações</th></tr></thead>
             <tbody>`;
         db.clients.forEach(c => {
             tableHtml += `
@@ -551,7 +515,7 @@
                 </div>
             </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-        document.getElementById('client-modal').classList.add('active'); // Ativa o modal
+        document.getElementById('client-modal').classList.add('active'); 
     }
 
     function saveClient() {
@@ -562,10 +526,7 @@
             contato: document.getElementById('clientContact').value.trim(),
         };
 
-        if (!client.nome) {
-            alert("O nome do cliente é obrigatório!");
-            return;
-        }
+        if (!client.nome) { alert("O nome do cliente é obrigatório!"); return; }
 
         if (id) {
             const index = db.clients.findIndex(c => c.id === id);
@@ -591,23 +552,21 @@
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            modal.classList.remove('active'); // Desativa a classe para transição
-            // Espera a transição terminar para remover o elemento
+            modal.classList.remove('active'); 
             modal.addEventListener('transitionend', () => modal.remove(), { once: true });
             
-            // Limpar URL de objeto de vídeo quando o modal é fechado
             if (currentVideoObjectUrl) {
                 URL.revokeObjectURL(currentVideoObjectUrl);
                 currentVideoObjectUrl = null;
             }
-            currentImageBase64 = null; // Limpa também a imagem
+            currentImageBase64 = null; 
         }
     }
 
 
     // --- INICIALIZAÇÃO ---
     window.onload = () => {
-        showView('view-products'); // Inicia na aba de produtos
+        showView('view-products'); 
     };
 </script>
 
