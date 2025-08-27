@@ -11,75 +11,202 @@
             --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c;
             --dark1: #2c3e50; --dark2: #34495e; --light1: #ecf0f1; --light2: #bdc3c7;
         }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1); font-size: 16px; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background-color: var(--dark1); color: var(--light1); display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 100; }
-        .sidebar h2 { text-align: center; color: var(--light1); margin-bottom: 30px; }
-        .sidebar nav a { display: block; color: var(--light2); text-decoration: none; padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s; }
-        .sidebar nav a:hover, .sidebar nav a.active { background-color: var(--dark2); color: var(--light1); }
-        .sidebar nav a i { margin-right: 10px; }
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1);
+            font-size: 16px; display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        /* --- Header para Mobile --- */
+        .mobile-header {
+            display: none; /* Escondido por padrão, visível em mobile */
+            background-color: var(--dark1); color: var(--light1); padding: 15px 20px;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 1100;
+        }
+        .mobile-header .menu-icon { font-size: 24px; cursor: pointer; }
+        .mobile-header h2 { margin: 0; font-size: 20px; }
+
+        /* --- Sidebar (Menu Lateral) --- */
+        .sidebar {
+            width: 250px; background-color: var(--dark1); color: var(--light1);
+            display: flex; flex-direction: column; padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 1000;
+        }
+        .sidebar h2 { text-align: center; color: var(--light1); margin-bottom: 30px; font-size: 24px; }
+        .sidebar nav a {
+            display: flex; align-items: center; color: var(--light2); text-decoration: none;
+            padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s, color 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background-color: var(--dark2); color: var(--light1);
+        }
+        .sidebar nav a i { margin-right: 12px; font-size: 18px; }
+
+        /* --- Conteúdo Principal --- */
+        .app-container { display: flex; flex-grow: 1; } /* Nova div para envolver sidebar + main */
         .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .header h1 { margin: 0; color: var(--dark1); }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background-color 0.3s; }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; border-bottom: 1px solid var(--light2); padding-bottom: 15px;
+        }
+        .header h1 { margin: 0; color: var(--dark1); font-size: 28px; }
+
+        /* --- Botões --- */
+        .btn {
+            padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 600; transition: background-color 0.3s, transform 0.2s; font-size: 15px;
+        }
+        .btn i { margin-right: 8px; }
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: #2980b9; }
+        .btn-primary:hover { background-color: #2980b9; transform: translateY(-1px); }
         .btn-danger { background-color: var(--danger); color: white; }
+        .btn-danger:hover { background-color: #c0392b; transform: translateY(-1px); }
         .btn-secondary { background-color: var(--light2); color: var(--dark1); }
-        .btn-secondary:hover { background-color: #aaa; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        .btn-secondary:hover { background-color: #aaa; transform: translateY(-1px); }
+
+        /* --- Tabelas --- */
+        .table-responsive { overflow-x: auto; margin-top: 20px; } /* Para tabelas em mobile */
+        .table {
+            width: 100%; border-collapse: collapse; background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden;
+            min-width: 600px; /* Garante que a tabela não fique muito estreita */
+        }
         .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
-        .table th { background-color: var(--dark2); color: var(--light1); }
+        .table th { background-color: var(--dark2); color: var(--light1); font-weight: 600; }
         .table img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .actions a { margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px; }
+        .actions a {
+            margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px;
+            transition: color 0.3s;
+        }
         .actions a:hover { color: var(--primary); }
 
-        /* Modal Styles */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 550px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: zoomIn 0.3s ease-out; }
-        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-content h2 { color: var(--dark1); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--light2); padding-bottom: 10px; }
-        .modal-content label { display: block; margin-bottom: 5px; color: var(--dark1); font-weight: 500; }
-        .modal-content input[type="text"], .modal-content textarea, .modal-content input[type="number"], .modal-content input[type="url"] {
-            width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid var(--light2); border-radius: 6px; box-sizing: border-box;
+        /* --- Formulários no Modal --- */
+        .modal-content label { display: block; margin-bottom: 5px; color: var(--dark1); font-weight: 500; font-size: 15px; }
+        .modal-content input[type="text"], .modal-content textarea,
+        .modal-content input[type="number"], .modal-content input[type="url"],
+        .modal-content input[type="file"] {
+            width: calc(100% - 22px); /* Ajusta para padding */
+            padding: 12px; margin-bottom: 15px; border: 1px solid var(--light2);
+            border-radius: 6px; box-sizing: border-box; font-size: 15px;
+            background-color: #ffffff; color: var(--dark1);
         }
-        .modal-content input[type="file"] { margin-bottom: 15px; }
-        .modal-content .file-upload-section { margin-bottom: 15px; border: 1px dashed var(--light2); padding: 15px; border-radius: 8px; background-color: #f9f9f9; }
-        .modal-content .file-upload-section label { margin-bottom: 10px; font-weight: 600; }
-        .modal-content .preview-image, .modal-content .preview-video { max-width: 150px; max-height: 100px; display: block; margin-top: 10px; border-radius: 4px; object-fit: cover; background-color: #eee; }
-        .modal-content .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal-content textarea { min-height: 80px; resize: vertical; }
+        .file-upload-section {
+            margin-bottom: 15px; border: 1px dashed var(--light2); padding: 15px;
+            border-radius: 8px; background-color: #f9f9f9;
+        }
+        .file-upload-section label { margin-bottom: 10px; font-weight: 600; }
+        .preview-image, .preview-video {
+            max-width: 100%; max-height: 180px; display: block; margin-top: 10px;
+            border-radius: 4px; object-fit: cover; background-color: #eee;
+        }
+        .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+
+        /* --- Modal Base --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+            z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 8px; max-width: 600px;
+            width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transform: translateY(-20px);
+            transition: transform 0.3s ease-out;
+        }
+        .modal.active .modal-content { transform: translateY(0); }
+        .modal-content h2 {
+            color: var(--dark1); margin-top: 0; margin-bottom: 20px;
+            border-bottom: 1px solid var(--light2); padding-bottom: 10px; font-size: 24px;
+        }
+
+        /* --- Responsividade --- */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed; left: -250px; top: 0; height: 100%;
+                transition: left 0.3s ease-out;
+            }
+            .sidebar.active { left: 0; }
+            .app-container { flex-direction: column; }
+            .main-content { padding: 20px; }
+            .mobile-header { display: flex; }
+            .header h1 { font-size: 24px; }
+            .btn { padding: 8px 12px; font-size: 14px; }
+            .btn i { margin-right: 5px; }
+            .table { min-width: unset; } /* Remove min-width para tabelas em mobile */
+            .table th, .table td { padding: 12px; font-size: 14px; }
+            /* Esconde colunas menos importantes em mobile */
+            .table th:nth-child(1), .table td:nth-child(1) { width: 80px; } /* Imagem */
+            .table th:nth-child(3), .table td:nth-child(3) { width: 100px; } /* Preço */
+            
+            /* Ajusta a tabela para empilhar conteúdo em telas muito pequenas */
+            .table.products th:nth-child(1), .table.products td:nth-child(1),
+            .table.products th:nth-child(3), .table.products td:nth-child(3) { display: none; }
+            .table.products th:nth-child(2), .table.products td:nth-child(2) { width: 70%; } /* Nome */
+            .table.products th:nth-child(4), .table.products td:nth-child(4) { width: 30%; text-align: right; } /* Ações */
+            
+            .table.clients th:nth-child(1), .table.clients td:nth-child(1) { width: 60%; } /* Nome */
+            .table.clients th:nth-child(2), .table.clients td:nth-child(2) { display: none; } /* Contato */
+            .table.clients th:nth-child(3), .table.clients td:nth-child(3) { width: 40%; text-align: right; } /* Ações */
+            
+            .modal-content { padding: 20px; width: 95%; }
+            .modal-content h2 { font-size: 20px; }
+        }
+
+        /* Overlay para o menu mobile */
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 999;
+        }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
-<aside class="sidebar">
-    <h2>Meu Catálogo</h2>
-    <nav>
-        <a href="#" onclick="showView('view-products')" class="active"><i class="fas fa-box-open"></i> Produtos</a>
-        <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
-        <a href="catalogo.html" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
-    </nav>
-</aside>
+<div class="mobile-header" id="mobile-header">
+    <i class="fas fa-bars menu-icon" onclick="toggleSidebar()"></i>
+    <h2>Painel Admin</h2>
+    <div style="width: 24px;"></div> </div>
 
-<main class="main-content">
-    <div id="view-products" class="view active">
-        <div class="header">
-            <h1>Gerenciar Produtos</h1>
-            <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button>
-        </div>
-        <div id="products-table-container"></div>
-    </div>
+<div class="app-container">
+    <aside class="sidebar" id="sidebar">
+        <h2>Meu Catálogo</h2>
+        <nav>
+            <a href="#" onclick="showView('view-products')"><i class="fas fa-box-open"></i> Produtos</a>
+            <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
+            <a href="catalogo.html" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
+        </nav>
+    </aside>
 
-    <div id="view-clients" class="view">
-        <div class="header">
-            <h1>Clientes Cadastrados</h1>
-            <button class="btn btn-primary" onclick="openClientModal()"><i class="fas fa-user-plus"></i> Novo Cliente</button>
+    <main class="main-content">
+        <div id="view-products" class="view">
+            <div class="header">
+                <h1>Gerenciar Produtos</h1>
+                <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button>
+            </div>
+            <div class="table-responsive">
+                <div id="products-table-container"></div>
+            </div>
         </div>
-        <div id="clients-table-container"></div>
-    </div>
-</main>
+
+        <div id="view-clients" class="view">
+            <div class="header">
+                <h1>Clientes Cadastrados</h1>
+                <button class="btn btn-primary" onclick="openClientModal()"><i class="fas fa-user-plus"></i> Novo Cliente</button>
+            </div>
+            <div class="table-responsive">
+                <div id="clients-table-container"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <script>
     // --- BANCO DE DADOS LOCAL ---
@@ -95,7 +222,14 @@
     let currentImageBase64 = null;
     let currentVideoObjectUrl = null; // Para upload de vídeo temporário
 
-    // --- NAVEGAÇÃO ---
+    // --- NAVEGAÇÃO E RESPONSIVIDADE ---
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
@@ -104,6 +238,11 @@
         
         if (viewId === 'view-products') renderProductsTable();
         if (viewId === 'view-clients') renderClientsTable();
+
+        // Fecha sidebar em mobile após seleção
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
     }
 
     // --- FUNÇÕES DE PRODUTOS (CRUD) ---
@@ -113,8 +252,16 @@
             container.innerHTML = "<p>Nenhum produto cadastrado. Clique em 'Novo Produto' para começar.</p>";
             return;
         }
-        let tableHtml = `<table class="table">
-            <tr><th>Imagem</th><th>Nome</th><th>Preço</th><th>Ações</th></tr>`;
+        let tableHtml = `<table class="table products">
+            <thead>
+                <tr>
+                    <th>Imagem</th>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>`;
         db.products.forEach(p => {
             tableHtml += `
                 <tr>
@@ -128,7 +275,7 @@
                 </tr>
             `;
         });
-        tableHtml += `</table>`;
+        tableHtml += `</tbody></table>`;
         container.innerHTML = tableHtml;
     }
 
@@ -139,7 +286,7 @@
 
         // Resetar variáveis de upload ao abrir o modal
         currentImageBase64 = product.imagemUrl || null;
-        currentVideoObjectUrl = null; // Vídeos upados não persistem, então não carregamos aqui
+        currentVideoObjectUrl = null; 
 
         const modalHtml = `
             <div class="modal" id="product-modal">
@@ -177,23 +324,30 @@
                 </div>
             </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-
+        document.getElementById('product-modal').classList.add('active'); // Ativa o modal
+        
         // Adiciona event listeners para os campos de upload
         setupImageUpload('productImageInput', 'previewImage');
         setupVideoUpload('productVideoInput', 'productVideoUrl', 'previewVideo');
 
         // Se estiver editando e já tiver URL de vídeo, ajusta o campo
-        if (isEditing && product.videoUrl && product.videoUrl.startsWith('blob:')) {
-            document.getElementById('productVideoInput').value = null; // Clear file input
-            document.getElementById('productVideoUrl').value = "Vídeo enviado por upload (temporário)";
-            document.getElementById('productVideoUrl').disabled = true;
-
-            const videoPrev = document.getElementById('previewVideo');
-            videoPrev.src = product.videoUrl;
-            videoPrev.style.display = 'block';
-            currentVideoObjectUrl = product.videoUrl; // Reatribui para o caso de não mudar
-        } else if (isEditing && product.videoUrl) {
-            document.getElementById('productVideoInput').disabled = true;
+        if (isEditing) {
+             const videoPrev = document.getElementById('previewVideo');
+            if (product.videoUrl && product.videoUrl.startsWith('blob:')) {
+                document.getElementById('productVideoInput').value = null; // Clear file input
+                document.getElementById('productVideoUrl').value = "Vídeo enviado por upload (temporário)";
+                document.getElementById('productVideoUrl').disabled = true;
+                videoPrev.src = product.videoUrl;
+                videoPrev.style.display = 'block';
+                currentVideoObjectUrl = product.videoUrl; 
+            } else if (product.videoUrl) {
+                document.getElementById('productVideoInput').disabled = true;
+                // Exibe o vídeo do YouTube se for o caso
+                const embedUrl = convertToEmbedUrl(product.videoUrl);
+                if (embedUrl) {
+                    videoPrev.outerHTML = `<iframe id="previewVideo" class="preview-video" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+                }
+            }
         }
     }
 
@@ -226,17 +380,26 @@
     function setupVideoUpload(fileInputId, urlInputId, previewId) {
         const fileInput = document.getElementById(fileInputId);
         const urlInput = document.getElementById(urlInputId);
-        const preview = document.getElementById(previewId);
+        let preview = document.getElementById(previewId); // Pode ser <video> ou <iframe>
 
         // Listener para upload de arquivo
         fileInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (currentVideoObjectUrl) {
-                URL.revokeObjectURL(currentVideoObjectUrl); // Libera memória da URL anterior
+                URL.revokeObjectURL(currentVideoObjectUrl); 
             }
             if (file) {
                 currentVideoObjectUrl = URL.createObjectURL(file);
+                // Substitui iframe por video se era YouTube antes
+                if (preview.tagName === 'IFRAME') {
+                    const newVideo = document.createElement('video');
+                    newVideo.id = previewId;
+                    newVideo.className = preview.className;
+                    preview.replaceWith(newVideo);
+                    preview = newVideo;
+                }
                 preview.src = currentVideoObjectUrl;
+                preview.controls = true;
                 preview.style.display = 'block';
                 urlInput.disabled = true;
                 urlInput.value = "Vídeo enviado por upload (temporário)";
@@ -253,32 +416,53 @@
         urlInput.addEventListener('input', function() {
             if (urlInput.value.trim() !== '') {
                 fileInput.disabled = true;
-                fileInput.value = null; // Limpa o input de arquivo
-                if (currentVideoObjectUrl) { // Se tinha um vídeo local, libera
+                fileInput.value = null; 
+                if (currentVideoObjectUrl) { 
                     URL.revokeObjectURL(currentVideoObjectUrl);
                     currentVideoObjectUrl = null;
                 }
-                preview.style.display = 'none';
-                preview.src = '';
+                // Substitui video por iframe se era upload local antes
+                if (preview.tagName === 'VIDEO') {
+                    const newIframe = document.createElement('iframe');
+                    newIframe.id = previewId;
+                    newIframe.className = preview.className;
+                    preview.replaceWith(newIframe);
+                    preview = newIframe;
+                }
+                const embedUrl = convertToEmbedUrl(urlInput.value);
+                if (embedUrl) {
+                    preview.src = embedUrl;
+                    preview.style.display = 'block';
+                } else {
+                    preview.style.display = 'none';
+                    preview.src = '';
+                }
             } else {
                 fileInput.disabled = false;
+                preview.style.display = 'none';
+                preview.src = '';
             }
         });
     }
 
+    function convertToEmbedUrl(url) {
+        let videoId = '';
+        try {
+            if (url.includes("youtu.be/")) videoId = new URL(url).pathname.substring(1);
+            else if (url.includes("watch?v=")) videoId = new URL(url).searchParams.get("v");
+        } catch (e) { return ''; }
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+    }
 
     function saveProduct() {
         const id = document.getElementById('productId').value;
         const productName = document.getElementById('productName').value.trim();
         const productDesc = document.getElementById('productDesc').value.trim();
         const productPrice = parseFloat(document.getElementById('productPrice').value) || 0;
-        const productVideoUrl = document.getElementById('productVideoUrl').value.trim();
+        const productVideoUrlInput = document.getElementById('productVideoUrl').value.trim();
 
-        // Determina a URL final da imagem
         const finalImageUrl = currentImageBase64;
-
-        // Determina a URL final do vídeo (prioriza upload temporário, senão YouTube URL)
-        const finalVideoUrl = currentVideoObjectUrl || (productVideoUrl.startsWith("Vídeo enviado por upload") ? null : productVideoUrl);
+        const finalVideoUrl = currentVideoObjectUrl || (productVideoUrlInput.startsWith("Vídeo enviado por upload") ? null : productVideoUrlInput);
 
         if (!productName || productPrice <= 0 || !finalImageUrl) {
             alert("Por favor, preencha Nome, Preço e selecione uma Imagem para o produto.");
@@ -291,13 +475,13 @@
             descricao: productDesc,
             valor: productPrice,
             imagemUrl: finalImageUrl,
-            videoUrl: finalVideoUrl || '', // Garante que seja string vazia se não houver vídeo
+            videoUrl: finalVideoUrl || '', 
         };
 
-        if (id) { // Editando
+        if (id) { 
             const index = db.products.findIndex(p => p.id === id);
             if (index !== -1) db.products[index] = product;
-        } else { // Criando
+        } else { 
             db.products.push(product);
         }
 
@@ -321,8 +505,15 @@
             container.innerHTML = "<p>Nenhum cliente cadastrado. Clique em 'Novo Cliente' para começar.</p>";
             return;
         }
-        let tableHtml = `<table class="table">
-            <tr><th>Nome</th><th>Contato</th><th>Ações</th></tr>`;
+        let tableHtml = `<table class="table clients">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Contato</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>`;
         db.clients.forEach(c => {
             tableHtml += `
                 <tr>
@@ -335,7 +526,7 @@
                 </tr>
             `;
         });
-        tableHtml += `</table>`;
+        tableHtml += `</tbody></table>`;
         container.innerHTML = tableHtml;
     }
 
@@ -360,6 +551,7 @@
                 </div>
             </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+        document.getElementById('client-modal').classList.add('active'); // Ativa o modal
     }
 
     function saveClient() {
@@ -399,7 +591,10 @@
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            modal.remove();
+            modal.classList.remove('active'); // Desativa a classe para transição
+            // Espera a transição terminar para remover o elemento
+            modal.addEventListener('transitionend', () => modal.remove(), { once: true });
+            
             // Limpar URL de objeto de vídeo quando o modal é fechado
             if (currentVideoObjectUrl) {
                 URL.revokeObjectURL(currentVideoObjectUrl);
