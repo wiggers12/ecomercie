@@ -1,0 +1,5 @@
+# Ignorar credenciais secretas do Firebase
+credentials.json
+
+# Ignorar pasta do ambiente virtual
+/venv/
