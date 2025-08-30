@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Painel de Controle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #3498db; --dark1: #2c3e50; --light1: #ecf0f1; --danger: #e74c3c; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--light1); margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-container { background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: var(--dark1); margin-top: 0; margin-bottom: 10px; }
+        p { color: #777; margin-bottom: 30px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 6px; background-color: var(--primary); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.3s; }
+        .btn:hover { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        #error-message { color: var(--danger); margin-top: 15px; font-size: 14px; display: none; }
+        .toggle-form { margin-top: 20px; font-size: 14px; }
+        .toggle-form a { color: var(--primary); cursor: pointer; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h1 id="form-title">Login</h1>
+    <p id="form-subtitle">Acesse o painel do seu catálogo</p>
+    <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+    </div>
+    <div class="input-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" required>
+    </div>
+    <button class="btn" id="submit-button" onclick="handleAuth()">Entrar</button>
+    <p id="error-message"></p>
+    <div class="toggle-form">
+        <span id="toggle-text">Não tem uma conta?</span>
+        <a id="toggle-link" onclick="toggleMode()">Crie uma agora</a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
+        authDomain: "ecomercie-vendas.firebaseapp.com",
+        projectId: "ecomercie-vendas",
+        storageBucket: "ecomercie-vendas.firebasestorage.app",
+        messagingSenderId: "1054540261609",
+        appId: "1:1054540261609:web:90042b823220b4c73f6878",
+        measurementId: "G-TNC5M9G89H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    let isLoginMode = true;
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) { window.location.href = '/admin'; }
+    });
+    
+    window.handleAuth = async function() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const button = document.getElementById('submit-button');
+        const errorMessage = document.getElementById('error-message');
+        button.disabled = true; button.innerText = 'Processando...'; errorMessage.style.display = 'none';
+        try {
+            if (isLoginMode) { await signInWithEmailAndPassword(auth, email, password); } 
+            else { await createUserWithEmailAndPassword(auth, email, password); }
+        } catch (error) {
+            errorMessage.innerText = getFriendlyErrorMessage(error.code);
+            errorMessage.style.display = 'block';
+            button.disabled = false;
+            button.innerText = isLoginMode ? 'Entrar' : 'Cadastrar';
+        }
+    }
+
+    window.toggleMode = function() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('form-title').innerText = isLoginMode ? 'Login' : 'Crie sua Conta';
+        document.getElementById('form-subtitle').innerText = isLoginMode ? 'Acesse o painel' : 'Preencha os dados';
+        document.getElementById('submit-button').innerText = isLoginMode ? 'Entrar' : 'Cadastrar';
+        document.getElementById('toggle-text').innerText = isLoginMode ? 'Não tem uma conta?' : 'Já tem uma conta?';
+        document.getElementById('toggle-link').innerText = isLoginMode ? 'Crie uma agora' : 'Faça o login';
+    }
+
+    function getFriendlyErrorMessage(errorCode) {
+        switch (errorCode) {
+            case 'auth/invalid-email': return 'O formato do e-mail é inválido.';
+            case 'auth/user-not-found': return 'Nenhuma conta encontrada com este e-mail.';
+            case 'auth/wrong-password': return 'Senha incorreta. Tente novamente.';
+            case 'auth/weak-password': return 'A senha precisa ter pelo menos 6 caracteres.';
+            case 'auth/email-already-in-use': return 'Este e-mail já está cadastrado. Tente fazer o login.';
+            default: return 'Ocorreu um erro. Tente novamente.';
+        }
+    }
+</script>
+
+</body>
+</html>

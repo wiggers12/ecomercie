@@ -4,164 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle</title>
+<link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        :root {
-            --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c;
-            --dark1: #2c3e50; --dark2: #34495e; --light1: #ecf0f1; --light2: #bdc3c7;
-        }
-        body {
-            margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1);
-            font-size: 16px; display: flex; flex-direction: column; min-height: 100vh;
-        }
-
-        /* --- Header para Mobile --- */
-        .mobile-header {
-            display: none; background-color: var(--dark1); color: var(--light1); padding: 15px 20px;
-            justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: sticky; top: 0; z-index: 1100;
-        }
-        .mobile-header .menu-icon { font-size: 24px; cursor: pointer; }
-        .mobile-header h2 { margin: 0; font-size: 20px; }
-
-        /* --- Sidebar (Menu Lateral) --- */
-        .sidebar {
-            width: 250px; background-color: var(--dark1); color: var(--light1);
-            display: flex; flex-direction: column; padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 1000;
-        }
+        :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark1: #2c3e50; --dark2: #34495e; --light1: #ecf0f1; --light2: #bdc3c7; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1); font-size: 16px; display: flex; flex-direction: column; min-height: 100vh; }
+        .mobile-header { display: none; background-color: var(--dark1); color: var(--light1); padding: 15px 20px; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1100; }
+        .sidebar { width: 250px; background-color: var(--dark1); color: var(--light1); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 1000; }
         .sidebar h2 { text-align: center; color: var(--light1); margin-bottom: 30px; font-size: 24px; }
-        .sidebar nav a {
-            display: flex; align-items: center; color: var(--light2); text-decoration: none;
-            padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s, color 0.3s;
-        }
-        .sidebar nav a:hover, .sidebar nav a.active {
-            background-color: var(--dark2); color: var(--light1);
-        }
+        .sidebar nav a { display: flex; align-items: center; color: var(--light2); text-decoration: none; padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s, color 0.3s; }
+        .sidebar nav a:hover, .sidebar nav a.active { background-color: var(--dark2); color: var(--light1); }
         .sidebar nav a i { margin-right: 12px; font-size: 18px; }
-
-        /* --- Conteúdo Principal --- */
         .app-container { display: flex; flex-grow: 1; }
         .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 25px; border-bottom: 1px solid var(--light2); padding-bottom: 15px;
-        }
-        .header h1 { margin: 0; color: var(--dark1); font-size: 28px; }
-
-        /* --- Botões --- */
-        .btn {
-            padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer;
-            font-weight: 600; transition: background-color 0.3s, transform 0.2s; font-size: 15px;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--light2); padding-bottom: 15px; }
+        h1 { margin: 0; color: var(--dark1); font-size: 28px; }
+        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 15px; }
         .btn i { margin-right: 8px; }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: #2980b9; transform: translateY(-1px); }
-        .btn-danger { background-color: var(--danger); color: white; }
-        .btn-danger:hover { background-color: #c0392b; transform: translateY(-1px); }
-        .btn-secondary { background-color: var(--light2); color: var(--dark1); }
-        .btn-secondary:hover { background-color: #aaa; transform: translateY(-1px); }
-
-        /* --- Tabelas --- */
         .table-responsive { overflow-x: auto; margin-top: 20px; }
-        .table {
-            width: 100%; border-collapse: collapse; background-color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden;
-            min-width: 600px; 
-        }
+        .table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; min-width: 600px; }
         .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
         .table th { background-color: var(--dark2); color: var(--light1); font-weight: 600; }
         .table img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .actions a {
-            margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px;
-            transition: color 0.3s;
-        }
+        .actions a { margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px; transition: color 0.3s; }
         .actions a:hover { color: var(--primary); }
-
-        /* --- Formulários no Modal --- */
-        .modal-content label { display: block; margin-bottom: 5px; color: var(--dark1); font-weight: 500; font-size: 15px; }
-        .modal-content input[type="text"], .modal-content textarea,
-        .modal-content input[type="number"], .modal-content input[type="url"],
-        .modal-content input[type="file"] {
-            width: 100%; 
-            padding: 12px; margin-bottom: 15px; border: 1px solid var(--light2);
-            border-radius: 6px; box-sizing: border-box; font-size: 15px;
-            background-color: #ffffff; color: var(--dark1);
-        }
-        .modal-content textarea { min-height: 80px; resize: vertical; }
-        .file-upload-section {
-            margin-bottom: 15px; border: 1px dashed var(--light2); padding: 15px;
-            border-radius: 8px; background-color: #f9f9f9;
-        }
-        .file-upload-section label { margin-bottom: 10px; font-weight: 600; }
-        .preview-image, .preview-video {
-            max-width: 100%; max-height: 180px; display: block; margin-top: 10px;
-            border-radius: 4px; object-fit: cover; background-color: #eee;
-        }
-        .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
-
-        /* --- Modal Base --- */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
-            z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.active { opacity: 1; visibility: visible; }
-        .modal-content {
-            background: white; padding: 30px; border-radius: 8px; max-width: 600px;
-            width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transform: translateY(-20px);
-            transition: transform 0.3s ease-out;
-            
-            /* ---- CORREÇÃO APLICADA AQUI ---- */
-            max-height: 90vh; /* Limita a altura máxima do modal */
-            overflow-y: auto; /* Adiciona a barra de rolagem vertical se necessário */
-        }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transform: translateY(-20px); transition: transform 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
         .modal.active .modal-content { transform: translateY(0); }
-        .modal-content h2 {
-            color: var(--dark1); margin-top: 0; margin-bottom: 20px;
-            border-bottom: 1px solid var(--light2); padding-bottom: 10px; font-size: 24px;
-        }
-
-        /* --- Responsividade --- */
+        .modal-content h2 { color: var(--dark1); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--light2); padding-bottom: 10px; font-size: 24px; }
+        label { display: block; margin-bottom: 5px; color: var(--dark1); font-weight: 500; font-size: 15px; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--light2); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .file-upload-section { margin-bottom: 15px; border: 1px dashed var(--light2); padding: 15px; border-radius: 8px; background-color: #f9f9f9; }
+        .preview-image, .preview-video { max-width: 100%; aspect-ratio: 16 / 9; display: block; margin-top: 10px; border-radius: 4px; object-fit: cover; background-color: #eee; }
+        .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column-reverse; gap: 10px; }
+        .toast { background-color: var(--dark1); color: var(--light1); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 15px; opacity: 0; transform: translateX(100%); animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards; }
+        .toast i { color: var(--secondary); font-size: 24px; }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
         @media (max-width: 768px) {
-            .sidebar {
-                position: fixed; left: -250px; top: 0; height: 100%;
-                transition: left 0.3s ease-out;
-            }
+            .sidebar { position: fixed; left: -250px; top: 0; height: 100%; transition: left 0.3s ease-out; }
             .sidebar.active { left: 0; }
             .app-container { flex-direction: column; }
             .main-content { padding: 20px; }
             .mobile-header { display: flex; }
-            .header h1 { font-size: 24px; }
-            .btn { padding: 10px 15px; font-size: 15px; }
-            .btn i { margin-right: 5px; }
-            .table { min-width: unset; } 
-            .table th, .table td { padding: 12px; font-size: 14px; }
-            
-            .table.products th:nth-child(1), .table.products td:nth-child(1),
-            .table.products th:nth-child(3), .table.products td:nth-child(3) { display: none; }
-            .table.products th:nth-child(2), .table.products td:nth-child(2) { width: 70%; } /* Nome */
-            .table.products th:nth-child(4), .table.products td:nth-child(4) { width: 30%; text-align: right; } /* Ações */
-            
-            .table.clients th:nth-child(1), .table.clients td:nth-child(1) { width: 60%; } /* Nome */
-            .table.clients th:nth-child(2), .table.clients td:nth-child(2) { display: none; } /* Contato */
-            .table.clients th:nth-child(3), .table.clients td:nth-child(3) { width: 40%; text-align: right; } /* Ações */
-            
-            .modal-content { padding: 20px; }
-            .modal-content h2 { font-size: 20px; }
+            h1 { font-size: 24px; }
         }
-
-        /* Overlay para o menu mobile */
-        .overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 999;
-        }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
         .overlay.active { display: block; }
     </style>
 </head>
@@ -175,399 +71,274 @@
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
-        <h2>Meu Catálogo</h2>
+        <div>
+            <h2>Meu Catálogo</h2>
+            <nav>
+                <a href="#" onclick="showView('view-products')" class="active"><i class="fas fa-box-open"></i> Produtos</a>
+                <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
+                <a href="/" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
+            </nav>
+        </div>
         <nav>
-            <a href="#" onclick="showView('view-products')"><i class="fas fa-box-open"></i> Produtos</a>
-            <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
-            <a href="catalogo.html" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
+             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </nav>
     </aside>
-
     <main class="main-content">
         <div id="view-products" class="view">
-            <div class="header">
-                <h1>Gerenciar Produtos</h1>
-                <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button>
-            </div>
-            <div class="table-responsive">
-                <div id="products-table-container"></div>
-            </div>
+            <div class="header"><h1>Gerenciar Produtos</h1><button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button></div>
+            <div class="table-responsive"><div id="products-table-container"></div></div>
         </div>
-
         <div id="view-clients" class="view">
-            <div class="header">
-                <h1>Clientes Cadastrados</h1>
-                <button class="btn btn-primary" onclick="openClientModal()"><i class="fas fa-user-plus"></i> Novo Cliente</button>
-            </div>
-            <div class="table-responsive">
-                <div id="clients-table-container"></div>
-            </div>
+            <div class="header"><h1>Clientes Cadastrados</h1></div><p>Funcionalidade de clientes a ser implementada.</p>
         </div>
     </main>
 </div>
 
 <div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div id="toast-container"></div>
 
-<script>
-    // --- BANCO DE DADOS LOCAL ---
-    let db = JSON.parse(localStorage.getItem("catalogoDigital")) || {
-        products: [],
-        clients: []
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
+        authDomain: "ecomercie-vendas.firebaseapp.com",
+        projectId: "ecomercie-vendas",
+        storageBucket: "ecomercie-vendas.firebasestorage.app",
+        messagingSenderId: "1054540261609",
+        appId: "1:1054540261609:web:90042b823220b4c73f6878",
+        measurementId: "G-TNC5M9G89H"
     };
-    function saveDB() {
-        localStorage.setItem("catalogoDigital", JSON.stringify(db));
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    const firestoreDb = getFirestore(app);
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = '/login';
+        } else {
+            showView('view-products'); 
+            listenForVisits(); 
+        }
+    });
+    
+    function showNotification(message) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-eye"></i> <div>${message}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => { if (toast) toast.remove(); }, 5000);
     }
 
-    // --- VARIÁVEIS TEMPORÁRIAS PARA UPLOAD ---
-    let currentImageBase64 = null;
-    let currentVideoObjectUrl = null; 
+    let unsubscribe;
+    function listenForVisits() {
+        if (unsubscribe) return;
+        const visitsCollection = collection(firestoreDb, 'visits');
+        const q = query(visitsCollection, where("timestamp", ">=", new Date()));
+        unsubscribe = onSnapshot(q, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added" && !change.doc.metadata.hasPendingWrites) {
+                    showNotification("Novo visitante no seu catálogo!");
+                }
+            });
+        }, (error) => { console.error("Erro no listener de visitas:", error); });
+    }
 
-    // --- NAVEGAÇÃO E RESPONSIVIDADE ---
-    function toggleSidebar() {
+    window.logout = async function() {
+        try { await signOut(auth); } catch (error) { console.error("Erro ao fazer logout:", error); }
+    }
+
+    window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('sidebar-overlay').classList.toggle('active');
     }
 
-    function showView(viewId) {
+    window.showView = function(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-        document.querySelector(`.sidebar nav a[onclick="showView('${viewId}')"]`).classList.add('active');
+        const viewToShow = document.getElementById(viewId);
+        if (viewToShow) viewToShow.classList.add('active');
         
-        if (viewId === 'view-products') renderProductsTable();
-        if (viewId === 'view-clients') renderClientsTable();
-
-        if (window.innerWidth <= 768) {
+        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+        const activeLink = document.querySelector(`.sidebar nav a[onclick="showView('${viewId}')"]`);
+        if (activeLink) activeLink.classList.add('active');
+        
+        if (viewId === 'view-products') { renderProductsTable(); }
+        
+        if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) {
             toggleSidebar();
         }
     }
 
-    // --- FUNÇÕES DE PRODUTOS (CRUD) ---
-    function renderProductsTable() {
-        const container = document.getElementById('products-table-container');
-        if (db.products.length === 0) {
-            container.innerHTML = "<p>Nenhum produto cadastrado. Clique em 'Novo Produto' para começar.</p>";
-            return;
-        }
-        let tableHtml = `<table class="table products">
-            <thead><tr><th>Imagem</th><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead>
-            <tbody>`;
-        db.products.forEach(p => {
-            tableHtml += `
-                <tr>
-                    <td><img src="${p.imagemUrl}" alt="${p.nome}"></td>
-                    <td>${p.nome}</td>
-                    <td>R$ ${p.valor.toFixed(2)}</td>
-                    <td class="actions">
-                        <a onclick="openProductModal('${p.id}')" title="Editar"><i class="fas fa-edit"></i></a>
-                        <a onclick="deleteProduct('${p.id}')" title="Excluir"><i class="fas fa-trash"></i></a>
-                    </td>
-                </tr>
-            `;
-        });
-        tableHtml += `</tbody></table>`;
-        container.innerHTML = tableHtml;
-    }
-
-    function openProductModal(productId = null) {
-        const product = db.products.find(p => p.id === productId) || {};
-        const isEditing = !!product.id;
-        const modalTitle = isEditing ? 'Editar Produto' : 'Adicionar Novo Produto';
-
-        currentImageBase64 = product.imagemUrl || null;
-        currentVideoObjectUrl = null; 
-
-        const modalHtml = `
-            <div class="modal" id="product-modal">
-                <div class="modal-content">
-                    <h2>${modalTitle}</h2>
-                    <input type="hidden" id="productId" value="${product.id || ''}">
-                    
-                    <label for="productName">Nome do Produto:</label>
-                    <input type="text" id="productName" placeholder="Ex: Camiseta Básica" value="${product.nome || ''}">
-                    
-                    <label for="productDesc">Descrição:</label>
-                    <textarea id="productDesc" placeholder="Detalhes do produto...">${product.descricao || ''}</textarea>
-                    
-                    <label for="productPrice">Preço (R$):</label>
-                    <input type="number" id="productPrice" placeholder="Ex: 99.90" value="${product.valor || ''}" step="0.01">
-                    
-                    <div class="file-upload-section">
-                        <label for="productImageInput">Imagem do Produto (Max 2MB):</label>
-                        <input type="file" id="productImageInput" accept="image/*">
-                        <img id="previewImage" class="preview-image" src="${product.imagemUrl || ''}" style="${product.imagemUrl ? 'display:block;' : 'display:none;'}">
-                    </div>
-
-                    <div class="file-upload-section">
-                        <label>Vídeo do Produto (Upload ou YouTube URL):</label>
-                        <input type="file" id="productVideoInput" accept="video/*">
-                        <input type="url" id="productVideoUrl" placeholder="Ou cole a URL do YouTube" value="${product.videoUrl && !product.videoUrl.startsWith('blob:') ? product.videoUrl : ''}">
-                        <video id="previewVideo" class="preview-video" controls style="display:none;"></video>
-                        <p style="font-size:12px;color:#888;margin-top:5px;">Atenção: Vídeos enviados por upload são temporários e serão perdidos ao recarregar a página. Use URLs do YouTube para persistência.</p>
-                    </div>
-
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="closeModal('product-modal')">Cancelar</button>
-                        <button class="btn btn-primary" onclick="saveProduct()">Salvar</button>
-                    </div>
-                </div>
-            </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        document.getElementById('product-modal').classList.add('active'); 
-        
-        setupImageUpload('productImageInput', 'previewImage');
-        setupVideoUpload('productVideoInput', 'productVideoUrl', 'previewVideo');
-
-        if (isEditing) {
-             const videoPrev = document.getElementById('previewVideo');
-            if (product.videoUrl && product.videoUrl.startsWith('blob:')) {
-                document.getElementById('productVideoInput').value = null; 
-                document.getElementById('productVideoUrl').value = "Vídeo enviado por upload (temporário)";
-                document.getElementById('productVideoUrl').disabled = true;
-                videoPrev.src = product.videoUrl;
-                videoPrev.style.display = 'block';
-                currentVideoObjectUrl = product.videoUrl; 
-            } else if (product.videoUrl) {
-                document.getElementById('productVideoInput').disabled = true;
-                const embedUrl = convertToEmbedUrl(product.videoUrl);
-                if (embedUrl) {
-                    videoPrev.outerHTML = `<iframe id="previewVideo" class="preview-video" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
-                    document.getElementById('previewVideo').style.display = 'block';
-                }
-            }
-        }
-    }
-
-    function setupImageUpload(inputId, previewId) {
-        const input = document.getElementById(inputId);
-        const preview = document.getElementById(previewId);
-
-        input.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (!file) {
-                preview.style.display = 'none';
-                currentImageBase64 = null;
-                return;
-            }
-            if (file.size > 2 * 1024 * 1024) { 
-                alert("Erro: A imagem é muito grande! O limite é de 2MB.");
-                event.target.value = null; preview.style.display = 'none'; currentImageBase64 = null;
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentImageBase64 = e.target.result;
-                preview.src = currentImageBase64;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function setupVideoUpload(fileInputId, urlInputId, previewId) {
-        const fileInput = document.getElementById(fileInputId);
-        const urlInput = document.getElementById(urlInputId);
-        let preview = document.getElementById(previewId);
-
-        fileInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (currentVideoObjectUrl) {
-                URL.revokeObjectURL(currentVideoObjectUrl); 
-            }
-            if (file) {
-                currentVideoObjectUrl = URL.createObjectURL(file);
-                if (preview.tagName === 'IFRAME') {
-                    const newVideo = document.createElement('video');
-                    newVideo.id = previewId; newVideo.className = preview.className;
-                    preview.replaceWith(newVideo); preview = newVideo;
-                }
-                preview.src = currentVideoObjectUrl;
-                preview.controls = true;
-                preview.style.display = 'block';
-                urlInput.disabled = true;
-                urlInput.value = "Vídeo enviado por upload (temporário)";
-            } else {
-                currentVideoObjectUrl = null;
-                preview.style.display = 'none'; preview.src = '';
-                urlInput.disabled = false; urlInput.value = '';
-            }
-        });
-
-        urlInput.addEventListener('input', function() {
-            if (urlInput.value.trim() !== '') {
-                fileInput.disabled = true; fileInput.value = null; 
-                if (currentVideoObjectUrl) { 
-                    URL.revokeObjectURL(currentVideoObjectUrl); currentVideoObjectUrl = null;
-                }
-                if (preview.tagName === 'VIDEO') {
-                    const newIframe = document.createElement('iframe');
-                    newIframe.id = previewId; newIframe.className = preview.className;
-                    preview.replaceWith(newIframe); preview = newIframe;
-                }
-                const embedUrl = convertToEmbedUrl(urlInput.value);
-                if (embedUrl) {
-                    preview.src = embedUrl; preview.style.display = 'block';
-                } else {
-                    preview.style.display = 'none'; preview.src = '';
-                }
-            } else {
-                fileInput.disabled = false;
-                preview.style.display = 'none'; preview.src = '';
-            }
-        });
-    }
-
-    function convertToEmbedUrl(url) {
-        let videoId = '';
-        try {
-            if (url.includes("youtu.be/")) videoId = new URL(url).pathname.substring(1);
-            else if (url.includes("watch?v=")) videoId = new URL(url).searchParams.get("v");
-        } catch (e) { return ''; }
-        return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-    }
-
-    function saveProduct() {
-        const id = document.getElementById('productId').value;
-        const productName = document.getElementById('productName').value.trim();
-        const productDesc = document.getElementById('productDesc').value.trim();
-        const productPrice = parseFloat(document.getElementById('productPrice').value) || 0;
-        const productVideoUrlInput = document.getElementById('productVideoUrl').value.trim();
-
-        const finalImageUrl = currentImageBase64;
-        const finalVideoUrl = currentVideoObjectUrl || (productVideoUrlInput.startsWith("Vídeo enviado por upload") ? null : productVideoUrlInput);
-
-        if (!productName || productPrice <= 0 || !finalImageUrl) {
-            alert("Por favor, preencha Nome, Preço e selecione uma Imagem para o produto.");
-            return;
-        }
-
-        const product = {
-            id: id || Date.now().toString(),
-            nome: productName, descricao: productDesc,
-            valor: productPrice, imagemUrl: finalImageUrl,
-            videoUrl: finalVideoUrl || '', 
-        };
-
-        if (id) { 
-            const index = db.products.findIndex(p => p.id === id);
-            if (index !== -1) db.products[index] = product;
-        } else { 
-            db.products.push(product);
-        }
-
-        saveDB();
-        renderProductsTable();
-        closeModal('product-modal');
-    }
-
-    function deleteProduct(productId) {
-        if (confirm("Tem certeza que deseja excluir este produto?")) {
-            db.products = db.products.filter(p => p.id !== productId);
-            saveDB();
-            renderProductsTable();
-        }
-    }
-
-    // --- FUNÇÕES DE CLIENTES ---
-    function renderClientsTable() {
-        const container = document.getElementById('clients-table-container');
-        if (db.clients.length === 0) {
-            container.innerHTML = "<p>Nenhum cliente cadastrado. Clique em 'Novo Cliente' para começar.</p>";
-            return;
-        }
-        let tableHtml = `<table class="table clients">
-            <thead><tr><th>Nome</th><th>Contato</th><th>Ações</th></tr></thead>
-            <tbody>`;
-        db.clients.forEach(c => {
-            tableHtml += `
-                <tr>
-                    <td>${c.nome}</td>
-                    <td>${c.contato || 'N/A'}</td>
-                    <td class="actions">
-                        <a onclick="openClientModal('${c.id}')" title="Editar"><i class="fas fa-edit"></i></a>
-                        <a onclick="deleteClient('${c.id}')" title="Excluir"><i class="fas fa-trash"></i></a>
-                    </td>
-                </tr>
-            `;
-        });
-        tableHtml += `</tbody></table>`;
-        container.innerHTML = tableHtml;
-    }
-
-    function openClientModal(clientId = null) {
-        const client = db.clients.find(c => c.id === clientId) || {};
-        const isEditing = !!client.id;
-        const modalTitle = isEditing ? 'Editar Cliente' : 'Adicionar Novo Cliente';
-
-        const modalHtml = `
-            <div class="modal" id="client-modal">
-                <div class="modal-content">
-                    <h2>${modalTitle}</h2>
-                    <input type="hidden" id="clientId" value="${client.id || ''}">
-                    <label for="clientName">Nome do Cliente:</label>
-                    <input type="text" id="clientName" placeholder="Nome Completo" value="${client.nome || ''}">
-                    <label for="clientContact">Contato (Telefone/Email):</label>
-                    <input type="text" id="clientContact" placeholder="Ex: (51) 99999-9999 ou email@exemplo.com" value="${client.contato || ''}">
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="closeModal('client-modal')">Cancelar</button>
-                        <button class="btn btn-primary" onclick="saveClient()">Salvar</button>
-                    </div>
-                </div>
-            </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        document.getElementById('client-modal').classList.add('active'); 
-    }
-
-    function saveClient() {
-        const id = document.getElementById('clientId').value;
-        const client = {
-            id: id || Date.now().toString(),
-            nome: document.getElementById('clientName').value.trim(),
-            contato: document.getElementById('clientContact').value.trim(),
-        };
-
-        if (!client.nome) { alert("O nome do cliente é obrigatório!"); return; }
-
-        if (id) {
-            const index = db.clients.findIndex(c => c.id === id);
-            if (index !== -1) db.clients[index] = client;
-        } else {
-            db.clients.push(client);
-        }
-
-        saveDB();
-        renderClientsTable();
-        closeModal('client-modal');
-    }
-
-    function deleteClient(clientId) {
-        if (confirm("Tem certeza que deseja excluir este cliente?")) {
-            db.clients = db.clients.filter(c => c.id !== clientId);
-            saveDB();
-            renderClientsTable();
-        }
-    }
-
-    // --- FUNÇÕES GERAIS ---
-    function closeModal(modalId) {
+    window.closeModal = function(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            modal.classList.remove('active'); 
+            modal.classList.remove('active');
             modal.addEventListener('transitionend', () => modal.remove(), { once: true });
-            
-            if (currentVideoObjectUrl) {
-                URL.revokeObjectURL(currentVideoObjectUrl);
-                currentVideoObjectUrl = null;
-            }
-            currentImageBase64 = null; 
         }
     }
 
+    async function uploadFile(file, progressElementId) {
+        if (!file) return null;
+        const progressElement = document.getElementById(progressElementId);
+        const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        return new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    if (progressElement) progressElement.style.width = progress + '%';
+                },
+                (error) => { console.error("Erro no upload:", error); reject(error); },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(downloadURL);
+                }
+            );
+        });
+    }
 
-    // --- INICIALIZAÇÃO ---
-    window.onload = () => {
-        showView('view-products'); 
-    };
+    async function renderProductsTable() {
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+            const idToken = await user.getIdToken();
+            const response = await fetch('/api/my_products', {
+                headers: { 'Authorization': `Bearer ${idToken}` }
+            });
+            if (!response.ok) throw new Error('Falha ao buscar produtos.');
+            const products = await response.json();
+            const container = document.getElementById('products-table-container');
+            if (!products || products.length === 0) {
+                container.innerHTML = "<p>Nenhum produto cadastrado para este usuário.</p>";
+                return;
+            }
+            let tableHtml = `<table class="table products"><thead><tr><th>Imagem</th><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead><tbody>`;
+            products.forEach(p => {
+                tableHtml += `
+                    <tr>
+                        <td><img src="${p.imagemUrl || 'https://via.placeholder.com/60x40'}" alt="${p.nome}"></td>
+                        <td>${p.nome}</td>
+                        <td>R$ ${(p.valor || 0).toFixed(2)}</td>
+                        <td class="actions">
+                            <a onclick="openProductModal('${p.id}')" title="Editar"><i class="fas fa-edit"></i></a>
+                            <a onclick="deleteProduct('${p.id}')" title="Excluir"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>`;
+            });
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+        } catch (error) {
+            document.getElementById('products-table-container').innerHTML = "<p style='color:red;'>Erro ao carregar produtos.</p>";
+        }
+    }
+
+    window.openProductModal = async function(productId = null) {
+        const isEditing = !!productId;
+        let product = {};
+        if (isEditing) {
+            const response = await fetch(`/api/products/${productId}`);
+            product = await response.json();
+        }
+        const modalTitle = isEditing ? 'Editar Produto' : 'Adicionar Novo Produto';
+        const modalHtml = `
+        <div class="modal active" id="product-modal">
+            <div class="modal-content">
+                <h2>${modalTitle}</h2>
+                <input type="hidden" id="productId" value="${product.id || ''}">
+                <input type="hidden" id="existingImageUrl" value="${product.imagemUrl || ''}">
+                <input type="hidden" id="existingVideoUrl" value="${product.videoUrl || ''}">
+                <label>Nome do Produto:</label>
+                <input type="text" id="productName" value="${product.nome || ''}">
+                <label>Descrição:</label>
+                <textarea id="productDesc">${product.descricao || ''}</textarea>
+                <label>Preço (R$):</label>
+                <input type="number" id="productPrice" value="${product.valor || ''}" step="0.01">
+                <div class="file-upload-section">
+                    <label>Imagem (Upload):</label>
+                    <input type="file" id="productImageInput" accept="image/*">
+                    <div id="image-progress" style="width:0%; height:5px; background:var(--secondary); transition:width 0.3s; margin-top:5px; border-radius: 5px;"></div>
+                    ${product.imagemUrl ? `<img src="${product.imagemUrl}" class="preview-image">` : ''}
+                </div>
+                <div class="file-upload-section">
+                    <label>Vídeo (Upload ou URL YouTube):</label>
+                    <input type="file" id="productVideoInput" accept="video/*">
+                    <div id="video-progress" style="width:0%; height:5px; background:var(--secondary); transition:width 0.3s; margin-top:5px; border-radius: 5px;"></div>
+                    <input type="url" id="productVideoUrl" placeholder="Ou cole a URL do YouTube" value="${product.videoUrl && !product.videoUrl.startsWith('https://firebasestorage') ? product.videoUrl : ''}">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="closeModal('product-modal')">Cancelar</button>
+                    <button class="btn btn-primary" onclick="saveProduct(event)">Salvar</button>
+                </div>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    window.saveProduct = async function(event) {
+        const user = auth.currentUser;
+        if (!user) { alert("Sessão expirada. Faça login novamente."); window.location.href = '/login'; return; }
+        const idToken = await user.getIdToken();
+        const id = document.getElementById('productId').value;
+        const imageFile = document.getElementById('productImageInput').files[0];
+        const videoFile = document.getElementById('productVideoInput').files[0];
+        let imageUrl = document.getElementById('existingImageUrl').value;
+        let videoUrl = document.getElementById('productVideoUrl').value.trim() || document.getElementById('existingVideoUrl').value;
+        const saveButton = event.target;
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        try {
+            if (imageFile) { imageUrl = await uploadFile(imageFile, 'image-progress'); }
+            if (videoFile) { videoUrl = await uploadFile(videoFile, 'video-progress'); }
+            const productData = {
+                nome: document.getElementById('productName').value,
+                descricao: document.getElementById('productDesc').value,
+                valor: parseFloat(document.getElementById('productPrice').value) || 0,
+                imagemUrl: imageUrl,
+                videoUrl: videoUrl || '',
+            };
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/products/${id}` : '/api/products';
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                body: JSON.stringify(productData),
+            });
+            if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+            renderProductsTable();
+            closeModal('product-modal');
+        } catch (error) {
+            alert("Ocorreu um erro ao salvar. Verifique o console.");
+            console.error("Erro ao salvar produto:", error);
+            saveButton.disabled = false;
+            saveButton.innerHTML = 'Salvar';
+        }
+    }
+    
+    window.deleteProduct = async function(productId) {
+        const user = auth.currentUser;
+        if (!user) { alert("Sessão expirada. Faça login novamente."); window.location.href = '/login'; return; }
+        const idToken = await user.getIdToken();
+        if (confirm("Tem certeza que deseja excluir este produto?")) {
+            try {
+                const response = await fetch(`/api/products/${productId}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${idToken}` }
+                });
+                if (!response.ok) throw new Error('Falha ao excluir o produto.');
+                renderProductsTable();
+            } catch(error) {
+                console.error('Erro:', error);
+                alert('Ocorreu um erro ao excluir.');
+            }
+        }
+    }
 </script>
 
 </body>
