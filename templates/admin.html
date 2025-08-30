@@ -98,10 +98,21 @@
 <div id="toast-container"></div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    // 👉 Primeiro registra o service worker de push
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/static/firebase-messaging-sw.js")
+
+        .then((registration) => {
+            console.log("✅ Service Worker registrado:", registration);
+        })
+        .catch((err) => {
+            console.error("❌ Erro ao registrar o Service Worker:", err);
+        });
+    }    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
     import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js"; <!-- ✅ IMPORTAÇÃO FALTANDO -->
 
     const firebaseConfig = {
         apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
@@ -117,6 +128,7 @@
     const auth = getAuth(app);
     const storage = getStorage(app);
     const firestoreDb = getFirestore(app);
+    const messaging = getMessaging(app);
 
     onAuthStateChanged(auth, (user) => {
         if (!user) {
@@ -124,9 +136,33 @@
         } else {
             showView('view-products'); 
             listenForVisits(); 
+            registerFcmToken(); // 🔔 registra token para push
         }
     });
     
+    async function registerFcmToken() {
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+            // 🔑 Troque pela sua VAPID KEY real do Firebase
+            const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
+            if (token) {
+                console.log("Token FCM:", token);
+                const idToken = await user.getIdToken();
+                await fetch("/api/save_fcm_token", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + idToken
+                    },
+                    body: JSON.stringify({ token })
+                });
+                console.log("Token salvo no Firestore!");
+            }
+        } catch (err) {
+            console.error("Erro ao registrar token FCM:", err);
+        }
+    }    
     function showNotification(message) {
         const container = document.getElementById('toast-container');
         if (!container) return;
