@@ -146,5 +146,6 @@ def save_fcm_token(user_uid):
 
 # --- INICIALIZAÇÃO DO SERVIDOR ---
 if __name__ == '__main__':
-    print("--- [DEBUG] Iniciando servidor Flask... ---")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.getenv("PORT", 5000))
+    print(f"--- [DEBUG] Iniciando servidor Flask na porta {port} ---")
+    app.run(host='0.0.0.0', port=port, debug=True)
