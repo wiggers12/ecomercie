@@ -130,10 +130,36 @@ def notify_visit():
     try:
         data = request.json
         owner_id = data.get('ownerId')
-        db.collection('visits').add({'timestamp': firestore.SERVER_TIMESTAMP,'owner_uid': owner_id or 'unknown'})
-        return jsonify({"success": True}), 200
-    except Exception as e: return jsonify({"success": False, "error": str(e)}), 500
 
+        # salva visita no Firestore
+        db.collection('visits').add({
+            'timestamp': firestore.SERVER_TIMESTAMP,
+            'owner_uid': owner_id or 'unknown'
+        })
+
+        # busca tokens FCM salvos para o lojista
+        tokens_ref = db.collection('users').document(owner_id).collection('tokens').stream()
+        tokens = [t.id for t in tokens_ref]
+
+        if tokens:
+            # cria a notificação
+            message = messaging.MulticastMessage(
+                notification=messaging.Notification(
+                    title="Nova visita 🚀",
+                    body="Alguém acabou de abrir seu catálogo!"
+                ),
+                tokens=tokens
+            )
+            response = messaging.send_multicast(message)
+            print(f"[DEBUG] Notificação enviada para {len(tokens)} dispositivos")
+        else:
+            print(f"[DEBUG] Nenhum token encontrado para {owner_id}")
+
+        return jsonify({"success": True}), 200
+
+    except Exception as e:
+        print(f"[ERRO notify_visit] {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 @app.route('/api/save_fcm_token', methods=['POST'])
 @check_token
 def save_fcm_token(user_uid):
