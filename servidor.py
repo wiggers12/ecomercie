@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+# servidor.py - VERSÃO CORRIGIDA E LIMPA
+
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
 import os
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from functools import wraps
@@ -60,8 +65,15 @@ def admin_page():
 @app.route("/api/catalog_data/<owner_id>", methods=["GET"])
 def get_catalog_data(owner_id):
     try:
+<<<<<<< HEAD
         products_ref = db.collection("products").where(filter=FieldFilter("owner_uid", "==", owner_id)).stream()
         products_list = [p.to_dict() | {"id": p.id} for p in products_ref]
+=======
+        products_ref = db.collection('products').where(
+            filter=FieldFilter('owner_uid', '==', owner_id)
+        ).stream()
+        products_list = [p.to_dict() | {'id': p.id} for p in products_ref]
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
         return jsonify({"products": products_list})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -71,8 +83,15 @@ def get_catalog_data(owner_id):
 @check_token
 def get_my_products(user_uid):
     try:
+<<<<<<< HEAD
         products_ref = db.collection("products").where(filter=FieldFilter("owner_uid", "==", user_uid)).stream()
         products_list = [p.to_dict() | {"id": p.id} for p in products_ref]
+=======
+        products_ref = db.collection('products').where(
+            filter=FieldFilter('owner_uid', '==', user_uid)
+        ).stream()
+        products_list = [p.to_dict() | {'id': p.id} for p in products_ref]
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
         return jsonify(products_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -138,6 +157,7 @@ def notify_visit():
         data = request.json
         owner_id = data.get("ownerId")
 
+<<<<<<< HEAD
         db.collection("visits").add({
             "timestamp": firestore.SERVER_TIMESTAMP,
             "owner_uid": owner_id or "unknown"
@@ -159,20 +179,71 @@ def notify_visit():
                 print(f"[DEBUG] Push enviado para {token[:20]}...")
             except Exception as e:
                 print(f"[ERRO] Falha no token {token[:20]}: {e}")
+=======
+        # salva visita
+        db.collection('visits').add({
+            'timestamp': firestore.SERVER_TIMESTAMP,
+            'owner_uid': owner_id or 'unknown'
+        })
+
+        # busca tokens
+        tokens_ref = db.collection('users').document(owner_id).collection('tokens').stream()
+        tokens = [t.id for t in tokens_ref]
+
+        if tokens:
+            for token in tokens:
+                try:
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title="Nova visita 🚀",
+                            body="Alguém acabou de abrir seu catálogo!"
+                        ),
+                        token=token
+                    )
+                    messaging.send(message)
+                    print(f"[DEBUG] Push enviado para token {token[:20]}...")
+                except Exception as e:
+                    print(f"[ERRO] Falha ao enviar push -> {e}")
+        else:
+            print(f"[DEBUG] Nenhum token encontrado para {owner_id}")
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
 
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+<<<<<<< HEAD
 
 @app.route("/api/save_fcm_token", methods=["POST"])
 def save_fcm_token():
+=======
+@app.route('/api/save_fcm_token', methods=['POST'])
+@check_token
+def save_fcm_token(user_uid):
+    try:
+        token = request.json.get('token')
+        if not token:
+            return jsonify({"error": "Nenhum token"}), 400
+        db.collection('users').document(user_uid).collection('tokens').document(token).set({
+            "owner_uid": user_uid,
+            "created_at": firestore.SERVER_TIMESTAMP
+        })
+        print(f"[DEBUG] Token salvo: {token}")
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/subscribe_topic', methods=['POST'])
+@check_token
+def subscribe_topic(user_uid):
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
     try:
         data = request.json
         token = data.get("token")
         owner_uid = data.get("owner", "public")
 
         if not token:
+<<<<<<< HEAD
             return jsonify({"error": "Nenhum token informado"}), 400
 
         db.collection("users").document(owner_uid).collection("tokens").document(token).set({
@@ -182,12 +253,23 @@ def save_fcm_token():
 
         print(f"[DEBUG] Token salvo para {owner_uid}: {token[:20]}...")
         return jsonify({"success": True}), 200
+=======
+            return jsonify({"error": "Token não informado"}), 400
+        response = messaging.subscribe_to_topic([token], topic)
+        print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
+        return jsonify({"success": True, "topic": topic}), 200
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+<<<<<<< HEAD
 
 # --- Static ---
 @app.route("/manifest.json")
+=======
+# --- ROTAS DE STATIC ---
+@app.route('/manifest.json')
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
 def manifest():
     return send_from_directory("static", "manifest.json")
 
@@ -207,5 +289,10 @@ def sw():
 # --- Inicialização ---
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
+<<<<<<< HEAD
     print(f"[DEBUG] Flask rodando na porta {port}")
     app.run(host="0.0.0.0", port=port, debug=True)
+=======
+    print(f"--- [DEBUG] Iniciando servidor Flask na porta {port} ---")
+    app.run(host='0.0.0.0', port=port, debug=True)
+>>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
