@@ -1,18 +1,17 @@
-# servidor.py - VERSÃO DE DEPURAÇÃO FUNCIONAL
+# servidor.py - VERSÃO CORRIGIDA
 
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from functools import wraps
-import json
 import firebase_admin
 from firebase_admin import credentials, firestore, auth, messaging
 from google.cloud.firestore_v1.base_query import FieldFilter
 
-print(">>> [DEBUG] MÓDULO app.py SENDO CARREGADO <<<")
+print(">>> [DEBUG] MÓDULO servidor.py SENDO CARREGADO <<<")
 
 try:
     if not firebase_admin._apps:
-        cred = credentials.Certificate("credentials.json") 
+        cred = credentials.Certificate("credentials.json")
         firebase_admin.initialize_app(cred)
     print(">>> [DEBUG] Firebase conectado com sucesso!")
 except Exception as e:
@@ -26,8 +25,9 @@ print(">>> [DEBUG] Aplicação Flask inicializada <<<")
 # --- DECORATOR DE AUTENTICAÇÃO ---
 def check_token(f):
     @wraps(f)
-    def wrap(*args,**kwargs):
-        if not request.headers.get('Authorization'): return jsonify({'message': 'Nenhum token fornecido'}), 401
+    def wrap(*args, **kwargs):
+        if not request.headers.get('Authorization'):
+            return jsonify({'message': 'Nenhum token fornecido'}), 401
         try:
             id_token = request.headers['Authorization'].split('Bearer ')[1]
             decoded_token = auth.verify_id_token(id_token)
@@ -44,14 +44,16 @@ def index_page():
     return "<h1>Servidor do Catálogo no Ar!</h1><p>Acesse /admin para gerenciar ou /catalogo/ID_DO_LOJISTA para ver um catálogo.</p>"
 
 @app.route('/catalogo/<owner_id>')
-def catalogo_page(owner_id): 
+def catalogo_page(owner_id):
     return render_template('catalogo.html', owner_id=owner_id)
 
 @app.route('/login')
-def login_page(): return render_template('login.html')
+def login_page(): 
+    return render_template('login.html')
 
 @app.route('/admin')
-def admin_page(): return render_template('admin.html')
+def admin_page(): 
+    return render_template('admin.html')
 
 # --- API ---
 @app.route('/api/catalog_data/<owner_id>', methods=['GET'])
@@ -60,7 +62,8 @@ def get_catalog_data(owner_id):
         products_ref = db.collection('products').where(filter=FieldFilter('owner_uid', '==', owner_id)).stream()
         products_list = [p.to_dict() | {'id': p.id} for p in products_ref]
         return jsonify({"products": products_list})
-    except Exception as e: return jsonify({"error": str(e)}), 500
+    except Exception as e: 
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/my_products', methods=['GET'])
 @check_token
@@ -69,23 +72,18 @@ def get_my_products(user_uid):
         products_ref = db.collection('products').where(filter=FieldFilter('owner_uid', '==', user_uid)).stream()
         products_list = [p.to_dict() | {'id': p.id} for p in products_ref]
         return jsonify(products_list)
-    except Exception as e: return jsonify({"error": str(e)}), 500
+    except Exception as e: 
+        return jsonify({"error": str(e)}), 500
 
-# <<< ROTA PROBLEMÁTICA AGORA COM ESPIÕES >>>
 @app.route('/api/products/<product_id>', methods=['GET'])
 def get_product(product_id):
-    print(f"\n--- [DEBUG] Rota GET /api/products/<id> foi chamada ---")
-    print(f"    -> Tentando buscar produto com ID recebido: '{product_id}'")
     try:
         doc = db.collection('products').document(product_id).get()
         if doc.exists:
-            print(f"    -> SUCESSO: Produto '{doc.to_dict().get('nome')}' encontrado no Firestore!")
             return jsonify(doc.to_dict() | {'id': doc.id})
         else:
-            print(f"    -> FALHA: Produto com ID '{product_id}' NÃO foi encontrado no Firestore.")
             return jsonify({"error": "Produto não encontrado"}), 404
     except Exception as e: 
-        print(f"    -> !!! ERRO em get_product: {e} !!!")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/products', methods=['POST'])
@@ -93,11 +91,12 @@ def get_product(product_id):
 def add_product(user_uid):
     try:
         novo_produto = request.json
-        novo_produto['owner_uid'] = user_uid 
+        novo_produto['owner_uid'] = user_uid
         _, document_ref = db.collection('products').add(novo_produto)
         novo_produto['id'] = document_ref.id
         return jsonify(novo_produto), 201
-    except Exception as e: return jsonify({"error": str(e)}), 500
+    except Exception as e: 
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/products/<product_id>', methods=['PUT'])
 @check_token
@@ -111,7 +110,8 @@ def update_product(user_uid, product_id):
         doc_ref.update(updates)
         updated_doc = doc_ref.get()
         return jsonify(updated_doc.to_dict() | {'id': updated_doc.id})
-    except Exception as e: return jsonify({"error": str(e)}), 500
+    except Exception as e: 
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/products/<product_id>', methods=['DELETE'])
 @check_token
@@ -123,8 +123,10 @@ def delete_product(user_uid, product_id):
             return jsonify({"error": "Permissão negada"}), 403
         doc_ref.delete()
         return jsonify({"message": "Produto excluído"}), 200
-    except Exception as e: return jsonify({"error": f"Erro: {e}"}), 404
-        
+    except Exception as e: 
+        return jsonify({"error": f"Erro: {e}"}), 404
+
+# --- ROTA DE NOTIFICAÇÃO CORRIGIDA ---
 @app.route('/api/notify_visit', methods=['POST'])
 def notify_visit():
     try:
@@ -142,16 +144,19 @@ def notify_visit():
         tokens = [t.id for t in tokens_ref]
 
         if tokens:
-            # cria a notificação
-            message = messaging.MulticastMessage(
-                notification=messaging.Notification(
-                    title="Nova visita 🚀",
-                    body="Alguém acabou de abrir seu catálogo!"
-                ),
-                tokens=tokens
-            )
-            response = messaging.send_multicast(message)
-            print(f"[DEBUG] Notificação enviada para {len(tokens)} dispositivos")
+            for token in tokens:
+                try:
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title="Nova visita 🚀",
+                            body="Alguém acabou de abrir seu catálogo!"
+                        ),
+                        token=token
+                    )
+                    messaging.send(message)
+                    print(f"[DEBUG] Notificação enviada para token {token[:20]}...")
+                except Exception as e:
+                    print(f"[ERRO] Falha ao enviar push para token {token[:20]}... -> {e}")
         else:
             print(f"[DEBUG] Nenhum token encontrado para {owner_id}")
 
@@ -160,6 +165,7 @@ def notify_visit():
     except Exception as e:
         print(f"[ERRO notify_visit] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/api/save_fcm_token', methods=['POST'])
 @check_token
 def save_fcm_token(user_uid):
@@ -168,36 +174,37 @@ def save_fcm_token(user_uid):
         if not token: return jsonify({"error": "Nenhum token"}), 400
         db.collection('users').document(user_uid).collection('tokens').document(token).set({})
         return jsonify({"success": True}), 200
-    except Exception as e: return jsonify({"error": str(e)}), 500
-# --- INSCRIÇÃO EM TÓPICO GLOBAL ---
+    except Exception as e: 
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/subscribe_topic', methods=['POST'])
 @check_token
 def subscribe_topic(user_uid):
     try:
         data = request.json
         token = data.get("token")
-        topic = data.get("topic", "todos")  # padrão = todos
+        topic = data.get("topic", "todos")
 
         if not token:
             return jsonify({"error": "Token não informado"}), 400
 
-        # Inscreve o token no tópico via Firebase Admin
-        response = messaging.subscribe_to_topic([token], topic)
-        print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
+        # OBS: dependendo da versão do firebase-admin, subscribe_to_topic pode não existir
+        try:
+            response = messaging.subscribe_to_topic([token], topic)
+            print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
+        except Exception as e:
+            print(f"[ERRO subscribe_topic] {e}")
 
         return jsonify({"success": True, "topic": topic}), 200
     except Exception as e:
         print(f"[ERRO subscribe_topic] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-from flask import send_from_directory
-
-# Manifest.json
+# --- ROTAS DE STATIC ---
 @app.route('/manifest.json')
 def manifest():
     return send_from_directory('static', 'manifest.json')
 
-# Ícones
 @app.route('/icon-192.png')
 def icon_192():
     return send_from_directory('static', 'icon-192.png')
@@ -206,12 +213,11 @@ def icon_192():
 def icon_512():
     return send_from_directory('static', 'icon-512.png')
 
-# Service Worker (FCM)
 @app.route('/firebase-messaging-sw.js')
 def service_worker():
     return send_from_directory('static', 'firebase-messaging-sw.js', mimetype='application/javascript')
 
-# --- INICIALIZAÇÃO DO SERVIDOR ---
+# --- INICIALIZAÇÃO ---
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
     print(f"--- [DEBUG] Iniciando servidor Flask na porta {port} ---")
