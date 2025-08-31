@@ -1,168 +1,152 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle</title>
-    <link rel="manifest" href="/manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark1: #2c3e50; --dark2: #34495e; --light1: #ecf0f1; --light2: #bdc3c7; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--light1); font-size: 16px; display: flex; flex-direction: column; min-height: 100vh; }
-        .mobile-header { display: none; background-color: var(--dark1); color: var(--light1); padding: 15px 20px; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1100; }
-        .sidebar { width: 250px; background-color: var(--dark1); color: var(--light1); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 1000; }
-        .sidebar h2 { text-align: center; color: var(--light1); margin-bottom: 30px; font-size: 24px; }
-        .sidebar nav a { display: flex; align-items: center; color: var(--light2); text-decoration: none; padding: 15px; margin: 5px 0; border-radius: 8px; transition: background-color 0.3s, color 0.3s; }
-        .sidebar nav a:hover, .sidebar nav a.active { background-color: var(--dark2); color: var(--light1); }
-        .sidebar nav a i { margin-right: 12px; font-size: 18px; }
-        .app-container { display: flex; flex-grow: 1; }
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
-        .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--light2); padding-bottom: 15px; gap: 10px; flex-wrap: wrap; }
-        h1 { margin: 0; color: var(--dark1); font-size: 28px; }
-        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 15px; }
-        .btn i { margin-right: 8px; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: #2980b9; transform: translateY(-1px); }
-        .btn-secondary { background-color: var(--secondary); color: white; }
-        .btn-secondary:hover { background-color: #27ae60; }
-        .table-responsive { overflow-x: auto; margin-top: 20px; }
-        .table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; min-width: 600px; }
-        .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
-        .table th { background-color: var(--dark2); color: var(--light1); font-weight: 600; }
-        .table img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .actions a { margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px; transition: color 0.3s; }
-        .actions a:hover { color: var(--primary); }
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column-reverse; gap: 10px; }
-        .toast { background-color: var(--dark1); color: var(--light1); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 15px; opacity: 0; transform: translateX(100%); animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards; }
-        .toast i { color: var(--secondary); font-size: 24px; }
-        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
-        @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Controle</title>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root { --primary:#3498db; --secondary:#2ecc71; --danger:#e74c3c; --dark1:#2c3e50; --dark2:#34495e; --light1:#ecf0f1; --light2:#bdc3c7; }
+    body { margin:0; font-family:'Poppins',sans-serif; background:var(--light1); font-size:16px; display:flex; flex-direction:column; min-height:100vh; }
+    .mobile-header{display:none;background:var(--dark1);color:var(--light1);padding:15px 20px;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,.2);position:sticky;top:0;z-index:1100;}
+    .sidebar{width:250px;background:var(--dark1);color:var(--light1);display:flex;flex-direction:column;justify-content:space-between;padding:20px;box-shadow:2px 0 5px rgba(0,0,0,.2);z-index:1000;}
+    .sidebar h2{text-align:center;color:var(--light1);margin-bottom:30px;font-size:24px;}
+    .sidebar nav a{display:flex;align-items:center;color:var(--light2);text-decoration:none;padding:15px;margin:5px 0;border-radius:8px;transition:.3s;}
+    .sidebar nav a:hover,.sidebar nav a.active{background:var(--dark2);color:var(--light1);}
+    .sidebar nav a i{margin-right:12px;font-size:18px;}
+    .app-container{display:flex;flex-grow:1;}
+    .main-content{flex-grow:1;padding:30px;overflow-y:auto;}
+    .view{display:none;}
+    .view.active{display:block;animation:fadeIn .5s;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;border-bottom:1px solid var(--light2);padding-bottom:15px;}
+    h1{margin:0;color:var(--dark1);font-size:28px;}
+    .btn{padding:10px 18px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:.2s;font-size:15px;}
+    .btn i{margin-right:8px;}
+    .btn-primary{background:var(--primary);color:white;}
+    .btn-primary:hover{background:#2980b9;transform:translateY(-1px);}
+    .table-responsive{overflow-x:auto;margin-top:20px;}
+    .table{width:100%;border-collapse:collapse;background:white;box-shadow:0 2px 10px rgba(0,0,0,.08);border-radius:8px;overflow:hidden;min-width:600px;}
+    .table th,.table td{padding:15px;text-align:left;border-bottom:1px solid var(--light1);}
+    .table th{background:var(--dark2);color:var(--light1);font-weight:600;}
+    .table img{width:60px;height:40px;object-fit:cover;border-radius:4px;}
+    .actions a{margin:0 8px;color:var(--dark1);cursor:pointer;font-size:18px;transition:.3s;}
+    .actions a:hover{color:var(--primary);}
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1100;opacity:0;visibility:hidden;transition:.3s;}
+    .modal.active{opacity:1;visibility:visible;}
+    .modal-content{background:white;padding:30px;border-radius:8px;max-width:600px;width:90%;box-shadow:0 5px 20px rgba(0,0,0,.4);max-height:90vh;overflow-y:auto;}
+    .modal-content h2{color:var(--dark1);margin:0 0 20px;border-bottom:1px solid var(--light2);padding-bottom:10px;font-size:24px;}
+    label{display:block;margin-bottom:5px;color:var(--dark1);font-weight:500;font-size:15px;}
+    .modal-content input,.modal-content textarea{width:100%;padding:12px;margin-bottom:15px;border:1px solid var(--light2);border-radius:6px;box-sizing:border-box;font-size:15px;}
+    .file-upload-section{margin-bottom:15px;border:1px dashed var(--light2);padding:15px;border-radius:8px;background:#f9f9f9;}
+    .preview-image{max-width:100%;margin-top:10px;border-radius:4px;object-fit:cover;background:#eee;}
+    .button-group{display:flex;justify-content:flex-end;gap:10px;margin-top:25px;}
+    #toast-container{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column-reverse;gap:10px;}
+    .toast{background:var(--dark1);color:var(--light1);padding:15px 20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.2);display:flex;align-items:center;gap:15px;opacity:0;transform:translateX(100%);animation:slideIn .5s forwards,fadeOut .5s 4.5s forwards;}
+    .toast i{color:var(--secondary);font-size:24px;}
+    @keyframes slideIn{to{opacity:1;transform:translateX(0);}}
+    @keyframes fadeOut{from{opacity:1;}to{opacity:0;transform:translateX(100%);}}
+    @media(max-width:768px){.sidebar{position:fixed;left:-250px;top:0;height:100%;transition:.3s;} .sidebar.active{left:0;} .app-container{flex-direction:column;} .main-content{padding:20px;} .mobile-header{display:flex;} h1{font-size:24px;}}
+    .overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999;}
+    .overlay.active{display:block;}
+  </style>
 </head>
 <body>
 
-<div class="mobile-header" id="mobile-header">
-    <i class="fas fa-bars menu-icon" onclick="toggleSidebar()"></i>
-    <h2>Painel Admin</h2>
-    <div style="width: 24px;"></div>
-</div>
+<div class="mobile-header"><i class="fas fa-bars menu-icon" onclick="toggleSidebar()"></i><h2>Painel Admin</h2><div style="width:24px;"></div></div>
 
 <div class="app-container">
-    <aside class="sidebar" id="sidebar">
-        <div>
-            <h2>Meu Catálogo</h2>
-            <nav>
-                <a href="#" onclick="showView('view-products')" class="active"><i class="fas fa-box-open"></i> Produtos</a>
-                <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
-                <a href="/" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
-            </nav>
-        </div>
-        <nav>
-             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
-        </nav>
-    </aside>
-    <main class="main-content">
-        <div id="view-products" class="view">
-            <div class="header">
-                <h1>Gerenciar Produtos</h1>
-                <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button>
-                <button class="btn btn-secondary" onclick="ativarNotificacoes()"><i class="fas fa-bell"></i> Ativar Notificações</button>
-            </div>
-            <div class="table-responsive"><div id="products-table-container"></div></div>
-        </div>
-        <div id="view-clients" class="view">
-            <div class="header"><h1>Clientes Cadastrados</h1></div>
-            <p>Funcionalidade de clientes a ser implementada.</p>
-        </div>
-    </main>
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <h2>Meu Catálogo</h2>
+      <nav>
+        <a href="#" onclick="showView('view-products')" class="active"><i class="fas fa-box-open"></i> Produtos</a>
+        <a href="#" onclick="showView('view-clients')"><i class="fas fa-users"></i> Clientes</a>
+        <a href="/" target="_blank"><i class="fas fa-eye"></i> Ver Catálogo</a>
+      </nav>
+    </div>
+    <nav><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a></nav>
+  </aside>
+  <main class="main-content">
+    <div id="view-products" class="view">
+      <div class="header"><h1>Gerenciar Produtos</h1><button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button></div>
+      <div class="table-responsive"><div id="products-table-container"></div></div>
+    </div>
+    <div id="view-clients" class="view">
+      <div class="header"><h1>Clientes Cadastrados</h1></div><p>Funcionalidade em breve.</p>
+    </div>
+  </main>
 </div>
 
+<div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="toast-container"></div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
-        authDomain: "ecomercie-vendas.firebaseapp.com",
-        projectId: "ecomercie-vendas",
-        storageBucket: "ecomercie-vendas.firebasestorage.app",
-        messagingSenderId: "1054540261609",
-        appId: "1:1054540261609:web:90042b823220b4c73f6878",
-        measurementId: "G-TNC5M9G89H"
-    };
+  const firebaseConfig = {
+    apiKey:"AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
+    authDomain:"ecomercie-vendas.firebaseapp.com",
+    projectId:"ecomercie-vendas",
+    storageBucket:"ecomercie-vendas.firebasestorage.app",
+    messagingSenderId:"1054540261609",
+    appId:"1:1054540261609:web:90042b823220b4c73f6878",
+    measurementId:"G-TNC5M9G89H"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const messaging = getMessaging(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const storage = getStorage(app);
+  const db = getFirestore(app);
+  const messaging = getMessaging(app);
 
-    // 🔔 botão manual para iOS
-    window.ativarNotificacoes = async function() {
-        try {
-            const perm = await Notification.requestPermission();
-            if (perm === "granted") {
-                console.log("✅ Notificações autorizadas pelo usuário");
-                await registerFcmToken();
-                showNotification("Notificações ativadas com sucesso!");
-            } else {
-                console.warn("❌ Permissão negada:", perm);
-                alert("Ative as notificações nas configurações do navegador.");
-            }
-        } catch (e) {
-            console.error("Erro ao ativar notificações:", e);
-        }
-    }
+  // --- Notificações ---
+  async function registerFcmToken(){
+    try{
+      if(Notification.permission!=="granted"){await Notification.requestPermission();}
+      const token=await getToken(messaging,{vapidKey:"BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg"});
+      if(!token){console.warn("⚠️ Nenhum token gerado");return;}
 
-    // Recebe notificações em primeiro plano
-    onMessage(messaging, (payload) => {
-        console.log("📩 Mensagem recebida no admin:", payload);
-        const title = payload.notification?.title || "Nova Notificação";
-        const body  = payload.notification?.body || "Você recebeu uma nova mensagem";
-        showNotification(`${title} - ${body}`);
-    });
+      const user=auth.currentUser;
+      let idToken=null; if(user) idToken=await user.getIdToken();
+      const headers={"Content-Type":"application/json"}; if(idToken) headers["Authorization"]="Bearer "+idToken;
 
-    async function registerFcmToken() {
-        const user = auth.currentUser;
-        if (!user) return;
-        const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
-        if (token) {
-            const idToken = await user.getIdToken();
-            await fetch("/api/save_fcm_token", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
-                body: JSON.stringify({ token })
-            });
-            console.log("Token FCM registrado:", token);
-        }
-    }
+      const resp=await fetch("/api/save_fcm_token",{method:"POST",headers,body:JSON.stringify({token,owner:user?user.uid:"public"})});
+      if(!resp.ok){console.error("❌ Erro ao salvar token:",await resp.text());}
+      else{console.log("✅ Token salvo no servidor!");}
+    }catch(e){console.error("❌ registerFcmToken:",e);}
+  }
 
-    function showNotification(message) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = `<i class="fas fa-bell"></i> <div>${message}</div>`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 5000);
-    }
+  onMessage(messaging,(payload)=>{
+    console.log("📩 Mensagem no admin:",payload);
+    const title=payload.notification?.title||"Nova Notificação";
+    const body=payload.notification?.body||"Você recebeu uma mensagem";
+    if(Notification.permission==="granted"){new Notification(title,{body,icon:"/icon-192.png"});}
+    showNotification(`${title} - ${body}`);
+  });
 
-    // Controle de views
-    window.showView = function(viewId) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-    }
+  function showNotification(msg){
+    const c=document.getElementById("toast-container"); if(!c)return;
+    const t=document.createElement("div"); t.className="toast"; t.innerHTML=`<i class="fas fa-bell"></i><div>${msg}</div>`;
+    c.appendChild(t); setTimeout(()=>{t.remove();},5000);
+  }
 
-    window.logout = async function() { await signOut(auth); }
+  // --- Auth ---
+  onAuthStateChanged(auth,(user)=>{
+    if(!user){window.location.href="/login";}
+    else{showView("view-products");registerFcmToken();}
+  });
+
+  window.logout=async()=>{await signOut(auth);}
+  window.toggleSidebar=()=>{document.getElementById("sidebar").classList.toggle("active");document.getElementById("sidebar-overlay").classList.toggle("active");}
+  window.showView=(id)=>{document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");}
+  window.openProductModal=()=>{alert("Aqui abriria o modal de produto (implementar).");}
 </script>
-
 </body>
 </html>
