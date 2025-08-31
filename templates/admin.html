@@ -157,8 +157,18 @@
                     },
                     body: JSON.stringify({ token })
                 });
-                console.log("Token salvo no Firestore!");
-            }
+               // 🔹 Inscreve no tópico global "todos"
+            await fetch("/api/subscribe_topic", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + idToken
+                },
+                body: JSON.stringify({ token, topic: "todos" })
+            });
+
+            console.log("Token inscrito no tópico 'todos'!");
+        }
         } catch (err) {
             console.error("Erro ao registrar token FCM:", err);
         }

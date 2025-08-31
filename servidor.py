@@ -169,6 +169,27 @@ def save_fcm_token(user_uid):
         db.collection('users').document(user_uid).collection('tokens').document(token).set({})
         return jsonify({"success": True}), 200
     except Exception as e: return jsonify({"error": str(e)}), 500
+# --- INSCRIÇÃO EM TÓPICO GLOBAL ---
+@app.route('/api/subscribe_topic', methods=['POST'])
+@check_token
+def subscribe_topic(user_uid):
+    try:
+        data = request.json
+        token = data.get("token")
+        topic = data.get("topic", "todos")  # padrão = todos
+
+        if not token:
+            return jsonify({"error": "Token não informado"}), 400
+
+        # Inscreve o token no tópico via Firebase Admin
+        response = messaging.subscribe_to_topic([token], topic)
+        print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
+
+        return jsonify({"success": True, "topic": topic}), 200
+    except Exception as e:
+        print(f"[ERRO subscribe_topic] {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 from flask import send_from_directory
 
 # Manifest.json
