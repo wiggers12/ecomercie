@@ -7,8 +7,7 @@
   <link rel="manifest" href="/manifest.json" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<<<<<<< HEAD
-=======
+
 
   <!-- OneSignal -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -24,7 +23,7 @@
     });
   </script>
 
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+(feat: adiciona OneSignal SDK e atualiza admin.html)
   <style>
     body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; }
     .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; }
@@ -46,10 +45,10 @@
   <div class="header">
     <h1>Painel Admin</h1>
     <div>
-<<<<<<< HEAD
+
       <button id="btnPermissao" class="btn btn-primary">🔔 Permitir Notificações</button>
-=======
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+
+(feat: adiciona OneSignal SDK e atualiza admin.html)
       <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
       <button class="btn btn-danger" onclick="logout()">Sair</button>
     </div>
@@ -63,10 +62,10 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-<<<<<<< HEAD
+
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
-=======
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+
+(feat: adiciona OneSignal SDK e atualiza admin.html)
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
@@ -82,7 +81,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
-<<<<<<< HEAD
+
     const messaging = getMessaging(app);
 
     // --- Service Worker
@@ -141,9 +140,9 @@
       }
     });
 
-=======
 
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+
+(feat: adiciona OneSignal SDK e atualiza admin.html)
     // --- Toast helper
     function showToast(msg) {
       const container = document.getElementById("toast-container");
@@ -154,11 +153,11 @@
       setTimeout(() => toast.remove(), 5000);
     }
 
-<<<<<<< HEAD
+
     // --- Render tabela produtos (igual ao seu)
-=======
+
     // --- Render tabela produtos
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+(feat: adiciona OneSignal SDK e atualiza admin.html)
     async function renderProductsTable() {
       const user = auth.currentUser;
       if (!user) return;
@@ -182,11 +181,11 @@
       document.getElementById("products-table-container").innerHTML = html;
     }
 
-<<<<<<< HEAD
+
     // --- Modal Produto + upload (igual ao seu)
-=======
+
     // --- Modal Produto
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+ (feat: adiciona OneSignal SDK e atualiza admin.html)
     window.openProductModal = () => {
       const modal = document.createElement("div");
       modal.className = "modal";
@@ -209,10 +208,10 @@
       document.body.appendChild(modal);
     };
 
-<<<<<<< HEAD
-=======
+
+
     // --- Upload helper
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+ (feat: adiciona OneSignal SDK e atualiza admin.html)
     async function uploadFile(file, progressId) {
       return new Promise((resolve, reject) => {
         const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
@@ -227,10 +226,10 @@
       });
     }
 
-<<<<<<< HEAD
-=======
+
+
     // --- Salvar produto
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+ (feat: adiciona OneSignal SDK e atualiza admin.html)
     window.saveProduct = async () => {
       const user = auth.currentUser;
       const idToken = await user.getIdToken();
@@ -246,10 +245,10 @@
       });
       document.querySelector(".modal").remove();
       renderProductsTable();
-<<<<<<< HEAD
-=======
+
+
       showToast("✅ Produto adicionado com sucesso!");
->>>>>>> 09e53a6 (feat: adiciona OneSignal SDK e atualiza admin.html)
+ (feat: adiciona OneSignal SDK e atualiza admin.html)
     };
 
     // --- Auth
