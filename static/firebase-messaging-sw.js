@@ -1,8 +1,8 @@
-// Service Worker para FCM
+// firebase-messaging-sw.js
+
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
 
-// Configuração do seu projeto Firebase
 firebase.initializeApp({
   apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
   authDomain: "ecomercie-vendas.firebaseapp.com",
@@ -13,18 +13,18 @@ firebase.initializeApp({
   measurementId: "G-TNC5M9G89H"
 });
 
+// Inicializa o Messaging
 const messaging = firebase.messaging();
 
-// 👉 Recebe notificações em segundo plano (quando app está fechado ou não focado)
+// 👉 Listener para notificações em segundo plano
 messaging.onBackgroundMessage(function(payload) {
-  console.log("📩 [SW] Mensagem recebida em segundo plano:", payload);
+  console.log("📩 [Service Worker] Mensagem recebida em segundo plano:", payload);
 
   const notificationTitle = payload.notification?.title || "Nova Notificação";
   const notificationOptions = {
-    body: payload.notification?.body || "Você recebeu uma nova mensagem.",
-    icon: "/icon-192.png" // usa seu ícone PWA
+    body: payload.notification?.body || "Você recebeu uma nova mensagem",
+    icon: "/icon-192.png"
   };
 
-  // Mostra notificação no celular/desktop
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
