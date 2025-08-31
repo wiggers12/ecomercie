@@ -133,20 +133,25 @@
 import { onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 // 👉 Ouve mensagens recebidas em primeiro plano
-onMessage(messaging, (payload) => {
+onMessage(messaging, async (payload) => {
     console.log("📩 Mensagem recebida no admin:", payload);
 
     const title = payload.notification?.title || "Nova Notificação";
     const body  = payload.notification?.body || "Você recebeu uma nova mensagem";
 
-    // Mostra push notification no celular
+    // Garante permissão
+    if (Notification.permission === "default") {
+        await Notification.requestPermission();
+    }
+
     if (Notification.permission === "granted") {
         new Notification(title, { body, icon: "/icon-192.png" });
     }
 
-    // Também mostra toast dentro do painel
+    // Também mostra toast interno
     showNotification(`${title} - ${body}`);
 });
+
 
 
     onAuthStateChanged(auth, (user) => {
@@ -340,7 +345,7 @@ onMessage(messaging, (payload) => {
                 </div>
                 <div class="button-group">
                     <button class="btn btn-secondary" onclick="closeModal('product-modal')">Cancelar</button>
-                    <button class="btn btn-primary" onclick="saveProduct(event)">Salvar</button>
+                    <button class="btn btn-pronMessage(messaging,imary" onclick="saveProduct(event)">Salvar</button>
                 </div>
             </div>
         </div>`;
