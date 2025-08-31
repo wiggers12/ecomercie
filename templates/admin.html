@@ -28,7 +28,7 @@
   <div class="header">
     <h1>Painel Admin</h1>
     <div>
-      <button id="btnPermissao" class="btn btn-primary">Permitir Notificações</button>
+      <button id="btnPermissao" class="btn btn-primary">🔔 Permitir Notificações</button>
       <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
       <button class="btn btn-danger" onclick="logout()">Sair</button>
     </div>
@@ -40,7 +40,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
@@ -56,7 +56,6 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
     const storage = getStorage(app);
     const messaging = getMessaging(app);
 
@@ -67,7 +66,7 @@
       .catch(err => console.error("❌ Erro SW:", err));
     }
 
-    // --- Notificação em foreground
+    // --- Foreground notifications
     onMessage(messaging, async (payload) => {
       console.log("📩 Foreground msg:", payload);
       const title = payload.notification?.title || "Nova Notificação";
@@ -83,27 +82,37 @@
     });
 
     // --- Salvar token
-    async function registerFcmToken() {
+    async function registerFcmToken(showAlert=false) {
       const user = auth.currentUser;
       if (!user) return;
       try {
         const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
         if (token) {
-          console.log("Token FCM:", token);
+          console.log("✅ Token FCM:", token);
+          if (showAlert) alert("📱 Token gerado:\n" + token);
           const idToken = await user.getIdToken();
           await fetch("/api/save_fcm_token", {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
             body: JSON.stringify({ token })
           });
+        } else {
+          if (showAlert) alert("❌ Nenhum token retornado. (iOS ainda não liberou)");
         }
-      } catch (err) { console.error("Erro token:", err); }
+      } catch (err) {
+        console.error("Erro ao gerar token:", err);
+        if (showAlert) alert("Erro ao gerar token: " + err.message);
+      }
     }
 
     // --- Botão Permitir Notificações
     document.getElementById("btnPermissao").addEventListener("click", async () => {
-      await Notification.requestPermission();
-      registerFcmToken();
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        registerFcmToken(true);
+      } else {
+        alert("⚠️ Permissão negada.");
+      }
     });
 
     // --- Toast helper
@@ -116,7 +125,7 @@
       setTimeout(() => toast.remove(), 5000);
     }
 
-    // --- Render tabela produtos
+    // --- Render tabela produtos (igual ao seu)
     async function renderProductsTable() {
       const user = auth.currentUser;
       if (!user) return;
@@ -140,7 +149,7 @@
       document.getElementById("products-table-container").innerHTML = html;
     }
 
-    // --- Modal Produto
+    // --- Modal Produto + upload (igual ao seu)
     window.openProductModal = () => {
       const modal = document.createElement("div");
       modal.className = "modal";
@@ -163,7 +172,6 @@
       document.body.appendChild(modal);
     };
 
-    // --- Upload helper
     async function uploadFile(file, progressId) {
       return new Promise((resolve, reject) => {
         const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
@@ -178,7 +186,6 @@
       });
     }
 
-    // --- Salvar produto
     window.saveProduct = async () => {
       const user = auth.currentUser;
       const idToken = await user.getIdToken();
@@ -200,7 +207,6 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) { window.location.href="/login"; return; }
       renderProductsTable();
-      registerFcmToken();
     });
     window.logout = ()=>signOut(auth);
   </script>
