@@ -130,6 +130,24 @@
     const storage = getStorage(app);
     const firestoreDb = getFirestore(app);
     const messaging = getMessaging(app);
+import { onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
+// 👉 Ouve mensagens recebidas em primeiro plano
+onMessage(messaging, (payload) => {
+    console.log("📩 Mensagem recebida no admin:", payload);
+
+    const title = payload.notification?.title || "Nova Notificação";
+    const body  = payload.notification?.body || "Você recebeu uma nova mensagem";
+
+    // Mostra push notification no celular
+    if (Notification.permission === "granted") {
+        new Notification(title, { body, icon: "/icon-192.png" });
+    }
+
+    // Também mostra toast dentro do painel
+    showNotification(`${title} - ${body}`);
+});
+
 
     onAuthStateChanged(auth, (user) => {
         if (!user) {
@@ -145,6 +163,10 @@
         const user = auth.currentUser;
         if (!user) return;
         try {
+        // 👉 pede permissão antes de registrar o token
+        if (Notification.permission !== "granted") {
+            await Notification.requestPermission();
+        }
             const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
             if (token) {
                 console.log("Token FCM:", token);
