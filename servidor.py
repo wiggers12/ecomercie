@@ -169,6 +169,26 @@ def save_fcm_token(user_uid):
         db.collection('users').document(user_uid).collection('tokens').document(token).set({})
         return jsonify({"success": True}), 200
     except Exception as e: return jsonify({"error": str(e)}), 500
+from flask import send_from_directory
+
+# Manifest.json
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json')
+
+# Ícones
+@app.route('/icon-192.png')
+def icon_192():
+    return send_from_directory('static', 'icon-192.png')
+
+@app.route('/icon-512.png')
+def icon_512():
+    return send_from_directory('static', 'icon-512.png')
+
+# Service Worker (FCM)
+@app.route('/firebase-messaging-sw.js')
+def service_worker():
+    return send_from_directory('static', 'firebase-messaging-sw.js', mimetype='application/javascript')
 
 # --- INICIALIZAÇÃO DO SERVIDOR ---
 if __name__ == '__main__':
