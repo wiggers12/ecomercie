@@ -21,12 +21,14 @@
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--light2); padding-bottom: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--light2); padding-bottom: 15px; gap: 10px; flex-wrap: wrap; }
         h1 { margin: 0; color: var(--dark1); font-size: 28px; }
         .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 15px; }
         .btn i { margin-right: 8px; }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: #2980b9; transform: translateY(-1px); }
+        .btn-secondary { background-color: var(--secondary); color: white; }
+        .btn-secondary:hover { background-color: #27ae60; }
         .table-responsive { overflow-x: auto; margin-top: 20px; }
         .table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; min-width: 600px; }
         .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--light1); }
@@ -34,31 +36,11 @@
         .table img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
         .actions a { margin: 0 8px; color: var(--dark1); cursor: pointer; font-size: 18px; transition: color 0.3s; }
         .actions a:hover { color: var(--primary); }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-        .modal.active { opacity: 1; visibility: visible; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transform: translateY(-20px); transition: transform 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
-        .modal.active .modal-content { transform: translateY(0); }
-        .modal-content h2 { color: var(--dark1); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--light2); padding-bottom: 10px; font-size: 24px; }
-        label { display: block; margin-bottom: 5px; color: var(--dark1); font-weight: 500; font-size: 15px; }
-        .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--light2); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        .file-upload-section { margin-bottom: 15px; border: 1px dashed var(--light2); padding: 15px; border-radius: 8px; background-color: #f9f9f9; }
-        .preview-image, .preview-video { max-width: 100%; aspect-ratio: 16 / 9; display: block; margin-top: 10px; border-radius: 4px; object-fit: cover; background-color: #eee; }
-        .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column-reverse; gap: 10px; }
         .toast { background-color: var(--dark1); color: var(--light1); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 15px; opacity: 0; transform: translateX(100%); animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards; }
         .toast i { color: var(--secondary); font-size: 24px; }
         @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
         @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -250px; top: 0; height: 100%; transition: left 0.3s ease-out; }
-            .sidebar.active { left: 0; }
-            .app-container { flex-direction: column; }
-            .main-content { padding: 20px; }
-            .mobile-header { display: flex; }
-            h1 { font-size: 24px; }
-        }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
-        .overlay.active { display: block; }
     </style>
 </head>
 <body>
@@ -85,35 +67,28 @@
     </aside>
     <main class="main-content">
         <div id="view-products" class="view">
-            <div class="header"><h1>Gerenciar Produtos</h1><button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button></div>
+            <div class="header">
+                <h1>Gerenciar Produtos</h1>
+                <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Novo Produto</button>
+                <button class="btn btn-secondary" onclick="ativarNotificacoes()"><i class="fas fa-bell"></i> Ativar Notificações</button>
+            </div>
             <div class="table-responsive"><div id="products-table-container"></div></div>
         </div>
         <div id="view-clients" class="view">
-            <div class="header"><h1>Clientes Cadastrados</h1></div><p>Funcionalidade de clientes a ser implementada.</p>
+            <div class="header"><h1>Clientes Cadastrados</h1></div>
+            <p>Funcionalidade de clientes a ser implementada.</p>
         </div>
     </main>
 </div>
 
-<div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="toast-container"></div>
 
 <script type="module">
-    // 👉 Primeiro registra o service worker de push
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/firebase-messaging-sw.js")
-        .then((registration) => {
-            console.log("✅ Service Worker registrado:", registration);
-        })
-        .catch((err) => {
-            console.error("❌ Erro ao registrar o Service Worker:", err);
-        });
-    }
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
     import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
@@ -127,289 +102,66 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
     const storage = getStorage(app);
-    const firestoreDb = getFirestore(app);
     const messaging = getMessaging(app);
-import { onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-// 👉 Ouve mensagens recebidas em primeiro plano
-onMessage(messaging, async (payload) => {
-    console.log("📩 Mensagem recebida no admin:", payload);
-
-    const title = payload.notification?.title || "Nova Notificação";
-    const body  = payload.notification?.body || "Você recebeu uma nova mensagem";
-
-    // Garante permissão
-    if (Notification.permission === "default") {
-        await Notification.requestPermission();
-    }
-
-    if (Notification.permission === "granted") {
-        new Notification(title, { body, icon: "/icon-192.png" });
-    }
-
-    // Também mostra toast interno
-    showNotification(`${title} - ${body}`);
-});
-
-
-
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            window.location.href = '/login';
-        } else {
-            showView('view-products'); 
-            listenForVisits(); 
-            registerFcmToken(); // 🔔 registra token para push
+    // 🔔 botão manual para iOS
+    window.ativarNotificacoes = async function() {
+        try {
+            const perm = await Notification.requestPermission();
+            if (perm === "granted") {
+                console.log("✅ Notificações autorizadas pelo usuário");
+                await registerFcmToken();
+                showNotification("Notificações ativadas com sucesso!");
+            } else {
+                console.warn("❌ Permissão negada:", perm);
+                alert("Ative as notificações nas configurações do navegador.");
+            }
+        } catch (e) {
+            console.error("Erro ao ativar notificações:", e);
         }
+    }
+
+    // Recebe notificações em primeiro plano
+    onMessage(messaging, (payload) => {
+        console.log("📩 Mensagem recebida no admin:", payload);
+        const title = payload.notification?.title || "Nova Notificação";
+        const body  = payload.notification?.body || "Você recebeu uma nova mensagem";
+        showNotification(`${title} - ${body}`);
     });
-    
+
     async function registerFcmToken() {
         const user = auth.currentUser;
         if (!user) return;
-        try {
-        // 👉 pede permissão antes de registrar o token
-        if (Notification.permission !== "granted") {
-            await Notification.requestPermission();
-        }
-            const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
-            if (token) {
-                console.log("Token FCM:", token);
-                const idToken = await user.getIdToken();
-                await fetch("/api/save_fcm_token", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + idToken
-                    },
-                    body: JSON.stringify({ token })
-                });
-               // 🔹 Inscreve no tópico global "todos"
-            await fetch("/api/subscribe_topic", {
+        const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
+        if (token) {
+            const idToken = await user.getIdToken();
+            await fetch("/api/save_fcm_token", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + idToken
-                },
-                body: JSON.stringify({ token, topic: "todos" })
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
+                body: JSON.stringify({ token })
             });
-
-            console.log("Token inscrito no tópico 'todos'!");
+            console.log("Token FCM registrado:", token);
         }
-        } catch (err) {
-            console.error("Erro ao registrar token FCM:", err);
-        }
-    }    
+    }
 
     function showNotification(message) {
         const container = document.getElementById('toast-container');
-        if (!container) return;
         const toast = document.createElement('div');
         toast.className = 'toast';
-        toast.innerHTML = `<i class="fas fa-eye"></i> <div>${message}</div>`;
+        toast.innerHTML = `<i class="fas fa-bell"></i> <div>${message}</div>`;
         container.appendChild(toast);
-        setTimeout(() => { if (toast) toast.remove(); }, 5000);
+        setTimeout(() => { toast.remove(); }, 5000);
     }
 
-    let unsubscribe;
-    function listenForVisits() {
-        if (unsubscribe) return;
-        const visitsCollection = collection(firestoreDb, 'visits');
-        const q = query(visitsCollection, where("timestamp", ">=", new Date()));
-        unsubscribe = onSnapshot(q, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added" && !change.doc.metadata.hasPendingWrites) {
-                    showNotification("Novo visitante no seu catálogo!");
-                }
-            });
-        }, (error) => { console.error("Erro no listener de visitas:", error); });
-    }
-
-    // --- Funções expostas ao escopo global ---
-    window.logout = async function() { try { await signOut(auth); } catch (error) { console.error("Erro ao fazer logout:", error); } }
-    window.toggleSidebar = function() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebar-overlay').classList.toggle('active');
-    }
+    // Controle de views
     window.showView = function(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        const viewToShow = document.getElementById(viewId);
-        if (viewToShow) viewToShow.classList.add('active');
-        
-        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-        const activeLink = document.querySelector(`.sidebar nav a[onclick="showView('${viewId}')"]`);
-        if (activeLink) activeLink.classList.add('active');
-        
-        if (viewId === 'view-products') { renderProductsTable(); }
-        
-        if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) {
-            toggleSidebar();
-        }
+        document.getElementById(viewId).classList.add('active');
     }
 
-    window.closeModal = function(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('active');
-            modal.addEventListener('transitionend', () => modal.remove(), { once: true });
-        }
-    }
-
-    async function uploadFile(file, progressElementId) {
-        if (!file) return null;
-        const progressElement = document.getElementById(progressElementId);
-        const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-        return new Promise((resolve, reject) => {
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    if (progressElement) progressElement.style.width = progress + '%';
-                },
-                (error) => { console.error("Erro no upload:", error); reject(error); },
-                async () => {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    resolve(downloadURL);
-                }
-            );
-        });
-    }
-
-    async function renderProductsTable() {
-        try {
-            const user = auth.currentUser;
-            if (!user) return;
-            const idToken = await user.getIdToken();
-            const response = await fetch('/api/my_products', {
-                headers: { 'Authorization': `Bearer ${idToken}` }
-            });
-            if (!response.ok) throw new Error('Falha ao buscar produtos.');
-            const products = await response.json();
-            const container = document.getElementById('products-table-container');
-            if (!products || products.length === 0) {
-                container.innerHTML = "<p>Nenhum produto cadastrado para este usuário.</p>";
-                return;
-            }
-            let tableHtml = `<table class="table products"><thead><tr><th>Imagem</th><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead><tbody>`;
-            products.forEach(p => {
-                tableHtml += `
-                    <tr>
-                        <td><img src="${p.imagemUrl || 'https://via.placeholder.com/60x40'}" alt="${p.nome}"></td>
-                        <td>${p.nome}</td>
-                        <td>R$ ${(p.valor || 0).toFixed(2)}</td>
-                        <td class="actions">
-                            <a onclick="openProductModal('${p.id}')" title="Editar"><i class="fas fa-edit"></i></a>
-                            <a onclick="deleteProduct('${p.id}')" title="Excluir"><i class="fas fa-trash"></i></a>
-                        </td>
-                    </tr>`;
-            });
-            tableHtml += `</tbody></table>`;
-            container.innerHTML = tableHtml;
-        } catch (error) {
-            document.getElementById('products-table-container').innerHTML = "<p style='color:red;'>Erro ao carregar produtos.</p>";
-        }
-    }
-
-    window.openProductModal = async function(productId = null) {
-        const isEditing = !!productId;
-        let product = {};
-        if (isEditing) {
-            const response = await fetch(`/api/products/${productId}`);
-            product = await response.json();
-        }
-        const modalTitle = isEditing ? 'Editar Produto' : 'Adicionar Novo Produto';
-        const modalHtml = `
-        <div class="modal active" id="product-modal">
-            <div class="modal-content">
-                <h2>${modalTitle}</h2>
-                <input type="hidden" id="productId" value="${product.id || ''}">
-                <input type="hidden" id="existingImageUrl" value="${product.imagemUrl || ''}">
-                <input type="hidden" id="existingVideoUrl" value="${product.videoUrl || ''}">
-                <label>Nome do Produto:</label>
-                <input type="text" id="productName" value="${product.nome || ''}">
-                <label>Descrição:</label>
-                <textarea id="productDesc">${product.descricao || ''}</textarea>
-                <label>Preço (R$):</label>
-                <input type="number" id="productPrice" value="${product.valor || ''}" step="0.01">
-                <div class="file-upload-section">
-                    <label>Imagem (Upload):</label>
-                    <input type="file" id="productImageInput" accept="image/*">
-                    <div id="image-progress" style="width:0%; height:5px; background:var(--secondary); transition:width 0.3s; margin-top:5px; border-radius: 5px;"></div>
-                    ${product.imagemUrl ? `<img src="${product.imagemUrl}" class="preview-image">` : ''}
-                </div>
-                <div class="file-upload-section">
-                    <label>Vídeo (Upload ou URL YouTube):</label>
-                    <input type="file" id="productVideoInput" accept="video/*">
-                    <div id="video-progress" style="width:0%; height:5px; background:var(--secondary); transition:width 0.3s; margin-top:5px; border-radius: 5px;"></div>
-                    <input type="url" id="productVideoUrl" placeholder="Ou cole a URL do YouTube" value="${product.videoUrl && !product.videoUrl.startsWith('https://firebasestorage') ? product.videoUrl : ''}">
-                </div>
-                <div class="button-group">
-                    <button class="btn btn-secondary" onclick="closeModal('product-modal')">Cancelar</button>
-                    <button class="btn btn-pronMessage(messaging,imary" onclick="saveProduct(event)">Salvar</button>
-                </div>
-            </div>
-        </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    window.saveProduct = async function(event) {
-        const user = auth.currentUser;
-        if (!user) { alert("Sessão expirada. Faça login novamente."); window.location.href = '/login'; return; }
-        const idToken = await user.getIdToken();
-        const id = document.getElementById('productId').value;
-        const imageFile = document.getElementById('productImageInput').files[0];
-        const videoFile = document.getElementById('productVideoInput').files[0];
-        let imageUrl = document.getElementById('existingImageUrl').value;
-        let videoUrl = document.getElementById('productVideoUrl').value.trim() || document.getElementById('existingVideoUrl').value;
-        const saveButton = event.target;
-        saveButton.disabled = true;
-        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-        try {
-            if (imageFile) { imageUrl = await uploadFile(imageFile, 'image-progress'); }
-            if (videoFile) { videoUrl = await uploadFile(videoFile, 'video-progress'); }
-            const productData = {
-                nome: document.getElementById('productName').value,
-                descricao: document.getElementById('productDesc').value,
-                valor: parseFloat(document.getElementById('productPrice').value) || 0,
-                imagemUrl: imageUrl,
-                videoUrl: videoUrl || '',
-            };
-            const method = id ? 'PUT' : 'POST';
-            const url = id ? `/api/products/${id}` : '/api/products';
-            const response = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-                body: JSON.stringify(productData),
-            });
-            if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
-            renderProductsTable();
-            closeModal('product-modal');
-        } catch (error) {
-            alert("Ocorreu um erro ao salvar. Verifique o console.");
-            console.error("Erro ao salvar produto:", error);
-            saveButton.disabled = false;
-            saveButton.innerHTML = 'Salvar';
-        }
-    }
-    
-    window.deleteProduct = async function(productId) {
-        const user = auth.currentUser;
-        if (!user) { alert("Sessão expirada. Faça login novamente."); window.location.href = '/login'; return; }
-        const idToken = await user.getIdToken();
-        if (confirm("Tem certeza que deseja excluir este produto?")) {
-            try {
-                const response = await fetch(`/api/products/${productId}`, { 
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${idToken}` }
-                });
-                if (!response.ok) throw new Error('Falha ao excluir o produto.');
-                renderProductsTable();
-            } catch(error) {
-                console.error('Erro:', error);
-                alert('Ocorreu um erro ao excluir.');
-            }
-        }
-    }
+    window.logout = async function() { await signOut(auth); }
 </script>
 
 </body>
