@@ -48,17 +48,23 @@
 
     async function initializeCatalog() {
         try {
-            fetch('/api/notify_visit', { 
+            // 🔔 Notifica o servidor que houve uma visita
+            const notifyRes = await fetch('/api/notify_visit', { 
                 method: 'POST', 
                 body: JSON.stringify({ ownerId: ownerId }), 
                 headers: {'Content-Type': 'application/json'} 
             });
+            const notifyData = await notifyRes.json();
+            console.log("📡 notify_visit resposta:", notifyData);
+
+            // Carrega os produtos do catálogo
             const response = await fetch(`/api/catalog_data/${ownerId}`);
             if (!response.ok) throw new Error('Falha ao buscar produtos.');
             const data = await response.json();
             allProducts = data.products;
             renderCatalog(allProducts);
         } catch (error) {
+            console.error("Erro no catálogo:", error);
             document.getElementById('product-grid').innerHTML = "<p style='color:red;'>Não foi possível carregar este catálogo.</p>";
         }
     }
