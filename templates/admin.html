@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle</title>
-<link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
@@ -100,19 +100,20 @@
 <script type="module">
     // 👉 Primeiro registra o service worker de push
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/static/firebase-messaging-sw.js")
-
+        navigator.serviceWorker.register("/firebase-messaging-sw.js")
         .then((registration) => {
             console.log("✅ Service Worker registrado:", registration);
         })
         .catch((err) => {
             console.error("❌ Erro ao registrar o Service Worker:", err);
         });
-    }    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    }
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
     import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js"; <!-- ✅ IMPORTAÇÃO FALTANDO -->
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
@@ -144,7 +145,6 @@
         const user = auth.currentUser;
         if (!user) return;
         try {
-            // 🔑 Troque pela sua VAPID KEY real do Firebase
             const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
             if (token) {
                 console.log("Token FCM:", token);
@@ -163,6 +163,7 @@
             console.error("Erro ao registrar token FCM:", err);
         }
     }    
+
     function showNotification(message) {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -187,15 +188,12 @@
         }, (error) => { console.error("Erro no listener de visitas:", error); });
     }
 
-    window.logout = async function() {
-        try { await signOut(auth); } catch (error) { console.error("Erro ao fazer logout:", error); }
-    }
-
+    // --- Funções expostas ao escopo global ---
+    window.logout = async function() { try { await signOut(auth); } catch (error) { console.error("Erro ao fazer logout:", error); } }
     window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('sidebar-overlay').classList.toggle('active');
     }
-
     window.showView = function(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         const viewToShow = document.getElementById(viewId);
