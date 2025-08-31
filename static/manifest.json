@@ -1,6 +1,6 @@
 {
-  "name": "Meu admin",
-  "short_name": "admin",
+  "name": "Meu painel de controle",
+  "short_name": "painel de controle",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
