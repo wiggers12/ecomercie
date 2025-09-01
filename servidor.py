@@ -1,4 +1,4 @@
-# servidor.py - VERSÃO SOMENTE ONESIGNAL
+# servidor.py - VERSÃO CORRIGIDA E LIMPA (OneSignal + Produtos + Sessions/Chat)
 
 import os
 import requests
@@ -9,10 +9,6 @@ from firebase_admin import credentials, firestore, auth
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 print(">>> [DEBUG] servidor.py carregando <<<")
-
-# --- Config OneSignal ---
-ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b171167053f7"  # seu App ID do OneSignal
-ONESIGNAL_API_KEY = "SUA_REST_API_KEY"  # chave REST API do painel OneSignal
 
 # --- Inicialização do Firebase ---
 try:
@@ -25,7 +21,11 @@ except Exception as e:
     exit()
 
 db = firestore.client()
-app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='')
+app = Flask(__name__, template_folder="templates", static_folder="static", static_url_path="")
+
+# OneSignal config
+ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b171167053f7"
+ONESIGNAL_API_KEY = "SUA_REST_API_KEY"  # coloque sua REST API KEY do OneSignal
 
 
 # --- Decorador de autenticação ---
@@ -42,6 +42,7 @@ def check_token(f):
             print(f"[ERRO] Token inválido: {e}")
             return jsonify({"message": "Token inválido ou expirado"}), 401
         return f(*args, **kwargs)
+
     return wrap
 
 
@@ -50,21 +51,20 @@ def check_token(f):
 def index_page():
     return "<h1>Servidor do Catálogo no Ar!</h1><p>Acesse /admin para gerenciar ou /catalogo/ID_DO_LOJISTA para ver um catálogo.</p>"
 
+
 @app.route("/catalogo/<owner_id>")
 def catalogo_page(owner_id):
     return render_template("catalogo.html", owner_id=owner_id)
+
 
 @app.route("/login")
 def login_page():
     return render_template("login.html")
 
+
 @app.route("/admin")
 def admin_page():
     return render_template("admin.html")
-
-@app.route("/chat")
-def chat_page():
-    return render_template("chat.html")
 
 
 # --- API Produtos ---
@@ -146,31 +146,33 @@ def delete_product(user_uid, product_id):
         return jsonify({"error": str(e)}), 500
 
 
-# --- Notificações (apenas OneSignal) ---
+# --- Notificações (OneSignal) ---
 @app.route("/api/notify_visit", methods=["POST"])
 def notify_visit():
     try:
         data = request.json
         owner_id = data.get("ownerId")
 
-        # salva no Firestore só para histórico
-        db.collection("visits").add({
-            "timestamp": firestore.SERVER_TIMESTAMP,
-            "owner_uid": owner_id or "unknown"
-        })
+        # salva visita
+        db.collection("visits").add(
+            {"timestamp": firestore.SERVER_TIMESTAMP, "owner_uid": owner_id or "unknown"}
+        )
 
-        # Envia push pelo OneSignal
+        # envia notificação via OneSignal
         headers = {
             "Content-Type": "application/json; charset=utf-8",
-            "Authorization": f"Basic {ONESIGNAL_API_KEY}"
+            "Authorization": f"Basic {ONESIGNAL_API_KEY}",
         }
         payload = {
             "app_id": ONESIGNAL_APP_ID,
             "included_segments": ["All"],  # ou "Subscribed Users"
             "headings": {"en": "Nova visita 🚀"},
-            "contents": {"en": "Alguém acabou de abrir seu catálogo!"}
+            "contents": {"en": "Alguém acabou de abrir seu catálogo!"},
         }
-        r = requests.post("https://onesignal.com/api/v1/notifications", headers=headers, json=payload)
+
+        r = requests.post(
+            "https://onesignal.com/api/v1/notifications", headers=headers, json=payload
+        )
         print("OneSignal response:", r.json())
 
         return jsonify({"success": True}), 200
@@ -178,79 +180,31 @@ def notify_visit():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# --- CHAT ---
-@app.route("/api/get_messages", methods=["GET"])
-def get_messages():
-    try:
-        session_id = request.args.get("sessionId")
-        if not session_id:
-            return jsonify({"error": "sessionId obrigatório"}), 400
-        msgs_ref = db.collection("sessions").document(session_id).collection("messages")\
-            .order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
-        messages = [m.to_dict() | {"id": m.id} for m in msgs_ref]
-        return jsonify(messages), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/send_message", methods=["POST"])
-def send_message():
-    try:
-        data = request.json
-        session_id = data.get("sessionId")
-        sender = data.get("sender", "user")
-        text = data.get("text")
-        if not session_id or not text:
-            return jsonify({"error": "Dados incompletos"}), 400
-
-        db.collection("sessions").document(session_id).set({
-            "last_message": text,
-            "updated_at": firestore.SERVER_TIMESTAMP
-        }, merge=True)
-
-        db.collection("sessions").document(session_id).collection("messages").add({
-            "sender": sender,
-            "text": text,
-            "timestamp": firestore.SERVER_TIMESTAMP
-        })
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/sessions", methods=["GET"])
-@check_token
-def get_sessions(user_uid):
-    try:
-        sessions_ref = db.collection("sessions").where(
-            filter=FieldFilter("owner_uid", "==", user_uid)
-        ).stream()
-        sessions = [s.to_dict() | {"id": s.id} for s in sessions_ref]
-        return jsonify(sessions), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# --- ROTAS DE STATIC ---
-@app.route('/manifest.json')
+# --- Static ---
+@app.route("/manifest.json")
 def manifest():
     return send_from_directory("static", "manifest.json")
+
 
 @app.route("/icon-192.png")
 def icon_192():
     return send_from_directory("static", "icon-192.png")
 
+
 @app.route("/icon-512.png")
 def icon_512():
     return send_from_directory("static", "icon-512.png")
 
+
 @app.route("/firebase-messaging-sw.js")
 def sw():
-    return send_from_directory("static", "firebase-messaging-sw.js", mimetype="application/javascript")
+    return send_from_directory(
+        "static", "firebase-messaging-sw.js", mimetype="application/javascript"
+    )
 
 
 # --- Inicialização ---
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    print(f"[DEBUG] Flask rodando na porta {port}")
+    print(f"--- [DEBUG] Iniciando servidor Flask na porta {port} ---")
     app.run(host="0.0.0.0", port=port, debug=True)
