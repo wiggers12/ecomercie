@@ -8,18 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-  <!-- OneSignal -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "2525d779-4ba0-490c-9ac7-b171167053f7", // seu App ID do OneSignal
-        notifyButton: { enable: true } // mostra o sininho
-      });
-    });
-  </script>
-
   <style>
     body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; }
     .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; }
@@ -27,63 +15,32 @@
     .btn { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; }
     .btn-primary { background:#3498db; color:#fff; }
     .btn-danger { background:#e74c3c; color:#fff; }
+    .tabs { display:flex; background:#ecf0f1; }
+    .tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-weight:600; }
+    .tab.active { background:#fff; border-bottom:3px solid #3498db; }
+    .section { display:none; padding:20px; }
+    .section.active { display:block; }
+
+    /* Produtos */
     .table { width:100%; margin-top:20px; border-collapse:collapse; background:#fff; }
     .table th,.table td { padding:12px; border:1px solid #ddd; text-align:left; }
-    .toast-container { position:fixed; bottom:20px; right:20px; z-index:9999; }
-    .toast { background:#2c3e50; color:#fff; padding:15px; border-radius:6px; margin-top:10px; }
-    .modal { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999; }
-    .modal-content { background:#fff;padding:20px;border-radius:8px;width:400px;max-width:95%; }
-    .modal-content label { display:block;margin-top:10px;font-weight:500; }
-    .progress-bar { width:0%;height:5px;background:green;margin-top:5px; }
 
-    /* --- ESTILOS DO CHAT MODAL --- */
-    .chat-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: none; /* Começa escondido */
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
-    }
-    .chat-modal-content {
-        background: #fff;
-        width: 90%;
-        height: 90%;
-        max-width: 1000px;
-        border-radius: 10px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    .chat-modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 20px;
-        background: #2c3e50;
-        color: white;
-    }
-    .chat-modal-header h2 { margin: 0; font-size: 1.2rem; }
-    .chat-modal-close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-    .chat-container { display: flex; flex-grow: 1; overflow: hidden; }
-    .chat-sidebar { width: 300px; background: #f8f9fa; border-right: 1px solid #ddd; overflow-y: auto; padding: 10px; }
-    .chat-main { flex-grow: 1; display: flex; flex-direction: column; }
-    .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .chat-input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
-    #chat-text-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-    .session-item { padding: 15px; border-radius: 6px; cursor: pointer; margin-bottom: 5px; }
-    .session-item:hover { background: #e9ecef; }
-    .session-item.active { background: #3498db; color: white; }
-    .session-id { font-weight: 600; }
-    .session-preview { font-size: 0.9em; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .msg-bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; }
-    .msg-bubble.user { background: #e9ecef; align-self: flex-start; }
-    .msg-bubble.admin { background: #3498db; color: white; align-self: flex-end; }
+    /* Chat */
+    .chat-container { display:flex; height:70vh; border:1px solid #ccc; border-radius:8px; overflow:hidden; background:#fff; }
+    .chat-sessions { width:260px; background:#2c3e50; color:#fff; padding:10px; overflow-y:auto; }
+    .chat-sessions h3 { margin:0 0 10px; text-align:center; }
+    .session { background:#34495e; padding:10px; border-radius:6px; margin-bottom:8px; cursor:pointer; }
+    .session:hover { background:#3d566e; }
+    .session.active { background:#3498db; }
+    .chat-box { flex:1; display:flex; flex-direction:column; }
+    .chat-header { background:#3498db; color:#fff; padding:10px; font-weight:600; }
+    .chat-messages { flex:1; padding:10px; overflow-y:auto; display:flex; flex-direction:column; }
+    .msg { margin:6px 0; padding:8px 12px; border-radius:10px; max-width:70%; word-wrap:break-word; }
+    .msg.user { background:#ecf0f1; align-self:flex-start; }
+    .msg.admin { background:#3498db; color:#fff; align-self:flex-end; }
+    .chat-input { display:flex; border-top:1px solid #ddd; padding:10px; }
+    .chat-input input { flex:1; padding:10px; border:1px solid #ccc; border-radius:8px; }
+    .chat-input button { margin-left:8px; background:#3498db; color:#fff; border:none; border-radius:8px; padding:10px 18px; cursor:pointer; font-weight:600; }
   </style>
 </head>
 <body>
@@ -92,306 +49,161 @@
     <div>
       <button id="btnPermissao" class="btn btn-primary">🔔 Permitir Notificações</button>
       <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
-      <button class="btn btn-primary" onclick="openChatModal()">💬 Conversar com Clientes</button>
       <button class="btn btn-danger" onclick="logout()">Sair</button>
     </div>
   </div>
 
-  <div id="products-table-container" style="padding: 20px;"></div>
-  <div id="toast-container" class="toast-container"></div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showSection('produtos')">📦 Produtos</div>
+    <div class="tab" onclick="showSection('chat')">💬 Chat</div>
+  </div>
 
-  <!-- MODAL DO CHAT -->
-  <div id="chat-modal" class="chat-modal-overlay">
-    <div class="chat-modal-content">
-      <div class="chat-modal-header">
-        <h2>Atendimento ao Cliente</h2>
-        <button class="chat-modal-close-btn" onclick="closeChatModal()">&times;</button>
+  <!-- Conteúdo -->
+  <div class="section active" id="produtos">
+    <h2>Meus Produtos</h2>
+    <div id="products-table-container"></div>
+  </div>
+
+  <div class="section" id="chat">
+    <h2>Conversas com Clientes</h2>
+    <div class="chat-container">
+      <div class="chat-sessions">
+        <h3>Sessões</h3>
+        <div id="sessions">Carregando...</div>
       </div>
-      <div class="chat-container">
-        <aside id="chat-sidebar" class="chat-sidebar">
-          <p>A carregar conversas...</p>
-        </aside>
-        <main class="chat-main">
-          <div id="chat-messages" class="chat-messages">
-            <p style="margin: auto; color: #888;">Selecione uma conversa para começar.</p>
-          </div>
-          <div class="chat-input-area">
-            <input type="text" id="chat-text-input" placeholder="Digite sua mensagem..." disabled>
-            <button id="chat-send-btn" class="btn btn-primary" onclick="sendMessage()" disabled>Enviar</button>
-          </div>
-        </main>
+      <div class="chat-box">
+        <div class="chat-header" id="chat-header">Selecione uma sessão</div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input">
+          <input type="text" id="chat-text" placeholder="Digite sua mensagem..." disabled>
+          <button onclick="sendMessage()" id="send-btn" disabled>Enviar</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+  <div id="toast-container" class="toast-container"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
-      authDomain: "ecomercie-vendas.firebaseapp.com",
-      projectId: "ecomercie-vendas",
-      storageBucket: "ecomercie-vendas.firebasestorage.app",
-      messagingSenderId: "1054540261609",
-      appId: "1:1054540261609:web:90042b823220b4c73f6878",
-      measurementId: "G-TNC5M9G89H"
-    };
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const messaging = getMessaging(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
+    authDomain: "ecomercie-vendas.firebaseapp.com",
+    projectId: "ecomercie-vendas",
+    storageBucket: "ecomercie-vendas.firebasestorage.app",
+    messagingSenderId: "1054540261609",
+    appId: "1:1054540261609:web:90042b823220b4c73f6878",
+    measurementId: "G-TNC5M9G89H"
+  };
 
-    let userToken = null; // Variável para guardar o token de autenticação
-    const baseUrl = window.location.origin; // CORREÇÃO: Usar a base URL para caminhos absolutos
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const messaging = getMessaging(app);
 
-    // --- Service Worker e Notificações (código existente mantido) ---
-    if ("serviceWorker" in navigator) {
-      // CORREÇÃO: Usar caminho absoluto para o Service Worker
-      navigator.serviceWorker.register(`${baseUrl}/firebase-messaging-sw.js`)
-      .then(() => console.log("✅ SW registrado"))
-      .catch(err => console.error("❌ Erro SW:", err));
-    }
-    onMessage(messaging, async (payload) => {
-      console.log("📩 Foreground msg:", payload);
-      const title = payload.notification?.title || "Nova Notificação";
-      const body  = payload.notification?.body  || "Você recebeu uma mensagem";
-      if (Notification.permission === "granted") {
-        new Notification(title, { body, icon: "/icon-192.png" });
-      }
-      showToast(`${title} - ${body}`);
+  // --- Tabs
+  function showSection(id){
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    document.querySelector(`.tab[onclick="showSection('${id}')"]`).classList.add("active");
+  }
+  window.showSection = showSection;
+
+  // ---- PRODUTOS ----
+  async function renderProductsTable() {
+    const user = auth.currentUser;
+    if (!user) return;
+    const idToken = await user.getIdToken();
+    const res = await fetch("/api/my_products", { headers: { "Authorization": "Bearer " + idToken } });
+    const products = await res.json();
+    let html = `<table class="table"><tr><th>Nome</th><th>Preço</th><th>Imagem</th></tr>`;
+    products.forEach(p => {
+      html += `<tr>
+        <td>${p.nome}</td>
+        <td>R$ ${(p.valor||0).toFixed(2)}</td>
+        <td>${p.imagemUrl ? `<img src="${p.imagemUrl}" width="60">` : "-"}</td>
+      </tr>`;
     });
-    async function registerFcmToken(showAlert=false) {
+    html += `</table>`;
+    document.getElementById("products-table-container").innerHTML = html;
+  }
+
+  // ---- CHAT ----
+  let selectedSession = null;
+
+  async function loadSessions(){
+    try {
       const user = auth.currentUser;
-      if (!user) return;
-      try {
-        const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
-        if (token) {
-          const idToken = await user.getIdToken();
-          await fetch(`${baseUrl}/api/save_fcm_token`, { // CORREÇÃO: Caminho absoluto
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
-            body: JSON.stringify({ token })
-          });
-          if (showAlert) alert("✅ Notificações ativadas!");
-        } else if (showAlert) alert("❌ Nenhum token retornado.");
-      } catch (err) {
-        console.error("Erro ao gerar token:", err);
-        if (showAlert) alert("Erro ao gerar token: " + err.message);
-      }
-    }
-    document.getElementById("btnPermissao").addEventListener("click", async () => {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        registerFcmToken(true);
-      } else {
-        alert("⚠️ Permissão negada.");
-      }
-    });
-
-    // --- Helpers (código existente mantido) ---
-    function showToast(msg) {
-      const container = document.getElementById("toast-container");
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      toast.innerText = msg;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 5000);
-    }
-    
-    // --- LÓGICA DE PRODUTOS (código existente mantido) ---
-    async function renderProductsTable() {
-      if (!userToken) return;
-      const res = await fetch(`${baseUrl}/api/my_products`, { headers: { "Authorization": "Bearer " + userToken } }); // CORREÇÃO: Caminho absoluto
-      const products = await res.json();
-      const container = document.getElementById("products-table-container");
-      if (!products.length) {
-        container.innerHTML = "<p>Nenhum produto ainda.</p>";
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/sessions", { headers: { "Authorization": "Bearer " + idToken } });
+      const sessions = await res.json();
+      const list=document.getElementById("sessions");
+      list.innerHTML="";
+      if(!Array.isArray(sessions) || !sessions.length){
+        list.innerHTML="<p>Nenhuma sessão encontrada.</p>";
         return;
       }
-      let html = `<table class="table"><tr><th>Nome</th><th>Preço</th><th>Imagem</th><th>Vídeo</th></tr>`;
-      products.forEach(p => {  
-        html += `<tr>
-          <td>${p.nome}</td>
-          <td>R$ ${(p.valor||0).toFixed(2)}</td>
-          <td>${p.imagemUrl ? `<img src="${p.imagemUrl}" width="60">` : "-"}</td>
-          <td>${p.videoUrl ? `<a href="${p.videoUrl}" target="_blank">Ver</a>` : "-"}</td>
-        </tr>`;
+      sessions.forEach(s=>{
+        const div=document.createElement("div");
+        div.className="session"+(s.id===selectedSession?" active":"");
+        div.textContent="Sessão: "+s.id.substring(0,6);
+        div.onclick=()=>selectSession(s.id);
+        list.appendChild(div);
       });
-      html += `</table>`;
-      container.innerHTML = html;
-    }
-    window.openProductModal = () => {
-      const modal = document.createElement("div");
-      modal.className = "modal";
-      modal.innerHTML = `
-        <div class="modal-content">
-          <h3>Novo Produto</h3>
-          <label>Nome:</label><input id="nomeProd">
-          <label>Preço:</label><input id="valorProd" type="number" step="0.01">
-          <label>Imagem:</label><input id="imgProd" type="file" accept="image/*">
-          <div id="img-progress" class="progress-bar"></div>
-          <label>Vídeo:</label><input id="videoProd" type="file" accept="video/*">
-          <div id="vid-progress" class="progress-bar"></div>
-          <button class="btn btn-primary" onclick="saveProduct()">Salvar</button>
-          <button class="btn btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
-        </div>`;
-      document.body.appendChild(modal);
-    };
-    async function uploadFile(file, progressId) {
-      return new Promise((resolve, reject) => {
-        const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-        const task = uploadBytesResumable(storageRef, file);
-        task.on("state_changed", snap => {
-          const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
-          document.getElementById(progressId).style.width = pct + "%";
-        }, reject, async () => {
-          const url = await getDownloadURL(task.snapshot.ref);
-          resolve(url);
-        });
-      });
-    }
-    window.saveProduct = async () => {
-      let imgUrl="", vidUrl="";
-      const imgFile=document.getElementById("imgProd").files[0];
-      const vidFile=document.getElementById("videoProd").files[0];
-      if (imgFile) imgUrl = await uploadFile(imgFile,"img-progress");
-      if (vidFile) vidUrl = await uploadFile(vidFile,"vid-progress");
-      const produto={ nome:document.getElementById("nomeProd").value, valor:parseFloat(document.getElementById("valorProd").value)||0, imagemUrl:imgUrl, videoUrl:vidUrl };
-      await fetch(`${baseUrl}/api/products`,{ // CORREÇÃO: Caminho absoluto
-        method:"POST", headers:{"Content-Type":"application/json","Authorization":"Bearer "+userToken},
-        body:JSON.stringify(produto)
-      });
-      document.querySelector(".modal").remove();
-      renderProductsTable();
-      showToast("✅ Produto adicionado com sucesso!");
-    };
+    } catch(e){ console.error(e); }
+  }
 
-    // --- LÓGICA DO CHAT (NOVA) ---
-    const chatModal = document.getElementById('chat-modal');
-    const chatSidebar = document.getElementById('chat-sidebar');
-    const chatMessages = document.getElementById('chat-messages');
-    const chatTextInput = document.getElementById('chat-text-input');
-    const chatSendBtn = document.getElementById('chat-send-btn');
-    let selectedSessionId = null;
-    let chatUpdateInterval;
+  function selectSession(id){
+    selectedSession=id;
+    document.getElementById("chat-header").textContent="Sessão: "+id;
+    document.getElementById("chat-text").disabled=false;
+    document.getElementById("send-btn").disabled=false;
+    loadMessages();
+  }
 
-    window.openChatModal = async () => {
-        chatModal.style.display = 'flex';
-        await fetchChatSessions();
-        // Inicia a atualização automática quando o modal é aberto
-        chatUpdateInterval = setInterval(() => {
-            fetchChatSessions();
-            if (selectedSessionId) {
-                fetchMessages();
-            }
-        }, 5000);
-    };
-
-    window.closeChatModal = () => {
-        chatModal.style.display = 'none';
-        // Para a atualização automática quando o modal é fechado para poupar recursos
-        clearInterval(chatUpdateInterval);
-    };
-
-    async function fetchChatSessions() {
-        if (!userToken) return;
-        try {
-            const res = await fetch(`${baseUrl}/api/sessions`, { headers: { "Authorization": "Bearer " + userToken } }); // CORREÇÃO: Caminho absoluto
-            const sessions = await res.json();
-            chatSidebar.innerHTML = '';
-            if (!sessions.length) {
-                chatSidebar.innerHTML = '<p>Nenhuma conversa.</p>';
-                return;
-            }
-            sessions.sort((a,b) => (b.updated_at?.seconds || 0) - (a.updated_at?.seconds || 0));
-            sessions.forEach(s => {
-                const item = document.createElement('div');
-                item.className = 'session-item';
-                if (s.id === selectedSessionId) item.classList.add('active');
-                item.innerHTML = `
-                    <div class="session-id">Cliente: ${s.id.substring(0, 8)}...</div>
-                    <div class="session-preview">${s.last_message || '...'}</div>
-                `;
-                item.onclick = () => selectSession(s.id);
-                chatSidebar.appendChild(item);
-            });
-        } catch (e) {
-            chatSidebar.innerHTML = '<p style="color:red">Erro ao carregar.</p>';
-        }
-    }
-    
-    async function selectSession(sessionId) {
-        selectedSessionId = sessionId;
-        document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
-        const activeItem = Array.from(chatSidebar.children).find(child => child.onclick && child.onclick.toString().includes(sessionId));
-        if(activeItem) activeItem.classList.add('active');
-        
-        chatTextInput.disabled = false;
-        chatSendBtn.disabled = false;
-        await fetchMessages();
-    }
-    
-    async function fetchMessages() {
-        if (!selectedSessionId || !userToken) return;
-        try {
-            const res = await fetch(`${baseUrl}/api/get_messages?sessionId=${selectedSessionId}`, { headers: { "Authorization": "Bearer " + userToken } }); // CORREÇÃO: Caminho absoluto
-            const messages = await res.json();
-            chatMessages.innerHTML = '';
-            messages.forEach(m => {
-                const bubble = document.createElement('div');
-                bubble.className = `msg-bubble ${m.sender}`;
-                bubble.textContent = m.text;
-                chatMessages.appendChild(bubble);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        } catch(e) {
-            chatMessages.innerHTML = '<p style="color:red">Erro ao carregar mensagens.</p>';
-        }
-    }
-
-    window.sendMessage = async () => {
-        const text = chatTextInput.value.trim();
-        if (!text || !selectedSessionId) return;
-        
-        const originalText = chatTextInput.value;
-        chatTextInput.value = '';
-
-        try {
-            await fetch(`${baseUrl}/api/send_message`, { // CORREÇÃO: Caminho absoluto
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + userToken },
-                body: JSON.stringify({ sessionId: selectedSessionId, sender: "admin", text: text })
-            });
-            await fetchMessages();
-            await fetchChatSessions();
-        } catch (e) {
-            alert('Erro ao enviar mensagem.');
-            chatTextInput.value = originalText;
-        }
-    };
-    chatTextInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+  async function loadMessages(){
+    if(!selectedSession) return;
+    const res=await fetch(`/api/get_messages?sessionId=${selectedSession}`);
+    const msgs=await res.json();
+    const box=document.getElementById("chat-messages");
+    box.innerHTML="";
+    msgs.forEach(m=>{
+      const div=document.createElement("div");
+      div.className="msg "+(m.sender==="user"?"user":"admin");
+      div.textContent=m.text;
+      box.appendChild(div);
     });
+    box.scrollTop=box.scrollHeight;
+  }
 
-    // --- Auth State Change ---
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { 
-        // CORREÇÃO: Usar caminho absoluto para o redirecionamento
-        window.location.href = `${baseUrl}/login`; 
-        return; 
-      }
-      userToken = await user.getIdToken();
-      renderProductsTable();
+  async function sendMessage(){
+    const text=document.getElementById("chat-text").value.trim();
+    if(!text || !selectedSession) return;
+    await fetch("/api/send_message",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ sessionId:selectedSession, sender:"admin", text })
     });
-    window.logout = ()=>signOut(auth);
+    document.getElementById("chat-text").value="";
+    loadMessages();
+  }
+  window.sendMessage = sendMessage;
 
-  </script>
+  // ---- Inicialização ----
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href="/login"; return; }
+    renderProductsTable();
+    setInterval(()=>{ loadSessions(); loadMessages(); },3000);
+  });
+  window.logout = ()=>signOut(auth);
+</script>
 </body>
 </html>
-
