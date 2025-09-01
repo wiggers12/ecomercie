@@ -1,13 +1,18 @@
-# servidor.py - VERSÃO CORRIGIDA E COMPLETA COM CHAT
+# servidor.py - VERSÃO SOMENTE ONESIGNAL
 
 import os
+import requests
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from functools import wraps
 import firebase_admin
-from firebase_admin import credentials, firestore, auth, messaging
+from firebase_admin import credentials, firestore, auth
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 print(">>> [DEBUG] servidor.py carregando <<<")
+
+# --- Config OneSignal ---
+ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b171167053f7"  # seu App ID do OneSignal
+ONESIGNAL_API_KEY = "SUA_REST_API_KEY"  # chave REST API do painel OneSignal
 
 # --- Inicialização do Firebase ---
 try:
@@ -141,73 +146,36 @@ def delete_product(user_uid, product_id):
         return jsonify({"error": str(e)}), 500
 
 
-# --- Notificações ---
+# --- Notificações (apenas OneSignal) ---
 @app.route("/api/notify_visit", methods=["POST"])
 def notify_visit():
     try:
         data = request.json
         owner_id = data.get("ownerId")
 
+        # salva no Firestore só para histórico
         db.collection("visits").add({
             "timestamp": firestore.SERVER_TIMESTAMP,
             "owner_uid": owner_id or "unknown"
         })
 
-        tokens_ref = db.collection("users").document(owner_id).collection("tokens").stream()
-        tokens = [t.id for t in tokens_ref]
-
-        for token in tokens:
-            try:
-                msg = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Nova visita 🚀",
-                        body="Alguém acabou de abrir seu catálogo!"
-                    ),
-                    token=token
-                )
-                messaging.send(msg)
-                print(f"[DEBUG] Push enviado para {token[:20]}...")
-            except Exception as e:
-                print(f"[ERRO] Falha no token {token[:20]}: {e}")
+        # Envia push pelo OneSignal
+        headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": f"Basic {ONESIGNAL_API_KEY}"
+        }
+        payload = {
+            "app_id": ONESIGNAL_APP_ID,
+            "included_segments": ["All"],  # ou "Subscribed Users"
+            "headings": {"en": "Nova visita 🚀"},
+            "contents": {"en": "Alguém acabou de abrir seu catálogo!"}
+        }
+        r = requests.post("https://onesignal.com/api/v1/notifications", headers=headers, json=payload)
+        print("OneSignal response:", r.json())
 
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
-
-@app.route('/api/save_fcm_token', methods=['POST'])
-@check_token
-def save_fcm_token(user_uid):
-    try:
-        token = request.json.get('token')
-        if not token:
-            return jsonify({"error": "Nenhum token"}), 400
-        db.collection('users').document(user_uid).collection('tokens').document(token).set({
-            "owner_uid": user_uid,
-            "created_at": firestore.SERVER_TIMESTAMP
-        })
-        print(f"[DEBUG] Token salvo: {token}")
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/api/subscribe_topic', methods=['POST'])
-@check_token
-def subscribe_topic(user_uid):
-    try:
-        data = request.json
-        token = data.get("token")
-        topic = data.get("topic", "public")
-
-        if not token:
-            return jsonify({"error": "Token não informado"}), 400
-
-        response = messaging.subscribe_to_topic([token], topic)
-        print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
-        return jsonify({"success": True, "topic": topic}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 # --- CHAT ---
@@ -232,15 +200,12 @@ def send_message():
         session_id = data.get("sessionId")
         sender = data.get("sender", "user")
         text = data.get("text")
-        owner_id = data.get("ownerId")  # <- novo campo
-
         if not session_id or not text:
             return jsonify({"error": "Dados incompletos"}), 400
 
         db.collection("sessions").document(session_id).set({
             "last_message": text,
-            "updated_at": firestore.SERVER_TIMESTAMP,
-            "owner_uid": owner_id or "unknown"  # <- salva vínculo
+            "updated_at": firestore.SERVER_TIMESTAMP
         }, merge=True)
 
         db.collection("sessions").document(session_id).collection("messages").add({
