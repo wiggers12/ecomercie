@@ -14,40 +14,85 @@
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
-        appId: "2525d779-4ba0-490c-9ac7-b171167053f7", // seu App ID do OneSignal
-        notifyButton: { enable: true } // mostra o sininho
+        appId: "2525d779-4ba0-490c-9ac7-b171167053f7",
+        notifyButton: { enable: true }
       });
     });
   </script>
 
   <style>
-    body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; }
+    body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; display:flex; height:100vh; }
+
+    /* Layout principal: sidebar (chat) + conteúdo */
+    .sidebar { width:280px; background:#2c3e50; color:#fff; padding:15px; overflow-y:auto; }
+    .sidebar h2 { font-size:18px; margin:0 0 15px; }
+    .session { background:#34495e; padding:10px; border-radius:6px; margin-bottom:8px; cursor:pointer; }
+    .session.active { background:#3498db; }
+
+    .content { flex:1; display:flex; flex-direction:column; }
+
     .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; }
     h1 { margin:0; }
+
     .btn { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; }
     .btn-primary { background:#3498db; color:#fff; }
     .btn-danger { background:#e74c3c; color:#fff; }
+
     .table { width:100%; margin-top:20px; border-collapse:collapse; background:#fff; }
     .table th,.table td { padding:12px; border:1px solid #ddd; text-align:left; }
+
     .toast-container { position:fixed; bottom:20px; right:20px; z-index:9999; }
     .toast { background:#2c3e50; color:#fff; padding:15px; border-radius:6px; margin-top:10px; }
+
     .modal { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999; }
     .modal-content { background:#fff;padding:20px;border-radius:8px;width:400px;max-width:95%; }
     .modal-content label { display:block;margin-top:10px;font-weight:500; }
     .progress-bar { width:0%;height:5px;background:green;margin-top:5px; }
+
+    /* Chat */
+    .chat { flex:1; display:flex; flex-direction:column; background:#fff; margin:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .chat-header { background:#3498db; color:#fff; padding:12px; font-weight:600; border-radius:8px 8px 0 0; }
+    .chat-messages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; }
+    .msg { max-width:60%; padding:10px 14px; border-radius:12px; margin-bottom:8px; word-wrap:break-word; }
+    .msg.user { background:#ecf0f1; align-self:flex-start; }
+    .msg.admin { background:#3498db; color:#fff; align-self:flex-end; }
+    .chat-input { display:flex; border-top:1px solid #ddd; }
+    .chat-input input { flex:1; border:none; padding:12px; font-size:14px; }
+    .chat-input button { background:#3498db; color:#fff; border:none; padding:12px 18px; cursor:pointer; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Painel Admin</h1>
-    <div>
-      <button id="btnPermissao" class="btn btn-primary">🔔 Permitir Notificações</button>
-      <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
-      <button class="btn btn-danger" onclick="logout()">Sair</button>
+  <!-- Sidebar de visitantes -->
+  <div class="sidebar">
+    <h2>👥 Usuários Online</h2>
+    <div id="sessions">Carregando...</div>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <div class="content">
+    <div class="header">
+      <h1>Painel Admin</h1>
+      <div>
+        <button id="btnPermissao" class="btn btn-primary">🔔 Permitir Notificações</button>
+        <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
+        <button class="btn btn-danger" onclick="logout()">Sair</button>
+      </div>
+    </div>
+
+    <!-- Tabela de produtos -->
+    <div id="products-table-container"></div>
+
+    <!-- Chat -->
+    <div class="chat">
+      <div class="chat-header" id="chat-header">Selecione um usuário</div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="chat-text" placeholder="Digite sua mensagem..." disabled>
+        <button onclick="sendMessage()" disabled id="send-btn">Enviar</button>
+      </div>
     </div>
   </div>
 
-  <div id="products-table-container"></div>
   <div id="toast-container" class="toast-container"></div>
 
   <script type="module">
@@ -224,8 +269,71 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) { window.location.href="/login"; return; }
       renderProductsTable();
+      loadSessions();
     });
     window.logout = ()=>signOut(auth);
+
+    // --- CHAT ---
+    let selectedSession = null;
+
+    async function loadSessions() {
+      try {
+        const res = await fetch("/api/sessions");
+        const sessions = await res.json();
+        const list = document.getElementById("sessions");
+        list.innerHTML = "";
+        sessions.forEach(s => {
+          const div = document.createElement("div");
+          div.className = "session" + (s.sessionId === selectedSession ? " active" : "");
+          div.textContent = `Sessão: ${s.sessionId.substring(0,6)}... (${s.lastSeen})`;
+          div.onclick = () => selectSession(s.sessionId);
+          list.appendChild(div);
+        });
+      } catch (e) {
+        console.error("Erro ao carregar sessões:", e);
+      }
+    }
+
+    async function selectSession(id) {
+      selectedSession = id;
+      document.getElementById("chat-header").textContent = "Chat com: " + id;
+      document.getElementById("chat-text").disabled = false;
+      document.getElementById("send-btn").disabled = false;
+      loadMessages();
+    }
+
+    async function loadMessages() {
+      if (!selectedSession) return;
+      const res = await fetch(`/api/get_messages?sessionId=${selectedSession}`);
+      const msgs = await res.json();
+      const box = document.getElementById("chat-messages");
+      box.innerHTML = "";
+      msgs.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "msg " + (m.from === "user" ? "user" : "admin");
+        div.textContent = m.text;
+        box.appendChild(div);
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = document.getElementById("chat-text").value.trim();
+      if (!text || !selectedSession) return;
+      await fetch("/api/send_message", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ sessionId:selectedSession, text, from:"admin" })
+      });
+      document.getElementById("chat-text").value = "";
+      loadMessages();
+    }
+
+    // Atualiza lista de sessões e mensagens a cada 3s
+    setInterval(() => {
+      loadSessions();
+      loadMessages();
+    }, 3000);
   </script>
 </body>
 </html>
