@@ -238,14 +238,18 @@
 
     <script type="module">
         // --- CONFIGURAÇÃO E AUTENTICAÇÃO FIREBASE ---
+        // !!!!!!!!!! IMPORTANTE !!!!!!!!!!
+        // SUBSTITUA O BLOCO DE CÓDIGO ABAIXO PELAS CREDENCIAIS REAIS DO SEU PROJETO FIREBASE
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SEU_APP_ID"
+            apiKey: "COLE_AQUI_SUA_API_KEY",
+            authDomain: "COLE_AQUI_SEU_AUTH_DOMAIN",
+            projectId: "COLE_AQUI_SEU_PROJECT_ID",
+            storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
+            messagingSenderId: "COLE_AQUI_SEU_MESSAGING_SENDER_ID",
+            appId: "COLE_AQUI_SEU_APP_ID"
         };
+        // !!!!!!!!!! IMPORTANTE !!!!!!!!!!
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
