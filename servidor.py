@@ -25,7 +25,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static", stati
 
 # OneSignal config
 ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b117167053f7"
-ONESIGNAL_API_KEY = "Legacy API Key"  # coloque sua REST API KEY do OneSignal
+ONESIGNAL_API_KEY = "Legacy API Key"  # coloque aqui a REST API KEY do OneSignal
 
 
 # --- Decorador de autenticação ---
@@ -42,7 +42,6 @@ def check_token(f):
             print(f"[ERRO] Token inválido: {e}")
             return jsonify({"message": "Token inválido ou expirado"}), 401
         return f(*args, **kwargs)
-
     return wrap
 
 
@@ -51,16 +50,13 @@ def check_token(f):
 def index_page():
     return "<h1>Servidor do Catálogo no Ar!</h1><p>Acesse /admin para gerenciar ou /catalogo/ID_DO_LOJISTA para ver um catálogo.</p>"
 
-
 @app.route("/catalogo/<owner_id>")
 def catalogo_page(owner_id):
     return render_template("catalogo.html", owner_id=owner_id)
 
-
 @app.route("/login")
 def login_page():
     return render_template("login.html")
-
 
 @app.route("/admin")
 def admin_page():
@@ -165,7 +161,7 @@ def notify_visit():
         }
         payload = {
             "app_id": ONESIGNAL_APP_ID,
-            "included_segments": ["All"],  # ou "Subscribed Users"
+            "included_segments": ["All"],
             "headings": {"en": "Nova visita 🚀"},
             "contents": {"en": "Alguém acabou de abrir seu catálogo!"},
         }
@@ -185,22 +181,28 @@ def notify_visit():
 def manifest():
     return send_from_directory("static", "manifest.json")
 
-
 @app.route("/icon-192.png")
 def icon_192():
     return send_from_directory("static", "icon-192.png")
 
-
 @app.route("/icon-512.png")
 def icon_512():
     return send_from_directory("static", "icon-512.png")
-
 
 @app.route("/firebase-messaging-sw.js")
 def sw():
     return send_from_directory(
         "static", "firebase-messaging-sw.js", mimetype="application/javascript"
     )
+
+# --- OneSignal Service Workers ---
+@app.route("/OneSignalSDKWorker.js")
+def onesignal_worker():
+    return send_from_directory("static", "OneSignalSDKWorker.js")
+
+@app.route("/OneSignalSDKUpdaterWorker.js")
+def onesignal_updater():
+    return send_from_directory("static", "OneSignalSDKUpdaterWorker.js")
 
 
 # --- Inicialização ---
