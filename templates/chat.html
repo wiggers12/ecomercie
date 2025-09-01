@@ -158,8 +158,7 @@
       await fetch("/api/send_message", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ session_id:selectedSession, text, sender:"admin" })
-      });
+        body:JSON.stringify({ sessionId:selectedSession, text, sender:"admin" })
       document.getElementById("chat-text").value = "";
       loadMessages();
     }
