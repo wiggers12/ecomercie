@@ -1,147 +1,193 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nosso Catálogo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #3498db; --dark1: #2c3e50; --light1: #ecf0f1; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--light1); margin: 0; }
-        .header { background: var(--dark1); color: white; padding: 20px 50px; text-align: center; }
-        h1 { margin: 0; font-weight: 600; }
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        .search-bar { width: 100%; padding: 15px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 30px; box-sizing: border-box; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .product-card img { width: 100%; height: 200px; object-fit: cover; }
-        .product-info { padding: 20px; text-align: center; }
-        h3 { margin: 0 0 10px 0; color: var(--dark1); font-size: 1.1em; }
-        .product-info p { font-size: 20px; font-weight: 600; color: var(--primary); margin: 0; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
-        .modal.active { opacity: 1; visibility: visible; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto; }
-        .modal.active .modal-content { transform: scale(1); }
-        .modal-content img { width: 100%; height: auto; aspect-ratio: 16/10; object-fit: cover; border-radius: 8px; }
-        .modal-content h2 { color: var(--dark1); margin-top: 20px; margin-bottom: 10px; }
-        .modal-price { font-size: 24px; font-weight: bold; color: var(--primary); margin: 0 0 15px 0; }
-        .modal-description { margin-bottom: 20px; line-height: 1.6; color: #555; }
-        .modal-video { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 8px; background-color: #000; margin-top: 20px; }
-        .close-btn { background: var(--dark1); color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; float: right; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nosso Catálogo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#0d6efd; --dark:#1c1c1c; --light:#f8f9fa; --accent:#ffc107; }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family:'Poppins',sans-serif; background:var(--light); }
+
+    /* Header */
+    header { background:var(--dark); color:white; text-align:center; padding:20px; font-size:1.5em; font-weight:600; }
+
+    /* Container */
+    .container { max-width:1200px; margin:auto; padding:20px; }
+
+    /* Barra de pesquisa */
+    .search-bar { width:100%; padding:12px; font-size:16px; border:2px solid #ddd; border-radius:8px; margin-bottom:20px; }
+
+    /* Grid */
+    .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:15px; }
+    .product-card { background:white; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); overflow:hidden; transition:.3s; cursor:pointer; }
+    .product-card:hover { transform:scale(1.05); box-shadow:0 6px 18px rgba(0,0,0,0.2); }
+    .product-card img { width:100%; height:100px; object-fit:cover; }
+    .product-info { padding:10px; text-align:center; }
+    .product-info h3 { font-size:14px; margin-bottom:5px; color:var(--dark); }
+    .product-info p { font-size:16px; font-weight:600; color:var(--primary); margin:0; }
+
+    /* Modal */
+    .modal { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:.3s; }
+    .modal.active { opacity:1; visibility:visible; }
+    .modal-content { background:white; padding:20px; border-radius:8px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; }
+    .modal-content img { width:100%; border-radius:8px; }
+    .modal-content h2 { margin:15px 0 5px; color:var(--dark); }
+    .modal-price { font-size:20px; font-weight:700; color:var(--primary); margin:10px 0; }
+    .modal-description { color:#444; line-height:1.5; margin-bottom:15px; }
+    .modal-video { width:100%; aspect-ratio:16/9; border:none; margin-top:15px; border-radius:6px; }
+    .close-btn { background:var(--dark); color:white; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
+
+    /* Carrinho flutuante */
+    .cart { position:fixed; bottom:20px; right:20px; background:white; border:2px solid var(--primary); border-radius:12px; padding:15px; width:300px; max-height:60vh; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:1100; }
+    .cart h3 { margin:0 0 10px; font-size:16px; color:var(--dark); }
+    .cart-item { display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; }
+    .cart-total { font-weight:700; margin-top:10px; font-size:16px; }
+    .payment-options { margin-top:10px; }
+    .payment-options button { width:100%; margin-top:8px; padding:10px; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
+    .btn-credit { background:#198754; color:white; }
+    .btn-debit { background:#0dcaf0; color:white; }
+    .btn-pix { background:#6f42c1; color:white; }
+
+    /* Botões sociais */
+    .social-buttons { position:fixed; bottom:20px; left:20px; display:flex; flex-direction:column; gap:10px; z-index:1200; }
+    .social-buttons a { display:flex; align-items:center; justify-content:center; width:45px; height:45px; border-radius:50%; color:white; font-size:20px; text-decoration:none; }
+    .whatsapp { background:#25d366; }
+    .instagram { background:#e1306c; }
+    .facebook { background:#1877f2; }
+  </style>
 </head>
 <body>
 
-<header class="header"><h1>Conheça Nossos Produtos</h1></header>
+<header>Conheça Nossos Produtos</header>
 
 <main class="container">
-    <input type="text" id="search-input" class="search-bar" placeholder="🔎 O que você procura?">
-    <div id="product-grid" class="product-grid"><p>Carregando produtos...</p></div>
+  <input type="text" id="search-input" class="search-bar" placeholder="🔎 O que você procura?">
+  <div id="product-grid" class="product-grid"><p>Carregando produtos...</p></div>
 </main>
 
+<!-- Carrinho -->
+<div id="cart" class="cart" style="display:none;">
+  <h3>🛒 Carrinho</h3>
+  <div id="cart-items"></div>
+  <p class="cart-total">Total: R$ 0,00</p>
+  <div class="payment-options">
+    <button class="btn-credit">💳 Crédito</button>
+    <button class="btn-debit">🏧 Débito</button>
+    <button class="btn-pix">⚡ Pix</button>
+  </div>
+</div>
+
+<!-- Botões sociais -->
+<div class="social-buttons">
+  <a href="https://wa.me/5551989378751" target="_blank" class="whatsapp"><i class="fa fa-whatsapp"></i></a>
+  <a href="https://instagram.com/analise_desenvolvimento_web" target="_blank" class="instagram"><i class="fa fa-instagram"></i></a>
+  <a href="https://facebook.com" target="_blank" class="facebook"><i class="fa fa-facebook"></i></a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
 <script>
-    const ownerId = '{{ owner_id }}';
-    let allProducts = [];
+  const ownerId = '{{ owner_id }}';
+  let allProducts = [];
+  let cart = [];
 
-    document.addEventListener('DOMContentLoaded', initializeCatalog);
+  document.addEventListener('DOMContentLoaded', initializeCatalog);
 
-    async function initializeCatalog() {
-        try {
-            // 🔔 Notifica o servidor que houve uma visita
-            const notifyRes = await fetch('/api/notify_visit', { 
-                method: 'POST', 
-                body: JSON.stringify({ ownerId: ownerId }), 
-                headers: {'Content-Type': 'application/json'} 
-            });
-            const notifyData = await notifyRes.json();
-            console.log("📡 notify_visit resposta:", notifyData);
+  async function initializeCatalog() {
+    try {
+      // Notifica visita
+      await fetch('/api/notify_visit', { 
+        method: 'POST',
+        body: JSON.stringify({ ownerId }),
+        headers:{'Content-Type':'application/json'}
+      });
 
-            // Carrega os produtos do catálogo
-            const response = await fetch(`/api/catalog_data/${ownerId}`);
-            if (!response.ok) throw new Error('Falha ao buscar produtos.');
-            const data = await response.json();
-            allProducts = data.products;
-            renderCatalog(allProducts);
-        } catch (error) {
-            console.error("Erro no catálogo:", error);
-            document.getElementById('product-grid').innerHTML = "<p style='color:red;'>Não foi possível carregar este catálogo.</p>";
-        }
+      // Carrega produtos
+      const res = await fetch(`/api/catalog_data/${ownerId}`);
+      if (!res.ok) throw new Error("Erro ao carregar produtos");
+      const data = await res.json();
+      allProducts = data.products;
+      renderCatalog(allProducts);
+    } catch (err) {
+      document.getElementById('product-grid').innerHTML="<p style='color:red;'>Erro ao carregar catálogo.</p>";
     }
+  }
 
-    function renderCatalog(productsToRender) {
-        const grid = document.getElementById('product-grid');
-        if (!productsToRender || productsToRender.length === 0) {
-            grid.innerHTML = "<p>Nenhum produto encontrado neste catálogo.</p>";
-            return;
-        }
-        grid.innerHTML = productsToRender.map(p => `
-            <div class="product-card" onclick="showProductDetail('${p.id}')">
-                <img src="${p.imagemUrl || 'https://via.placeholder.com/400x300'}" alt="${p.nome}">
-                <div class="product-info">
-                    <h3>${p.nome}</h3><p>R$ ${(p.valor || 0).toFixed(2)}</p>
-                </div>
-            </div>`).join('');
-    }
+  function renderCatalog(products) {
+    const grid=document.getElementById('product-grid');
+    if(!products.length){ grid.innerHTML="<p>Nenhum produto encontrado.</p>"; return; }
+    grid.innerHTML=products.map(p=>`
+      <div class="product-card">
+        <img src="${p.imagemUrl || 'https://via.placeholder.com/200x100'}" alt="${p.nome}">
+        <div class="product-info">
+          <h3>${p.nome}</h3>
+          <p>R$ ${(p.valor||0).toFixed(2)}</p>
+          <button onclick="addToCart('${p.id}','${p.nome}',${p.valor||0})">Adicionar</button>
+        </div>
+      </div>
+    `).join('');
+  }
 
-    async function showProductDetail(productId) {
-        try {
-            const response = await fetch(`/api/products/${productId}`);
-            if (!response.ok) throw new Error('Produto não encontrado.');
-            const product = await response.json();
-            let videoContent = '';
-            if (product.videoUrl) {
-                if (product.videoUrl.includes('firebasestorage.googleapis.com')) {
-                    videoContent = `<video class="modal-video" controls src="${product.videoUrl}"></video>`;
-                } else if (product.videoUrl.includes('youtube.com') || product.videoUrl.includes('youtu.be')) {
-                    const youtubeEmbedUrl = convertToEmbedUrl(product.videoUrl);
-                    videoContent = `<iframe class="modal-video" src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
-                }
-            }
-            const modalHtml = `
-            <div class="modal active" id="detail-modal" onclick="closeModal('detail-modal')">
-                <div class="modal-content" onclick="event.stopPropagation()">
-                    <img src="${product.imagemUrl || 'https://via.placeholder.com/600x400'}" alt="${product.nome}">
-                    <h2>${product.nome}</h2>
-                    <p class="modal-price">R$ ${(product.valor || 0).toFixed(2)}</p>
-                    <p class="modal-description">${product.descricao || 'Nenhuma descrição disponível.'}</p>
-                    ${videoContent}
-                    <button class="close-btn" onclick="closeModal('detail-modal')">Fechar</button>
-                </div>
-            </div>`;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        } catch (error) {
-            alert("Não foi possível carregar os detalhes deste produto.");
-        }
-    }
+  function addToCart(id,nome,valor){
+    cart.push({id,nome,valor});
+    updateCart();
+  }
 
-    function convertToEmbedUrl(url) {
-        if (!url) return '';
-        let videoId = '';
-        try {
-            if (url.includes("youtu.be/")) videoId = new URL(url).pathname.substring(1);
-            else if (url.includes("watch?v=")) videoId = new URL(url).searchParams.get("v");
-        } catch (e) { return ''; }
-        return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-    }
-
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('active');
-            modal.addEventListener('transitionend', () => modal.remove(), { once: true });
-        }
-    }
-
-    document.getElementById('search-input').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filteredProducts = allProducts.filter(p => 
-            (p.nome && p.nome.toLowerCase().includes(searchTerm)) || 
-            (p.descricao && p.descricao.toLowerCase().includes(searchTerm))
-        );
-        renderCatalog(filteredProducts);
+  function updateCart(){
+    const cartDiv=document.getElementById('cart');
+    const itemsDiv=document.getElementById('cart-items');
+    let total=0;
+    itemsDiv.innerHTML="";
+    cart.forEach(item=>{
+      total+=item.valor;
+      itemsDiv.innerHTML+=`<div class="cart-item"><span>${item.nome}</span><span>R$ ${item.valor.toFixed(2)}</span></div>`;
     });
-</script>
+    document.querySelector('.cart-total').innerText="Total: R$ "+total.toFixed(2);
+    cartDiv.style.display="block";
+  }
 
+  // Modal de detalhes
+  async function showProductDetail(productId){
+    const res=await fetch(`/api/products/${productId}`);
+    if(!res.ok) return;
+    const product=await res.json();
+    let videoContent='';
+    if(product.videoUrl){
+      if(product.videoUrl.includes('firebasestorage')) videoContent=`<video class="modal-video" controls src="${product.videoUrl}"></video>`;
+      else if(product.videoUrl.includes('youtu')) videoContent=`<iframe class="modal-video" src="${convertToEmbedUrl(product.videoUrl)}" allowfullscreen></iframe>`;
+    }
+    const modalHtml=`
+      <div class="modal active" id="detail-modal" onclick="closeModal('detail-modal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+          <img src="${product.imagemUrl}" alt="${product.nome}">
+          <h2>${product.nome}</h2>
+          <p class="modal-price">R$ ${(product.valor||0).toFixed(2)}</p>
+          <p class="modal-description">${product.descricao||'Sem descrição.'}</p>
+          ${videoContent}
+          <button class="close-btn" onclick="closeModal('detail-modal')">Fechar</button>
+        </div>
+      </div>`;
+    document.body.insertAdjacentHTML('beforeend',modalHtml);
+  }
+
+  function convertToEmbedUrl(url){
+    if(url.includes("youtu.be/")) return `https://www.youtube.com/embed/${url.split("/").pop()}`;
+    if(url.includes("watch?v=")) return `https://www.youtube.com/embed/${new URL(url).searchParams.get("v")}`;
+    return url;
+  }
+
+  function closeModal(id){
+    const modal=document.getElementById(id);
+    if(modal) modal.remove();
+  }
+
+  // Pesquisa
+  document.getElementById('search-input').addEventListener('input',(e)=>{
+    const term=e.target.value.toLowerCase();
+    const filtered=allProducts.filter(p=>p.nome?.toLowerCase().includes(term)||p.descricao?.toLowerCase().includes(term));
+    renderCatalog(filtered);
+  });
+</script>
 </body>
 </html>
