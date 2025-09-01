@@ -1,69 +1,243 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Conversas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Painel de Atendimento com IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary:#3498db; --dark1:#2c3e50; --light1:#f4f4f4; --white:#fff; }
-        body { margin:0; font-family:'Poppins',sans-serif; background:var(--light1); display:flex; height:100vh; overflow: hidden; }
-        .sidebar { width:300px; background:var(--dark1); color:var(--white); display:flex; flex-direction:column; padding:15px; border-right: 1px solid #46607a; }
-        .sidebar h2 { font-size:18px; margin:0 0 15px; text-align:center; padding-bottom: 10px; border-bottom: 1px solid #46607a;}
-        .sidebar-content { flex: 1; overflow-y:auto; }
-        .session { background:#34495e; padding:12px 15px; border-radius:8px; margin-bottom:10px; cursor:pointer; transition: background 0.2s ease-in-out; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .session:hover { background:#3d566e; }
-        .session.active { background:var(--primary); font-weight: 600; }
-        .session small { display: block; opacity: 0.7; margin-top: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .content { flex:1; display:flex; flex-direction:column; background:var(--white); }
-        .chat-header { background:var(--primary); color:var(--white); padding:15px; font-weight:600; text-align: center; }
-        .chat-messages { flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; }
-        .msg { max-width:75%; padding:10px 15px; border-radius:18px; margin-bottom:12px; line-height: 1.4; word-wrap:break-word; }
-        .msg.user { background:#e9eef2; align-self:flex-start; border-bottom-left-radius: 4px; }
-        .msg.admin { background:var(--primary); color:#fff; align-self:flex-end; border-bottom-right-radius: 4px; }
-        .chat-input { display:flex; border-top:1px solid #ddd; padding:15px; background: #f9f9f9; }
-        .chat-input input { flex:1; border:1px solid #ccc; border-radius:20px; padding:10px 15px; font-size:14px; outline-color: var(--primary); }
-        .chat-input button { margin-left:10px; background:var(--primary); color:#fff; border:none; border-radius:20px; padding:10px 20px; cursor:pointer; font-weight:600; transition: background 0.2s; }
-        .chat-input button:hover { background: #2980b9; }
-        .placeholder { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #aaa; text-align: center; }
-        
-        @media (max-width:768px) {
-            body { flex-direction:column; }
-            .sidebar { width:100%; height:180px; }
-            .sidebar-content { display: flex; flex-direction: row; }
-            .session { min-width:180px; margin-right:10px; margin-bottom: 0; }
-            .content { flex:1; height:calc(100vh - 180px); }
+        :root {
+            --cor-primaria: #007bff;
+            --cor-primaria-hover: #0069d9;
+            --cor-fundo: #f4f7fa;
+            --cor-sidebar: #ffffff;
+            --cor-chat: #ffffff;
+            --cor-texto-principal: #212529;
+            --cor-texto-secundario: #6c757d;
+            --cor-borda: #dee2e6;
+            --sombra: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto-principal);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Barra Lateral (Conversas) --- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--cor-sidebar);
+            border-right: 1px solid var(--cor-borda);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .sidebar-header {
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--cor-borda);
+        }
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        #lista-sessoes {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .item-sessao {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
+        }
+        .item-sessao:hover {
+            background-color: #e9ecef;
+        }
+        .item-sessao.ativa {
+            background-color: var(--cor-primaria);
+            color: white;
+            border-color: var(--cor-primaria);
+        }
+        .item-sessao-id {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .item-sessao-preview {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .item-sessao.ativa .item-sessao-preview {
+            opacity: 0.9;
+        }
+
+        /* --- Área Principal do Chat --- */
+        .container-chat {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .placeholder-chat {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            color: var(--cor-texto-secundario);
+        }
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--cor-borda);
+            font-weight: 600;
+        }
+        #area-mensagens {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .bolha-msg {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .bolha-msg.user {
+            background-color: #e9ecef;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        .bolha-msg.admin {
+            background-color: var(--cor-primaria);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        /* --- Área de Inserção de Texto --- */
+        .area-input {
+            padding: 20px;
+            border-top: 1px solid var(--cor-borda);
+            background-color: var(--cor-sidebar);
+        }
+        .container-input {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 25px;
+            padding: 5px;
+            border: 1px solid var(--cor-borda);
+        }
+        #texto-chat {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            background: transparent;
+        }
+        .botao-chat {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .botao-chat:hover { background-color: #f1f1f1; }
+        .botao-chat:disabled { cursor: not-allowed; opacity: 0.5; }
+        .botao-chat.enviar {
+            background-color: var(--cor-primaria);
+            margin-left: 5px;
+        }
+        .botao-chat.enviar:hover { background-color: var(--cor-primaria-hover); }
+        .botao-chat svg {
+            width: 20px;
+            height: 20px;
+        }
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--cor-primaria);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Media Queries para Responsividade --- */
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: 200px; border-right: none; border-bottom: 1px solid var(--cor-borda); }
+            #lista-sessoes { display: flex; flex-direction: row; }
+            .item-sessao { min-width: 200px; margin-right: 10px; margin-bottom: 0;}
+            .container-chat { height: calc(100vh - 200px); }
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>Conversas Ativas</h2>
-        <div class="sidebar-content" id="sessions"><p>Verificando login...</p></div>
-    </div>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>Conversas</h1>
+        </div>
+        <div id="lista-sessoes">
+            <p>A verificar autenticação...</p>
+        </div>
+    </aside>
 
-    <div class="content">
-        <div class="chat-header" id="chat-header">Selecione uma conversa para começar</div>
-        <div class="chat-messages" id="chat-messages">
-            <div class="placeholder">
-                <h1>Painel de Atendimento</h1>
-                <p>As conversas com seus clientes aparecerão aqui.</p>
+    <main class="container-chat">
+        <div id="placeholder" class="placeholder-chat">
+            <div>
+                <h2>Bem-vindo ao Painel de Atendimento</h2>
+                <p>Selecione uma conversa à esquerda para começar.</p>
             </div>
         </div>
-        <div class="chat-input">
-            <input type="text" id="chat-text" placeholder="Digite sua resposta..." disabled>
-            <button onclick="sendMessage()" id="send-btn" disabled>Enviar</button>
+        <div id="chat-ativo" style="display: none; flex-grow: 1; flex-direction: column;">
+            <div class="chat-header" id="chat-header"></div>
+            <div id="area-mensagens"></div>
+            <div class="area-input">
+                <div class="container-input">
+                    <input type="text" id="texto-chat" placeholder="Escreva a sua resposta..." autocomplete="off">
+                    <button id="botao-sugestao" class="botao-chat" title="Sugerir resposta com IA">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 13h-3v3h-2v-3H8v-2h3V9h2v4h3v2z"/></svg>
+                    </button>
+                    <button id="botao-enviar" class="botao-chat enviar" title="Enviar mensagem">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <!-- SDK do Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
     <script type="module">
-        // --- INÍCIO: CONFIGURAÇÃO E AUTENTICAÇÃO FIREBASE ---
-        // IMPORTANTE: Substitua com as suas credenciais do Firebase
+        // --- CONFIGURAÇÃO E AUTENTICAÇÃO FIREBASE ---
         const firebaseConfig = {
             apiKey: "SUA_API_KEY",
             authDomain: "SEU_AUTH_DOMAIN",
@@ -72,188 +246,201 @@
             messagingSenderId: "SEU_MESSAGING_SENDER_ID",
             appId: "SEU_APP_ID"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        let userToken = null;
+        // --- ELEMENTOS DO DOM ---
+        const ui = {
+            listaSessoes: document.getElementById('lista-sessoes'),
+            placeholder: document.getElementById('placeholder'),
+            chatAtivo: document.getElementById('chat-ativo'),
+            chatHeader: document.getElementById('chat-header'),
+            areaMensagens: document.getElementById('area-mensagens'),
+            textoChat: document.getElementById('texto-chat'),
+            botaoSugestao: document.getElementById('botao-sugestao'),
+            botaoEnviar: document.getElementById('botao-enviar'),
+        };
 
+        // --- ESTADO DA APLICAÇÃO ---
+        let userToken = null;
+        let selectedSessionId = null;
+        let sessoesCacheKey = '';
+        let isSuggesting = false;
+
+        // --- LÓGICA PRINCIPAL ---
+        
+        // Função utilitária para chamadas à API
+        async function apiFetch(endpoint, options = {}) {
+            const headers = { "Content-Type": "application/json", ...options.headers };
+            if (userToken) {
+                headers["Authorization"] = `Bearer ${userToken}`;
+            }
+            try {
+                const response = await fetch(endpoint, { ...options, headers });
+                if (!response.ok) {
+                    if (response.status === 401) auth.signOut(); // Se não estiver autorizado, faz logout
+                    throw new Error(`Erro na API: ${response.status}`);
+                }
+                return response.json();
+            } catch (error) {
+                console.error(`Falha na chamada a ${endpoint}:`, error);
+                throw error;
+            }
+        }
+        
+        function renderSessoes(sessoes) {
+            const newCacheKey = JSON.stringify(sessoes.map(s => s.id + s.last_message));
+            // Evita redesenhar a lista desnecessariamente se nada mudou
+            if (sessoesCacheKey === newCacheKey) return;
+            sessoesCacheKey = newCacheKey;
+
+            ui.listaSessoes.innerHTML = '';
+            sessoes.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'item-sessao';
+                item.classList.toggle('ativa', s.id === selectedSessionId);
+                item.innerHTML = `
+                    <div class="item-sessao-id">Cliente: ${s.id.substring(0, 8)}...</div>
+                    <div class="item-sessao-preview">${s.last_message || 'Nenhuma mensagem ainda.'}</div>
+                `;
+                item.onclick = () => selectSession(s.id);
+                ui.listaSessoes.appendChild(item);
+            });
+        }
+
+        async function fetchSessoes() {
+            if (!userToken) return;
+            try {
+                const sessoes = await apiFetch("/api/sessions");
+                if (sessoes && sessoes.length > 0) {
+                    // Ordena as sessões pela data da última mensagem
+                    sessoes.sort((a, b) => {
+                        const dateA = a.updated_at ? a.updated_at.seconds : 0;
+                        const dateB = b.updated_at ? b.updated_at.seconds : 0;
+                        return dateB - dateA;
+                    });
+                    renderSessoes(sessoes);
+                } else {
+                    ui.listaSessoes.innerHTML = '<p>Nenhuma conversa encontrada.</p>';
+                }
+            } catch (error) {
+                ui.listaSessoes.innerHTML = '<p style="color: #d9534f;">Erro ao carregar conversas.</p>';
+            }
+        }
+        
+        async function renderMensagens(mensagens) {
+            ui.areaMensagens.innerHTML = '';
+            if (!mensagens || mensagens.length === 0) return;
+
+            mensagens.forEach(m => {
+                const bolha = document.createElement('div');
+                bolha.className = `bolha-msg ${m.sender === 'admin' ? 'admin' : 'user'}`;
+                bolha.textContent = m.text;
+                ui.areaMensagens.appendChild(bolha);
+            });
+            ui.areaMensagens.scrollTop = ui.areaMensagens.scrollHeight;
+        }
+
+        async function fetchMensagens() {
+            if (!selectedSessionId) return;
+            try {
+                const mensagens = await apiFetch(`/api/get_messages?sessionId=${selectedSessionId}`);
+                renderMensagens(mensagens);
+            } catch (error) {
+                 ui.areaMensagens.innerHTML = '<p style="color: #d9534f;">Erro ao carregar mensagens.</p>';
+            }
+        }
+
+        function selectSession(sessionId) {
+            if (selectedSessionId === sessionId) return;
+            
+            selectedSessionId = sessionId;
+            ui.placeholder.style.display = 'none';
+            ui.chatAtivo.style.display = 'flex';
+            ui.chatHeader.textContent = `Conversa com Cliente: ${sessionId.substring(0, 8)}...`;
+            
+            document.querySelectorAll('.item-sessao').forEach(el => el.classList.remove('ativa'));
+            const elAtivo = Array.from(document.querySelectorAll('.item-sessao')).find(el => el.querySelector('.item-sessao-id').textContent.includes(sessionId.substring(0, 8)));
+            if (elAtivo) elAtivo.classList.add('ativa');
+            
+            fetchMensagens();
+        }
+
+        async function enviarMensagem() {
+            const text = ui.textoChat.value.trim();
+            if (!text || !selectedSessionId) return;
+            
+            ui.textoChat.value = '';
+            ui.textoChat.disabled = true;
+            ui.botaoEnviar.disabled = true;
+
+            // Renderização otimista
+            const bolha = document.createElement('div');
+            bolha.className = 'bolha-msg admin';
+            bolha.textContent = text;
+            ui.areaMensagens.appendChild(bolha);
+            ui.areaMensagens.scrollTop = ui.areaMensagens.scrollHeight;
+
+            try {
+                await apiFetch('/api/send_message', {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId: selectedSessionId, text, sender: 'admin' })
+                });
+                fetchSessoes(); // Atualiza a preview da sessão
+            } catch (error) {
+                bolha.style.opacity = '0.5';
+                bolha.textContent += ' (Falha no envio)';
+            } finally {
+                ui.textoChat.disabled = false;
+                ui.botaoEnviar.disabled = false;
+                ui.textoChat.focus();
+            }
+        }
+
+        async function sugerirResposta() {
+            if (!selectedSessionId || isSuggesting) return;
+            isSuggesting = true;
+            
+            const originalIcon = ui.botaoSugestao.innerHTML;
+            ui.botaoSugestao.innerHTML = '<div class="loading-spinner"></div>';
+            ui.botaoSugestao.disabled = true;
+
+            try {
+                const response = await apiFetch('/api/generate_reply', {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId: selectedSessionId })
+                });
+                ui.textoChat.value = response.reply;
+                ui.textoChat.focus();
+            } catch (error) {
+                alert('Ocorreu um erro ao gerar a sugestão. Verifique se a rota /api/generate_reply existe no servidor.');
+            } finally {
+                isSuggesting = false;
+                ui.botaoSugestao.innerHTML = originalIcon;
+                ui.botaoSugestao.disabled = false;
+            }
+        }
+
+        // --- INICIALIZAÇÃO E EVENTOS ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
-                console.log("Usuário autenticado:", user.uid);
                 userToken = await user.getIdToken(true);
-                loadSessions();
-                // Inicia a busca periódica por novas mensagens/sessões
+                fetchSessoes();
+                // Verifica por novas sessões e mensagens periodicamente
                 setInterval(() => {
-                    loadSessions();
-                    loadMessages();
+                    fetchSessoes();
+                    if (selectedSessionId) {
+                        fetchMensagens();
+                    }
                 }, 5000);
             } else {
-                console.log("Nenhum usuário logado. Redirecionando...");
                 window.location.href = '/login';
             }
         });
-        // --- FIM: CONFIGURAÇÃO E AUTENTICAÇÃO FIREBASE ---
 
-        // Função utilitária para chamadas à API
-        async function apiJson(url, options = {}) {
-            try {
-                const headers = {
-                    "Content-Type": "application/json",
-                    ...(options.headers || {})
-                };
-                if (userToken) {
-                    headers["Authorization"] = `Bearer ${userToken}`;
-                }
-
-                const res = await fetch(url, {
-                    method: options.method || "GET",
-                    headers,
-                    body: options.body || undefined
-                });
-                
-                const data = await res.json().catch(() => null);
-
-                if (!res.ok) {
-                    console.error(`API error ${res.status} @ ${url}`, data);
-                    if (res.status === 401) {
-                         auth.signOut();
-                    }
-                    throw new Error(`${url} -> ${res.status}`);
-                }
-                return data;
-            } catch (err) {
-                console.error("Network/Parse error @", url, err);
-                throw err;
-            }
-        }
-
-        let selectedSession = null;
-        let sessionsCacheKey = ""; // Cache para evitar redesenhar a lista desnecessariamente
-
-        // Carregar sessões
-        async function loadSessions() {
-            if (!userToken) return;
-            try {
-                const sessions = await apiJson("/api/sessions");
-                const list = document.getElementById("sessions");
-
-                if (!Array.isArray(sessions) || sessions.length === 0) {
-                    list.innerHTML = "<div style='padding: 10px; opacity: 0.7;'>Nenhuma sessão encontrada.</div>";
-                    return;
-                }
-
-                sessions.sort((a, b) => new Date(b.updated_at.seconds * 1000) - new Date(a.updated_at.seconds * 1000));
-
-                const newCacheKey = JSON.stringify(sessions.map(s => s.id + s.last_message));
-                if (sessionsCacheKey === newCacheKey) {
-                    return; 
-                }
-                sessionsCacheKey = newCacheKey;
-                
-                list.innerHTML = "";
-                sessions.forEach(s => {
-                    const id = s.id;
-                    const div = document.createElement("div");
-                    div.className = "session" + (id === selectedSession ? " active" : "");
-                    div.innerHTML = `Cliente: ${String(id).substring(0, 8)}... <small>${s.last_message || ''}</small>`;
-                    div.onclick = () => selectSession(id);
-                    list.appendChild(div);
-                });
-            } catch (err) {
-                 document.getElementById("sessions").innerHTML = "<p style='color: #ff9a9a;'>Erro ao carregar sessões.</p>";
-            }
-        }
-
-        // Selecionar conversa
-        async function selectSession(id) {
-            if (selectedSession === id) return;
-
-            selectedSession = id;
-            document.getElementById("chat-header").textContent = "Conversa com Cliente: " + id.substring(0, 8);
-            document.getElementById("chat-text").disabled = false;
-            document.getElementById("send-btn").disabled = false;
-            document.getElementById("chat-messages").innerHTML = `<div class="placeholder">Carregando mensagens...</div>`;
-            
-            document.querySelectorAll(".session").forEach(el => el.classList.remove("active"));
-            const activeEl = Array.from(document.querySelectorAll(".session")).find(el => el.innerHTML.includes(id.substring(0,8)));
-            if(activeEl) activeEl.classList.add("active");
-            
-            loadMessages();
-        }
-
-        // Carregar mensagens
-        async function loadMessages() {
-            if (!selectedSession) return;
-            try {
-                const messages = await apiJson(`/api/get_messages?sessionId=${encodeURIComponent(selectedSession)}`);
-                const box = document.getElementById("chat-messages");
-                box.innerHTML = "";
-
-                if (!messages || messages.length === 0) {
-                    box.innerHTML = `<div class="placeholder">Ainda não há mensagens.</div>`;
-                    return;
-                }
-
-                messages.forEach(m => {
-                    const who = (m.sender ?? "user") === "user" ? "user" : "admin";
-                    const div = document.createElement("div");
-                    div.className = "msg " + who;
-                    div.textContent = m.text || "";
-                    box.appendChild(div);
-                });
-                box.scrollTop = box.scrollHeight;
-            } catch (err) {
-                document.getElementById("chat-messages").innerHTML = `<div class="placeholder" style="color: #ff9a9a;">Erro ao carregar mensagens.</div>`;
-            }
-        }
-
-        // Enviar mensagem
-        async function sendMessage() {
-            const input = document.getElementById("chat-text");
-            const btn = document.getElementById("send-btn");
-            const text = input.value.trim();
-            if (!text || !selectedSession) return;
-
-            btn.disabled = true;
-            input.disabled = true;
-
-            const box = document.getElementById("chat-messages");
-            if(box.querySelector('.placeholder')) box.innerHTML = '';
-            
-            const preview = document.createElement("div");
-            preview.className = "msg admin";
-            preview.textContent = text;
-            box.appendChild(preview);
-            box.scrollTop = box.scrollHeight;
-
-            input.value = "";
-
-            try {
-                await apiJson("/api/send_message", {
-                    method: "POST",
-                    body: JSON.stringify({ sessionId: selectedSession, text, sender: "admin" })
-                });
-            } catch (e) {
-                console.error("Falha ao enviar mensagem.", e);
-                preview.style.opacity = '0.5';
-                preview.textContent += ' (Falha no envio)';
-            } finally {
-                btn.disabled = false;
-                input.disabled = false;
-                input.focus();
-                loadMessages(); 
-            }
-        }
-        window.sendMessage = sendMessage;
-
-        // Adiciona evento de "Enter" para enviar mensagem
-        document.getElementById("chat-text").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
+        ui.botaoEnviar.onclick = enviarMensagem;
+        ui.textoChat.onkeypress = (e) => { if (e.key === 'Enter') { e.preventDefault(); enviarMensagem(); } };
+        ui.botaoSugestao.onclick = sugerirResposta;
 
     </script>
 </body>
