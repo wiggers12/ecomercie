@@ -1,168 +1,176 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nosso Catálogo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary:#3498db; --dark1:#2c3e50; --light1:#ecf0f1; }
-        body { font-family:'Poppins',sans-serif; background:var(--light1); margin:0; }
-        .header { background:var(--dark1); color:#fff; padding:20px 50px; text-align:center; }
-        h1 { margin:0; font-weight:600; }
-        .container { max-width:1200px; margin:30px auto; padding:0 20px; }
-        .search-bar { width:100%; padding:15px; font-size:16px; border:2px solid #ddd; border-radius:8px; margin-bottom:25px; box-sizing:border-box; }
-        .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:20px; }
-        .product-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:.3s; cursor:pointer; }
-        .product-card:hover { transform:translateY(-5px); box-shadow:0 8px 25px rgba(0,0,0,0.15); }
-        .product-card img { width:100%; height:180px; object-fit:cover; }
-        .product-info { padding:15px; text-align:center; }
-        .product-info h3 { margin:0 0 10px; color:var(--dark1); font-size:1em; }
-        .product-info p { font-size:18px; font-weight:600; color:var(--primary); margin:0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nosso Catálogo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#3498db; --dark1:#2c3e50; --light1:#ecf0f1; }
+    body { font-family:'Poppins',sans-serif; background:var(--light1); margin:0; }
+    .header { background:var(--dark1); color:#fff; padding:20px 50px; text-align:center; }
+    h1 { margin:0; font-weight:600; }
+    .container { max-width:1200px; margin:30px auto; padding:0 20px; }
+    .search-bar { width:100%; padding:15px; font-size:16px; border:2px solid #ddd; border-radius:8px; margin-bottom:25px; box-sizing:border-box; }
+    .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:20px; }
+    .product-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:.3s; cursor:pointer; }
+    .product-card:hover { transform:translateY(-5px); box-shadow:0 8px 25px rgba(0,0,0,0.15); }
+    .product-card img { width:100%; height:180px; object-fit:cover; }
+    .product-info { padding:15px; text-align:center; }
+    .product-info h3 { margin:0 0 10px; color:var(--dark1); font-size:1em; }
+    .product-info p { font-size:18px; font-weight:600; color:var(--primary); margin:0; }
 
-        /* Modal Produto */
-        .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; visibility:hidden; transition:.3s; }
-        .modal.active { opacity:1; visibility:visible; }
-        .modal-content { background:#fff; padding:25px; border-radius:10px; max-width:600px; width:90%; box-shadow:0 5px 20px rgba(0,0,0,.4); transform:scale(.95); transition:.3s; max-height:90vh; overflow-y:auto; }
-        .modal.active .modal-content { transform:scale(1); }
-        .modal-content img { width:100%; border-radius:8px; }
-        .modal-content h2 { margin:15px 0 10px; color:var(--dark1); }
-        .modal-price { font-size:22px; font-weight:bold; color:var(--primary); margin:10px 0; }
-        .modal-description { margin:10px 0; line-height:1.6; color:#555; }
-        .modal-video { width:100%; aspect-ratio:16/9; border:none; border-radius:8px; background:#000; margin-top:15px; }
-        .close-btn { background:var(--dark1); color:#fff; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:15px; }
+    /* Modal Produto */
+    .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; visibility:hidden; transition:.3s; }
+    .modal.active { opacity:1; visibility:visible; }
+    .modal-content { background:#fff; padding:25px; border-radius:10px; max-width:600px; width:90%; box-shadow:0 5px 20px rgba(0,0,0,.4); transform:scale(.95); transition:.3s; max-height:90vh; overflow-y:auto; }
+    .modal.active .modal-content { transform:scale(1); }
+    .modal-content img { width:100%; border-radius:8px; }
+    .modal-content h2 { margin:15px 0 10px; color:var(--dark1); }
+    .modal-price { font-size:22px; font-weight:bold; color:var(--primary); margin:10px 0; }
+    .modal-description { margin:10px 0; line-height:1.6; color:#555; }
+    .modal-video { width:100%; aspect-ratio:16/9; border:none; border-radius:8px; background:#000; margin-top:15px; }
+    .close-btn { background:var(--dark1); color:#fff; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:15px; }
 
-        /* Chat */
-        #chat-btn { position:fixed; bottom:90px; right:20px; background:#3498db; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); }
-        #chat-box { position:fixed; bottom:160px; right:20px; width:300px; max-height:400px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,.2); display:none; flex-direction:column; z-index:1200; }
-        #chat-header { background:#3498db; color:#fff; padding:10px; border-radius:10px 10px 0 0; font-weight:600; }
-        #chat-messages { flex:1; padding:10px; overflow-y:auto; font-size:14px; }
-        .msg { margin:6px 0; padding:8px 12px; border-radius:10px; max-width:80%; word-wrap:break-word; }
-        .msg.user { background:#ecf0f1; align-self:flex-end; }
-        .msg.admin { background:#3498db; color:#fff; align-self:flex-start; }
-        #chat-input { display:flex; border-top:1px solid #ddd; }
-        #chat-input input { flex:1; border:none; padding:10px; font-size:14px; }
-        #chat-input button { background:#3498db; color:#fff; border:none; padding:10px 15px; cursor:pointer; }
+    /* Chat */
+    #chat-btn { position:fixed; bottom:90px; right:20px; background:#3498db; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); }
+    #chat-box { position:fixed; bottom:160px; right:20px; width:300px; max-height:400px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,.2); display:none; flex-direction:column; z-index:1200; }
+    #chat-header { background:#3498db; color:#fff; padding:10px; border-radius:10px 10px 0 0; font-weight:600; }
+    #chat-messages { flex:1; padding:10px; overflow-y:auto; font-size:14px; display:flex; flex-direction:column; }
+    .msg { margin:6px 0; padding:8px 12px; border-radius:10px; max-width:80%; word-wrap:break-word; }
+    .msg.user { background:#ecf0f1; align-self:flex-end; }
+    .msg.admin { background:#3498db; color:#fff; align-self:flex-start; }
+    #chat-input { display:flex; border-top:1px solid #ddd; }
+    #chat-input input { flex:1; border:none; padding:10px; font-size:14px; }
+    #chat-input button { background:#3498db; color:#fff; border:none; padding:10px 15px; cursor:pointer; }
 
-        footer { background:#2c3e50; color:#fff; text-align:center; padding:20px; margin-top:40px; }
-        footer a { color:#ffcc00; margin:0 5px; text-decoration:none; }
-    </style>
+    footer { background:#2c3e50; color:#fff; text-align:center; padding:20px; margin-top:40px; }
+    footer a { color:#ffcc00; margin:0 5px; text-decoration:none; }
+  </style>
 </head>
 <body>
 
 <header class="header"><h1>🛍️ Nosso Catálogo</h1></header>
 
 <main class="container">
-    <input type="text" id="search-input" class="search-bar" placeholder="🔎 Buscar produtos...">
-    <div id="product-grid" class="product-grid"><p>Carregando produtos...</p></div>
+  <input type="text" id="search-input" class="search-bar" placeholder="🔎 Buscar produtos...">
+  <div id="product-grid" class="product-grid"><p>Carregando produtos...</p></div>
 </main>
 
 <!-- Chat -->
 <button id="chat-btn">💬</button>
 <div id="chat-box">
-    <div id="chat-header">Chat com o Vendedor</div>
-    <div id="chat-messages"></div>
-    <div id="chat-input">
-        <input type="text" id="chat-text" placeholder="Digite sua mensagem...">
-        <button onclick="sendMessage()">Enviar</button>
-    </div>
+  <div id="chat-header">Chat com o Vendedor</div>
+  <div id="chat-messages"></div>
+  <div id="chat-input">
+    <input type="text" id="chat-text" placeholder="Digite sua mensagem...">
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
 </div>
 
 <footer>
-    <p>© 2025 Meu Catálogo. Todos os direitos reservados.</p>
-    <p><a href="https://wa.me/5551998378751" target="_blank">WhatsApp</a> | <a href="#">Instagram</a> | <a href="#">Facebook</a></p>
+  <p>© 2025 Meu Catálogo. Todos os direitos reservados.</p>
+  <p><a href="https://wa.me/5551998378751" target="_blank">WhatsApp</a> | <a href="#">Instagram</a> | <a href="#">Facebook</a></p>
 </footer>
 
 <script>
-    const ownerId = '{{ owner_id }}';
-    let allProducts = [];
-    const sessionId = localStorage.getItem("sessionId") || crypto.randomUUID();
-    localStorage.setItem("sessionId", sessionId);
+  const ownerId = "{{ owner_id }}";  // vindo do servidor Flask
+  const sessionId = localStorage.getItem("sessionId") || crypto.randomUUID();
+  localStorage.setItem("sessionId", sessionId);
+  let allProducts = [];
 
-    document.addEventListener('DOMContentLoaded', initializeCatalog);
+  document.addEventListener('DOMContentLoaded', initializeCatalog);
 
-    async function initializeCatalog() {
-        try {
-            // 🔔 Notifica visita
-            await fetch('/api/notify_visit', {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({ ownerId, sessionId })
-            });
+  async function initializeCatalog() {
+    try {
+      // 🔔 Notifica visita (já cria sessão no servidor)
+      await fetch('/api/notify_visit', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ ownerId, sessionId })
+      });
 
-            // 🔄 Carrega catálogo
-            const res = await fetch(`/api/catalog_data/${ownerId}`);
-            const data = await res.json();
-            allProducts = data.products;
-            renderCatalog(allProducts);
+      // 🔄 Carrega catálogo
+      const res = await fetch(`/api/catalog_data/${ownerId}`);
+      const data = await res.json();
+      allProducts = data.products;
+      renderCatalog(allProducts);
 
-            // ⏳ Inicia polling do chat
-            setInterval(loadMessages, 3000);
-        } catch (e) {
-            console.error("Erro:", e);
-            document.getElementById('product-grid').innerHTML="<p style='color:red'>Erro ao carregar catálogo.</p>";
-        }
+      // ⏳ Inicia polling do chat
+      setInterval(loadMessages, 3000);
+    } catch (e) {
+      console.error("Erro:", e);
+      document.getElementById('product-grid').innerHTML="<p style='color:red'>Erro ao carregar catálogo.</p>";
     }
+  }
 
-    function renderCatalog(products) {
-        const grid=document.getElementById("product-grid");
-        if(!products.length){ grid.innerHTML="<p>Nenhum produto encontrado.</p>"; return; }
-        grid.innerHTML = products.map(p=>`
-            <div class="product-card" onclick="showProductDetail('${p.id}')">
-                <img src="${p.imagemUrl || 'https://via.placeholder.com/400x300'}">
-                <div class="product-info"><h3>${p.nome}</h3><p>R$ ${(p.valor||0).toFixed(2)}</p></div>
-            </div>`).join('');
+  function renderCatalog(products) {
+    const grid=document.getElementById("product-grid");
+    if(!products.length){ grid.innerHTML="<p>Nenhum produto encontrado.</p>"; return; }
+    grid.innerHTML = products.map(p=>`
+      <div class="product-card" onclick="showProductDetail('${p.id}')">
+        <img src="${p.imagemUrl || 'https://via.placeholder.com/400x300'}">
+        <div class="product-info"><h3>${p.nome}</h3><p>R$ ${(p.valor||0).toFixed(2)}</p></div>
+      </div>`).join('');
+  }
+
+  async function showProductDetail(id) {
+    const res=await fetch(`/api/products/${id}`);
+    const p=await res.json();
+    let video='';
+    if(p.videoUrl){
+      if(p.videoUrl.includes('firebasestorage')) video=`<video class="modal-video" controls src="${p.videoUrl}"></video>`;
+      else if(p.videoUrl.includes('youtube')) video=`<iframe class="modal-video" src="https://www.youtube.com/embed/${new URL(p.videoUrl).searchParams.get("v")}" frameborder="0" allowfullscreen></iframe>`;
     }
+    const modalHtml=`
+      <div class="modal active" id="detail-modal" onclick="closeModal('detail-modal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+          <img src="${p.imagemUrl||'https://via.placeholder.com/600x400'}">
+          <h2>${p.nome}</h2>
+          <p class="modal-price">R$ ${(p.valor||0).toFixed(2)}</p>
+          <p class="modal-description">${p.descricao||''}</p>
+          ${video}
+          <button class="close-btn" onclick="closeModal('detail-modal')">Fechar</button>
+        </div>
+      </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
 
-    async function showProductDetail(id) {
-        const res=await fetch(`/api/products/${id}`);
-        const p=await res.json();
-        let video='';
-        if(p.videoUrl){
-            if(p.videoUrl.includes('firebasestorage')) video=`<video class="modal-video" controls src="${p.videoUrl}"></video>`;
-            else if(p.videoUrl.includes('youtube')) video=`<iframe class="modal-video" src="https://www.youtube.com/embed/${new URL(p.videoUrl).searchParams.get("v")}" frameborder="0" allowfullscreen></iframe>`;
-        }
-        const modalHtml=`
-        <div class="modal active" id="detail-modal" onclick="closeModal('detail-modal')">
-          <div class="modal-content" onclick="event.stopPropagation()">
-            <img src="${p.imagemUrl||'https://via.placeholder.com/600x400'}">
-            <h2>${p.nome}</h2>
-            <p class="modal-price">R$ ${(p.valor||0).toFixed(2)}</p>
-            <p class="modal-description">${p.descricao||''}</p>
-            ${video}
-            <button class="close-btn" onclick="closeModal('detail-modal')">Fechar</button>
-          </div>
-        </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-    function closeModal(id){const m=document.getElementById(id);if(m){m.classList.remove('active');m.addEventListener('transitionend',()=>m.remove(),{once:true});}}
+  function closeModal(id){
+    const m=document.getElementById(id);
+    if(m){m.classList.remove('active');m.addEventListener('transitionend',()=>m.remove(),{once:true});}
+  }
 
-    // Chat
-    const chatBtn=document.getElementById("chat-btn");
-    const chatBox=document.getElementById("chat-box");
-    chatBtn.onclick=()=>{chatBox.style.display=chatBox.style.display==="flex"?"none":"flex";};
+  // --- CHAT ---
+  const chatBtn=document.getElementById("chat-btn");
+  const chatBox=document.getElementById("chat-box");
+  chatBtn.onclick=()=>{chatBox.style.display=chatBox.style.display==="flex"?"none":"flex";};
 
-    async function sendMessage(){
-        const text=document.getElementById("chat-text").value.trim();
-        if(!text) return;
-        await fetch('/api/send_message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,text,from:"user"})});
-        document.getElementById("chat-text").value="";
-        loadMessages();
-    }
+  async function sendMessage(){
+    const text=document.getElementById("chat-text").value.trim();
+    if(!text) return;
+    await fetch('/api/send_message',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({session_id:sessionId, text, sender:"user"})
+    });
+    document.getElementById("chat-text").value="";
+    loadMessages();
+  }
 
-    async function loadMessages(){
-        const res=await fetch(`/api/get_messages?sessionId=${sessionId}`);
-        const msgs=await res.json();
-        const box=document.getElementById("chat-messages");
-        box.innerHTML="";
-        msgs.forEach(m=>{
-            const div=document.createElement("div");
-            div.className="msg "+(m.from==="user"?"user":"admin");
-            div.textContent=m.text;
-            box.appendChild(div);
-        });
-        box.scrollTop=box.scrollHeight;
-    }
+  async function loadMessages(){
+    const res=await fetch(`/api/get_messages/${sessionId}`);
+    const msgs=await res.json();
+    const box=document.getElementById("chat-messages");
+    box.innerHTML="";
+    msgs.forEach(m=>{
+      const div=document.createElement("div");
+      div.className="msg "+(m.sender==="user"?"user":"admin");
+      div.textContent=m.text;
+      box.appendChild(div);
+    });
+    box.scrollTop=box.scrollHeight;
+  }
 </script>
 
 </body>
