@@ -223,18 +223,18 @@
   }
 
   async function loadMessages(){
-    const res = await fetch(`/api/get_messages/${sessionId}`);
-    const msgs=await res.json();
-    const box=document.getElementById("chat-messages");
-    box.innerHTML="";
-    msgs.forEach(m=>{
-      const div=document.createElement("div");
-      div.className="msg "+(m.from==="user"?"user":"admin");
-      div.textContent=m.text;
-      box.appendChild(div);
-    });
-    box.scrollTop=box.scrollHeight;
-  }
+  const res = await fetch(`/api/get_messages?sessionId=${sessionId}`);
+  const msgs=await res.json();
+  const box=document.getElementById("chat-messages");
+  box.innerHTML="";
+  msgs.forEach(m=>{
+    const div=document.createElement("div");
+    div.className="msg "+(m.sender==="user"?"user":"admin");
+    div.textContent=m.text;
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
+}
 
   // --- CARRINHO ---
   const cartBtn=document.getElementById("cart-btn");
