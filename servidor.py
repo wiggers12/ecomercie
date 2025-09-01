@@ -25,7 +25,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static", stati
 
 # OneSignal config
 ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b171167053f7"
-ONESIGNAL_API_KEY = "2525d779-4ba0-490c-9ac7-b117167053f7"  # coloque sua REST API KEY do OneSignal
+ONESIGNAL_API_KEY = "Legacy API Key"  # coloque sua REST API KEY do OneSignal
 
 
 # --- Decorador de autenticação ---
