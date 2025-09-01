@@ -56,7 +56,10 @@ def login_page():
 @app.route("/admin")
 def admin_page():
     return render_template("admin.html")
-
+    
+@app.route("/chat")
+def chat_page():
+    return render_template("chat.html")
 
 # --- API Produtos ---
 @app.route("/api/catalog_data/<owner_id>", methods=["GET"])
