@@ -24,7 +24,7 @@ db = firestore.client()
 app = Flask(__name__, template_folder="templates", static_folder="static", static_url_path="")
 
 # OneSignal config
-ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b171167053f7"
+ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b117167053f7"
 ONESIGNAL_API_KEY = "Legacy API Key"  # coloque sua REST API KEY do OneSignal
 
 
