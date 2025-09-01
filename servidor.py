@@ -146,7 +146,6 @@ def notify_visit():
         owner_id = data.get("ownerId")
         session_id = data.get("sessionId") or str(uuid.uuid4())
 
-        # cria sessão se ainda não existir
         db.collection("sessions").document(session_id).set({
             "owner_uid": owner_id,
             "created_at": firestore.SERVER_TIMESTAMP,
@@ -160,61 +159,9 @@ def notify_visit():
             "session_id": session_id
         })
 
-        tokens_ref = db.collection("users").document(owner_id).collection("tokens").stream()
-        tokens = [t.id for t in tokens_ref]
-
-        for token in tokens:
-            try:
-                msg = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Nova visita 🚀",
-                        body="Alguém acabou de abrir seu catálogo!"
-                    ),
-                    token=token
-                )
-                messaging.send(msg)
-                print(f"[DEBUG] Push enviado para {token[:20]}...")
-            except Exception as e:
-                print(f"[ERRO] Falha no token {token[:20]}: {e}")
-
         return jsonify({"success": True, "session_id": session_id}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
-
-@app.route('/api/save_fcm_token', methods=['POST'])
-@check_token
-def save_fcm_token(user_uid):
-    try:
-        token = request.json.get('token')
-        if not token:
-            return jsonify({"error": "Nenhum token"}), 400
-        db.collection('users').document(user_uid).collection('tokens').document(token).set({
-            "owner_uid": user_uid,
-            "created_at": firestore.SERVER_TIMESTAMP
-        })
-        print(f"[DEBUG] Token salvo: {token}")
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/api/subscribe_topic', methods=['POST'])
-@check_token
-def subscribe_topic(user_uid):
-    try:
-        data = request.json
-        token = data.get("token")
-        topic = data.get("topic", "public")
-
-        if not token:
-            return jsonify({"error": "Token não informado"}), 400
-
-        response = messaging.subscribe_to_topic([token], topic)
-        print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
-        return jsonify({"success": True, "topic": topic}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 # --- CHAT ---
@@ -231,7 +178,6 @@ def get_sessions(user_uid):
         return jsonify({"error": str(e)}), 500
 
 
-# versão para admin (com token na rota já existente)
 @app.route("/api/get_messages/<session_id>", methods=["GET"])
 @check_token
 def get_messages(user_uid, session_id):
@@ -244,7 +190,6 @@ def get_messages(user_uid, session_id):
         return jsonify({"error": str(e)}), 500
 
 
-# versão para catálogo (sem token, querystring)
 @app.route("/api/get_messages", methods=["GET"])
 def get_messages_public():
     try:
@@ -263,8 +208,8 @@ def get_messages_public():
 def send_message():
     try:
         data = request.json
-        session_id = data.get("sessionId") or data.get("session_id")
-        sender = data.get("from") or data.get("sender", "user")
+        session_id = data.get("session_id") or data.get("sessionId")
+        sender = data.get("sender") or data.get("from", "user")
         text = data.get("text")
 
         if not session_id or not text:
