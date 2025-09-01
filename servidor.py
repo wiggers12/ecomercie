@@ -1,4 +1,4 @@
-# servidor.py - VERSÃO FINAL COM CHAT + CÓDIGO ORIGINAL INTACTO
+# servidor.py - VERSÃO FINAL COM CHAT + CÓDIGO ORIGINAL INTACTO E AJUSTADO
 
 import os
 from flask import Flask, render_template, request, jsonify, send_from_directory
@@ -144,14 +144,15 @@ def notify_visit():
     try:
         data = request.json
         owner_id = data.get("ownerId")
+        session_id = data.get("sessionId") or str(uuid.uuid4())
 
-        # cria sessão de chat automaticamente
-        session_id = str(uuid.uuid4())
+        # cria sessão se ainda não existir
         db.collection("sessions").document(session_id).set({
             "owner_uid": owner_id,
             "created_at": firestore.SERVER_TIMESTAMP,
-            "last_message": "Novo visitante entrou no catálogo"
-        })
+            "last_message": "Novo visitante entrou no catálogo",
+            "updated_at": firestore.SERVER_TIMESTAMP
+        }, merge=True)
 
         db.collection("visits").add({
             "timestamp": firestore.SERVER_TIMESTAMP,
@@ -230,6 +231,7 @@ def get_sessions(user_uid):
         return jsonify({"error": str(e)}), 500
 
 
+# versão para admin (com token na rota já existente)
 @app.route("/api/get_messages/<session_id>", methods=["GET"])
 @check_token
 def get_messages(user_uid, session_id):
@@ -242,25 +244,41 @@ def get_messages(user_uid, session_id):
         return jsonify({"error": str(e)}), 500
 
 
+# versão para catálogo (sem token, querystring)
+@app.route("/api/get_messages", methods=["GET"])
+def get_messages_public():
+    try:
+        session_id = request.args.get("sessionId")
+        if not session_id:
+            return jsonify({"error": "sessionId obrigatório"}), 400
+        msgs_ref = db.collection("sessions").document(session_id).collection("messages")\
+            .order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+        messages = [m.to_dict() | {"id": m.id} for m in msgs_ref]
+        return jsonify(messages), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/send_message", methods=["POST"])
 def send_message():
     try:
         data = request.json
-        session_id = data.get("session_id")
-        sender = data.get("sender", "user")
+        session_id = data.get("sessionId") or data.get("session_id")
+        sender = data.get("from") or data.get("sender", "user")
         text = data.get("text")
 
         if not session_id or not text:
             return jsonify({"error": "Dados incompletos"}), 400
 
-        msg_ref = db.collection("sessions").document(session_id).collection("messages").add({
+        db.collection("sessions").document(session_id).collection("messages").add({
             "sender": sender,
             "text": text,
             "timestamp": firestore.SERVER_TIMESTAMP
         })
 
         db.collection("sessions").document(session_id).update({
-            "last_message": text
+            "last_message": text,
+            "updated_at": firestore.SERVER_TIMESTAMP
         })
 
         return jsonify({"success": True}), 200
