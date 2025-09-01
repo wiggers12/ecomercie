@@ -5,15 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nosso Catálogo</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     :root { --primary:#3498db; --dark1:#2c3e50; --light1:#ecf0f1; }
     body { font-family:'Poppins',sans-serif; background:var(--light1); margin:0; }
-    .header { background:var(--dark1); color:#fff; padding:20px 50px; text-align:center; }
-    h1 { margin:0; font-weight:600; }
+
+    /* Cabeçalho */
+    .header { background:var(--dark1); color:#fff; padding:15px 25px; display:flex; align-items:center; justify-content:space-between; }
+    .logo { font-size:1.2em; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .menu { display:flex; gap:20px; }
+    .menu a { color:#fff; text-decoration:none; font-weight:500; transition:.3s; }
+    .menu a:hover { color:var(--primary); }
+    .hamburger { display:none; font-size:1.5em; cursor:pointer; }
+
+    h1 { margin:0; font-weight:600; text-align:center; }
+
+    /* Conteúdo */
     .container { max-width:1200px; margin:30px auto; padding:0 20px; }
     .search-bar { width:100%; padding:15px; font-size:16px; border:2px solid #ddd; border-radius:8px; margin-bottom:25px; box-sizing:border-box; }
 
-    /* Grid com cards menores */
+    /* Grid com cards */
     .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:15px; }
     .product-card { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1); transition:.3s; cursor:pointer; }
     .product-card:hover { transform:translateY(-4px); box-shadow:0 6px 18px rgba(0,0,0,0.15); }
@@ -25,17 +36,22 @@
     /* Modal Produto */
     .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; visibility:hidden; transition:.3s; }
     .modal.active { opacity:1; visibility:visible; }
-    .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; width:90%; box-shadow:0 5px 20px rgba(0,0,0,.4); max-height:90vh; overflow-y:auto; }
+    .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; width:90%; box-shadow:0 5px 20px rgba(0,0,0,.4); max-height:90vh; overflow-y:auto; animation:fadeIn .3s ease; }
+    @keyframes fadeIn { from {transform:scale(.9);opacity:.5;} to {transform:scale(1);opacity:1;} }
     .modal-content img { width:100%; border-radius:8px; }
     .modal-content h2 { margin:15px 0 10px; color:var(--dark1); }
     .modal-price { font-size:20px; font-weight:bold; color:var(--primary); margin:10px 0; }
     .modal-description { margin:10px 0; line-height:1.6; color:#555; }
     .modal-video { width:100%; aspect-ratio:16/9; border:none; border-radius:8px; background:#000; margin-top:15px; }
-    .close-btn { background:var(--dark1); color:#fff; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:15px; }
-    .add-cart-btn { background:var(--primary); color:#fff; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:15px; font-weight:600; }
+    .close-btn, .add-cart-btn { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:15px; font-weight:600; transition:.3s; }
+    .close-btn { background:var(--dark1); color:#fff; }
+    .add-cart-btn { background:var(--primary); color:#fff; }
+    .close-btn:hover { opacity:.8; }
+    .add-cart-btn:hover { background:#217dbb; }
 
     /* Chat */
-    #chat-btn { position:fixed; bottom:90px; right:20px; background:#3498db; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); }
+    #chat-btn { position:fixed; bottom:90px; right:20px; background:#3498db; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:.3s; }
+    #chat-btn:hover { transform:scale(1.1); }
     #chat-box { position:fixed; bottom:160px; right:20px; width:90%; max-width:350px; height:400px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,.2); display:none; flex-direction:column; z-index:1200; }
     #chat-header { background:#3498db; color:#fff; padding:10px; border-radius:10px 10px 0 0; font-weight:600; text-align:center; }
     #chat-messages { flex:1; padding:10px; overflow-y:auto; font-size:14px; display:flex; flex-direction:column; }
@@ -47,11 +63,14 @@
     #chat-input button { background:#3498db; color:#fff; border:none; padding:10px 15px; cursor:pointer; }
 
     /* Carrinho Flutuante */
-    #cart-btn { position:fixed; bottom:20px; right:20px; background:#2c3e50; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); }
+    #cart-btn { position:fixed; bottom:20px; right:20px; background:#2c3e50; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:.3s; }
+    #cart-btn:hover { transform:scale(1.1); }
+    #cart-count { position:absolute; top:-5px; right:-5px; background:#e74c3c; color:#fff; border-radius:50%; font-size:12px; padding:2px 6px; }
 
     #cart-box { position:fixed; bottom:90px; right:20px; width:90%; max-width:400px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,.2); display:none; flex-direction:column; z-index:1200; padding:15px; }
     #cart-box h3 { margin:0 0 10px; text-align:center; color:var(--dark1); }
-    .cart-item { display:flex; justify-content:space-between; margin:5px 0; border-bottom:1px solid #eee; padding-bottom:5px; }
+    .cart-item { display:flex; justify-content:space-between; align-items:center; margin:5px 0; border-bottom:1px solid #eee; padding-bottom:5px; }
+    .cart-item button { background:#e74c3c; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:12px; }
     .cart-total { font-weight:600; text-align:right; margin:10px 0; }
     .payment-options button { width:100%; margin-top:8px; padding:10px; border:none; border-radius:6px; font-weight:600; cursor:pointer; }
     .pix { background:#27ae60; color:#fff; }
@@ -59,12 +78,28 @@
     .boleto { background:#f39c12; color:#fff; }
 
     footer { background:#2c3e50; color:#fff; text-align:center; padding:20px; margin-top:40px; }
-    footer a { color:#ffcc00; margin:0 5px; text-decoration:none; }
+    footer a { color:#ffcc00; margin:0 10px; text-decoration:none; font-size:1.2em; }
+    footer a:hover { color:#fff; }
+
+    /* Responsividade */
+    @media (max-width:768px){
+      .menu { display:none; flex-direction:column; background:var(--dark1); position:absolute; top:60px; right:0; width:200px; padding:10px; }
+      .menu.active { display:flex; }
+      .hamburger { display:block; }
+    }
   </style>
 </head>
 <body>
 
-<header class="header"><h1>🛍️ Nosso Catálogo</h1></header>
+<header class="header">
+  <div class="logo"><i class="fas fa-store"></i> Meu Catálogo</div>
+  <div class="menu" id="menu">
+    <a href="#">Início</a>
+    <a href="#">Produtos</a>
+    <a href="#">Contato</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
+</header>
 
 <main class="container">
   <input type="text" id="search-input" class="search-bar" placeholder="🔎 Buscar produtos...">
@@ -83,7 +118,7 @@
 </div>
 
 <!-- Carrinho -->
-<button id="cart-btn">🛒</button>
+<button id="cart-btn">🛒<span id="cart-count">0</span></button>
 <div id="cart-box">
   <h3>Seu Carrinho</h3>
   <div id="cart-items"></div>
@@ -97,7 +132,11 @@
 
 <footer>
   <p>© 2025 Meu Catálogo. Todos os direitos reservados.</p>
-  <p><a href="https://wa.me/5551998378751" target="_blank">WhatsApp</a> | <a href="#">Instagram</a> | <a href="#">Facebook</a></p>
+  <div>
+    <a href="https://wa.me/5551998378751" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-facebook"></i></a>
+  </div>
 </footer>
 
 <script>
@@ -106,6 +145,8 @@
   localStorage.setItem("sessionId", sessionId);
   let allProducts = [];
   let cart = [];
+
+  function toggleMenu(){ document.getElementById("menu").classList.toggle("active"); }
 
   document.addEventListener('DOMContentLoaded', initializeCatalog);
 
@@ -198,12 +239,19 @@
   // --- CARRINHO ---
   const cartBtn=document.getElementById("cart-btn");
   const cartBox=document.getElementById("cart-box");
+  const cartCount=document.getElementById("cart-count");
   cartBtn.onclick=()=>{cartBox.style.display=cartBox.style.display==="flex"?"none":"flex";renderCart();};
 
   function addToCart(id,nome,valor){
     cart.push({id,nome,valor});
-    alert("✅ Produto adicionado ao carrinho!");
+    updateCartCount();
     closeModal('detail-modal');
+    renderCart();
+  }
+
+  function removeFromCart(index){
+    cart.splice(index,1);
+    updateCartCount();
     renderCart();
   }
 
@@ -212,9 +260,11 @@
     const total=document.querySelector(".cart-total");
     if(cart.length===0){items.innerHTML="<p>Seu carrinho está vazio.</p>"; total.textContent="Total: R$ 0,00";return;}
     let sum=0;
-    items.innerHTML=cart.map(c=>{sum+=c.valor; return `<div class="cart-item"><span>${c.nome}</span><span>R$ ${c.valor.toFixed(2)}</span></div>`;}).join('');
+    items.innerHTML=cart.map((c,i)=>{sum+=c.valor; return `<div class="cart-item"><span>${c.nome}</span><span>R$ ${c.valor.toFixed(2)}</span><button onclick="removeFromCart(${i})">x</button></div>`;}).join('');
     total.textContent="Total: R$ "+sum.toFixed(2);
   }
+
+  function updateCartCount(){ cartCount.textContent=cart.length; }
 
   // --- BUSCA ---
   document.getElementById('search-input').addEventListener('input',(e)=>{
