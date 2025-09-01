@@ -1,8 +1,8 @@
-// --- Importa Firebase no modo compat (garante suporte em navegadores antigos) ---
+// --- Importa Firebase compat ---
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
 
-// --- Configuração do Firebase (igual ao admin.html) ---
+// --- Configuração Firebase ---
 firebase.initializeApp({
   apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
   authDomain: "ecomercie-vendas.firebaseapp.com",
@@ -13,48 +13,66 @@ firebase.initializeApp({
   measurementId: "G-TNC5M9G89H"
 });
 
-// --- Inicializa messaging ---
 const messaging = firebase.messaging();
 
-// --- Listener para mensagens em segundo plano ---
+// --- Mensagens em segundo plano ---
 messaging.onBackgroundMessage((payload) => {
-  console.log("📩 [SW] Mensagem recebida em segundo plano:", payload);
+  console.log("📩 [SW] Mensagem recebida:", payload);
 
-  const notificationTitle = payload.notification?.title || "Nova Notificação";
+  const notificationTitle = payload.notification?.title || payload.data?.title || "Nova Notificação";
   const notificationOptions = {
-    body: payload.notification?.body || "Você recebeu uma nova mensagem",
+    body: payload.notification?.body || payload.data?.body || "Você recebeu uma nova mensagem",
     icon: "/icon-192.png",
     badge: "/icon-192.png",
-    data: { url: "/admin" } // 🔹 Ao clicar, leva para o painel admin
+    data: { url: payload.data?.url || "/admin" }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// --- Evento de clique na notificação ---
-self.addEventListener("notificationclick", function(event) {
+// --- Clique na notificação ---
+self.addEventListener("notificationclick", (event) => {
   console.log("🖱️ [SW] Notificação clicada:", event);
   event.notification.close();
 
-  // 🔹 Garante que abre o painel
   event.waitUntil(
-    clients.matchAll({ type: "window" }).then((clientList) => {
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes("/admin") && "focus" in client) {
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow("/admin");
+        return clients.openWindow(event.notification.data.url || "/admin");
       }
     })
   );
 });
 
-// --- Debug extra: mostra quando o SW é ativado ---
-self.addEventListener("install", () => {
-  console.log("✅ [SW] Instalado com sucesso");
+// --- Cache PWA ---
+const CACHE_NAME = "ecomercie-cache-v1";
+const ASSETS = ["/", "/manifest.json", "/icon-192.png", "/icon-512.png"];
+
+self.addEventListener("install", (event) => {
+  console.log("✅ [SW] Instalado");
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
+  );
 });
-self.addEventListener("activate", () => {
-  console.log("🚀 [SW] Ativo e pronto para receber push");
+
+self.addEventListener("activate", (event) => {
+  console.log("🚀 [SW] Ativo");
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((resp) => resp || fetch(event.request))
+  );
 });
