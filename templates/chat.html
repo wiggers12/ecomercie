@@ -32,13 +32,11 @@
 </head>
 <body>
 
-  <!-- Sidebar com sessões -->
   <div class="sidebar">
     <h2>Conversas</h2>
     <div id="sessions">Carregando...</div>
   </div>
 
-  <!-- Área principal de chat -->
   <div class="content">
     <div class="chat-header" id="chat-header">Selecione uma conversa</div>
     <div class="chat-messages" id="chat-messages"></div>
@@ -67,25 +65,58 @@
 
     let selectedSession = null;
 
+    // --- util de chamada à API com token, cookies e tratamento de erro
+    async function apiJson(url, options = {}) {
+      try {
+        const user = auth.currentUser;
+        const idToken = user ? await user.getIdToken() : null;
+
+        const res = await fetch(url, {
+          method: options.method || "GET",
+          credentials: "include",                            // inclui cookies se houver
+          headers: {
+            "Content-Type": "application/json",
+            ...(idToken ? { "Authorization": "Bearer " + idToken } : {}),
+            ...(options.headers || {})
+          },
+          body: options.body || undefined
+        });
+
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          console.error(`API error ${res.status} @ ${url}`, data);
+          throw new Error(`${url} -> ${res.status}`);
+        }
+        return data;
+      } catch (err) {
+        console.error("Network/Parse error @", url, err);
+        throw err;
+      }
+    }
+
     // Carregar sessões
     async function loadSessions() {
-      const user = auth.currentUser;
-      if (!user) return;
-      const idToken = await user.getIdToken();
+      try {
+        const sessions = await apiJson("/api/sessions");
+        const list = document.getElementById("sessions");
+        list.innerHTML = "";
 
-      const res = await fetch("/api/sessions", {
-        headers: { "Authorization": "Bearer " + idToken }
-      });
-      const sessions = await res.json();
-      const list = document.getElementById("sessions");
-      list.innerHTML = "";
-      sessions.forEach(s => {
-        const div = document.createElement("div");
-        div.className = "session" + (s.id === selectedSession ? " active" : "");
-        div.textContent = `Sessão: ${s.id.substring(0,6)}...`;
-        div.onclick = () => selectSession(s.id);
-        list.appendChild(div);
-      });
+        if (!Array.isArray(sessions) || sessions.length === 0) {
+          list.innerHTML = "<div>Nenhuma sessão encontrada.</div>";
+          return;
+        }
+
+        sessions.forEach(s => {
+          const id = s.id || s.sessionId || s._id || String(s);
+          const div = document.createElement("div");
+          div.className = "session" + (id === selectedSession ? " active" : "");
+          div.textContent = `Sessão: ${String(id).substring(0,6)}...`;
+          div.onclick = () => selectSession(id);
+          list.appendChild(div);
+        });
+      } catch (_) {
+        // sidebar fica como está; erros já foram logados
+      }
     }
 
     // Selecionar conversa
@@ -97,49 +128,78 @@
       loadMessages();
     }
 
-    // Carregar mensagens
+    // Carregar mensagens (com fallback de formato)
     async function loadMessages() {
       if (!selectedSession) return;
-      const user = auth.currentUser;
-      const idToken = await user.getIdToken();
+      try {
+        const data = await apiJson(`/api/get_messages?sessionId=${encodeURIComponent(selectedSession)}`);
+        const msgs = Array.isArray(data) ? data : (data?.messages || []);
 
-      const res = await fetch(`/api/get_messages?sessionId=${selectedSession}`, {
-        headers: { "Authorization": "Bearer " + idToken }
-      });
-      const msgs = await res.json();
-      const box = document.getElementById("chat-messages");
-      box.innerHTML = "";
-      msgs.forEach(m => {
-        const div = document.createElement("div");
-        div.className = "msg " + (m.sender === "user" ? "user" : "admin");
-        div.textContent = m.text;
-        box.appendChild(div);
-      });
-      box.scrollTop = box.scrollHeight;
+        const box = document.getElementById("chat-messages");
+        box.innerHTML = "";
+
+        if (!msgs.length) {
+          const empty = document.createElement("div");
+          empty.style.opacity = ".7";
+          empty.textContent = "Sem mensagens ainda.";
+          box.appendChild(empty);
+          return;
+        }
+
+        msgs.forEach(m => {
+          const txt = m.text ?? m.message ?? m.content ?? "";
+          const who = (m.sender ?? m.role ?? "user") === "user" ? "user" : "admin";
+          const div = document.createElement("div");
+          div.className = "msg " + who;
+          div.textContent = txt;
+          box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+      } catch (_) {
+        // erro já logado
+      }
     }
 
-    // Enviar mensagem (exposta ao escopo global para funcionar com onclick)
+    // Enviar mensagem (com fallback de rota; limpa input no finally)
     async function sendMessage() {
-      const text = document.getElementById("chat-text").value.trim();
+      const input = document.getElementById("chat-text");
+      const btn = document.getElementById("send-btn");
+      const text = input.value.trim();
       if (!text || !selectedSession) return;
 
-      const user = auth.currentUser;
-      const idToken = await user.getIdToken();
+      btn.disabled = true;
 
-      await fetch("/api/send_message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + idToken
-        },
-        body: JSON.stringify({ sessionId: selectedSession, text, sender: "admin" })
-      });
+      // Otimista: mostra a mensagem já na tela
+      const box = document.getElementById("chat-messages");
+      const preview = document.createElement("div");
+      preview.className = "msg admin";
+      preview.textContent = text;
+      box.appendChild(preview);
+      box.scrollTop = box.scrollHeight;
 
-      document.getElementById("chat-text").value = "";
-      loadMessages();
+      try {
+        // tentativa principal
+        await apiJson("/api/send_message", {
+          method: "POST",
+          body: JSON.stringify({ sessionId: selectedSession, text, sender: "admin" })
+        });
+      } catch (e) {
+        // fallback: algumas APIs esperam sessionId na query
+        try {
+          await apiJson(`/api/send_message?sessionId=${encodeURIComponent(selectedSession)}`, {
+            method: "POST",
+            body: JSON.stringify({ text, sender: "admin" })
+          });
+        } catch (e2) {
+          console.error("Falha ao enviar mensagem (tenta ajustar rota/campos do backend).", e2);
+        }
+      } finally {
+        input.value = "";                  // garante limpar mesmo com erro
+        btn.disabled = false;
+        loadMessages();                    // re-sincroniza com o backend
+      }
     }
-    // <<< ponto-chave para seu erro
-    window.sendMessage = sendMessage;
+    window.sendMessage = sendMessage; // necessário por causa do onclick
 
     // Inicialização
     onAuthStateChanged(auth, (user) => {
