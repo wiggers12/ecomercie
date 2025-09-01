@@ -1,12 +1,11 @@
-# servidor.py - VERSÃO FINAL COM CHAT + CÓDIGO ORIGINAL INTACTO E AJUSTADO
+# servidor.py - VERSÃO FINAL COM CHAT + ONESIGNAL
 
-import os
+import os, uuid, requests
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from functools import wraps
 import firebase_admin
-from firebase_admin import credentials, firestore, auth, messaging
+from firebase_admin import credentials, firestore, auth
 from google.cloud.firestore_v1.base_query import FieldFilter
-import uuid
 
 print(">>> [DEBUG] servidor.py carregando <<<")
 
@@ -24,7 +23,7 @@ db = firestore.client()
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='')
 
 
-# --- Decorador de autenticação ---
+# --- Autenticação ---
 def check_token(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -44,7 +43,7 @@ def check_token(f):
 # --- Rotas HTML ---
 @app.route("/")
 def index_page():
-    return "<h1>Servidor do Catálogo no Ar!</h1><p>Acesse /admin para gerenciar ou /catalogo/ID_DO_LOJISTA para ver um catálogo.</p>"
+    return "<h1>Servidor do Catálogo rodando!</h1><p>Acesse /admin ou /catalogo/ID</p>"
 
 @app.route("/catalogo/<owner_id>")
 def catalogo_page(owner_id):
@@ -59,7 +58,7 @@ def admin_page():
     return render_template("admin.html")
 
 
-# --- API Produtos ---
+# --- Produtos ---
 @app.route("/api/catalog_data/<owner_id>", methods=["GET"])
 def get_catalog_data(owner_id):
     try:
@@ -85,17 +84,6 @@ def get_my_products(user_uid):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/products/<product_id>", methods=["GET"])
-def get_product(product_id):
-    try:
-        doc = db.collection("products").document(product_id).get()
-        if doc.exists:
-            return jsonify(doc.to_dict() | {"id": doc.id})
-        return jsonify({"error": "Produto não encontrado"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/products", methods=["POST"])
 @check_token
 def add_product(user_uid):
@@ -109,36 +97,23 @@ def add_product(user_uid):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/products/<product_id>", methods=["PUT"])
-@check_token
-def update_product(user_uid, product_id):
-    try:
-        doc_ref = db.collection("products").document(product_id)
-        doc = doc_ref.get()
-        if not doc.exists or doc.to_dict().get("owner_uid") != user_uid:
-            return jsonify({"error": "Permissão negada"}), 403
-        updates = request.json
-        doc_ref.update(updates)
-        return jsonify(doc_ref.get().to_dict() | {"id": product_id})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/products/<product_id>", methods=["DELETE"])
-@check_token
-def delete_product(user_uid, product_id):
-    try:
-        doc_ref = db.collection("products").document(product_id)
-        doc = doc_ref.get()
-        if not doc.exists or doc.to_dict().get("owner_uid") != user_uid:
-            return jsonify({"error": "Permissão negada"}), 403
-        doc_ref.delete()
-        return jsonify({"message": "Produto excluído"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 # --- Notificações ---
+def send_onesignal_notification(title, body):
+    url = "https://onesignal.com/api/v1/notifications"
+    headers = {
+        "Authorization": f"Basic {os.getenv('ONESIGNAL_REST_API_KEY')}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "app_id": os.getenv("ONESIGNAL_APP_ID"),
+        "included_segments": ["Subscribed Users"],
+        "headings": {"en": title},
+        "contents": {"en": body}
+    }
+    r = requests.post(url, headers=headers, json=payload)
+    print("[DEBUG] OneSignal resposta:", r.json())
+
+
 @app.route("/api/notify_visit", methods=["POST"])
 def notify_visit():
     try:
@@ -153,11 +128,7 @@ def notify_visit():
             "updated_at": firestore.SERVER_TIMESTAMP
         }, merge=True)
 
-        db.collection("visits").add({
-            "timestamp": firestore.SERVER_TIMESTAMP,
-            "owner_uid": owner_id or "unknown",
-            "session_id": session_id
-        })
+        send_onesignal_notification("Nova visita 🚀", "Alguém abriu seu catálogo!")
 
         return jsonify({"success": True, "session_id": session_id}), 200
     except Exception as e:
@@ -180,10 +151,10 @@ def get_sessions(user_uid):
 
 @app.route("/api/get_messages/<session_id>", methods=["GET"])
 @check_token
-def get_messages(user_uid, session_id):
+def get_messages_admin(user_uid, session_id):
     try:
         msgs_ref = db.collection("sessions").document(session_id).collection("messages")\
-            .order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+            .order_by("timestamp").stream()
         messages = [m.to_dict() | {"id": m.id} for m in msgs_ref]
         return jsonify(messages), 200
     except Exception as e:
@@ -194,10 +165,8 @@ def get_messages(user_uid, session_id):
 def get_messages_public():
     try:
         session_id = request.args.get("sessionId")
-        if not session_id:
-            return jsonify({"error": "sessionId obrigatório"}), 400
         msgs_ref = db.collection("sessions").document(session_id).collection("messages")\
-            .order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+            .order_by("timestamp").stream()
         messages = [m.to_dict() | {"id": m.id} for m in msgs_ref]
         return jsonify(messages), 200
     except Exception as e:
@@ -209,9 +178,8 @@ def send_message():
     try:
         data = request.json
         session_id = data.get("session_id") or data.get("sessionId")
-        sender = data.get("sender") or data.get("from", "user")
+        sender = data.get("sender", "user")
         text = data.get("text")
-
         if not session_id or not text:
             return jsonify({"error": "Dados incompletos"}), 400
 
@@ -231,7 +199,7 @@ def send_message():
         return jsonify({"error": str(e)}), 500
 
 
-# --- ROTAS DE STATIC ---
+# --- Static ---
 @app.route('/manifest.json')
 def manifest():
     return send_from_directory("static", "manifest.json")
@@ -249,8 +217,6 @@ def sw():
     return send_from_directory("static", "firebase-messaging-sw.js", mimetype="application/javascript")
 
 
-# --- Inicialização ---
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    print(f"[DEBUG] Flask rodando na porta {port}")
     app.run(host="0.0.0.0", port=port, debug=True)
