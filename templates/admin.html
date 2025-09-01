@@ -8,6 +8,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+  <!-- OneSignal -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "2525d779-4ba0-490c-9ac7-b171167053f7",
+        notifyButton: { enable: true }
+      });
+      console.log("✅ OneSignal inicializado");
+    });
+  </script>
+
   <style>
     body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; display:flex; height:100vh; }
 
@@ -47,11 +60,11 @@
     .chat-input input { flex:1; border:none; padding:12px; font-size:14px; }
     .chat-input button { background:#3498db; color:#fff; border:none; padding:12px 18px; cursor:pointer; }
 
-    /* Responsividade */
-    @media (max-width: 768px) {
-      body { flex-direction:column; }
-      .sidebar { width:100%; display:flex; overflow-x:auto; }
-      .content { flex:1; }
+    /* Responsivo */
+    @media(max-width:768px){
+      body{ flex-direction:column; }
+      .sidebar{ width:100%; display:flex; overflow-x:auto; }
+      .session{ min-width:180px; margin-right:10px; }
     }
   </style>
 </head>
@@ -90,7 +103,6 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
@@ -105,48 +117,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
-    const messaging = getMessaging(app);
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    }
-
-    // --- Notificações recebidas em primeiro plano ---
-    onMessage(messaging, async (payload) => {
-      const title = payload.notification?.title || "Nova Notificação";
-      const body  = payload.notification?.body  || "Você recebeu uma mensagem";
-      if (Notification.permission === "granted") {
-        new Notification(title, { body, icon: "/icon-192.png" });
-      }
-      showToast(`${title} - ${body}`);
-    });
-
-    // --- Salvar token FCM ---
-    async function registerFcmToken(showAlert=false) {
-      const user = auth.currentUser;
-      if (!user) return;
-      try {
-        const token = await getToken(messaging, { vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" });
-        if (token) {
-          const idToken = await user.getIdToken();
-          await fetch("/api/save_fcm_token", {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + idToken   // ✅ CORRIGIDO
-            },
-            body: JSON.stringify({ token })
-          });
-          if (showAlert) showToast("🔔 Token salvo com sucesso!");
-        }
-      } catch (err) { console.error(err); }
-    }
-
-    document.getElementById("btnPermissao").addEventListener("click", async () => {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") registerFcmToken(true);
-    });
 
     // --- Toast helper
     function showToast(msg) {
@@ -158,7 +128,17 @@
       setTimeout(() => toast.remove(), 5000);
     }
 
-    // --- Produtos
+    // --- Botão Permitir Notificações (OneSignal)
+    document.getElementById("btnPermissao").addEventListener("click", async () => {
+      if (window.OneSignal) {
+        window.OneSignal.Notifications.requestPermission().then(result=>{
+          if(result==="granted"){ showToast("✅ Notificações ativadas!"); }
+          else{ showToast("⚠️ Permissão negada."); }
+        });
+      }
+    });
+
+    // --- Render produtos
     async function renderProductsTable() {
       const user = auth.currentUser;
       if (!user) return;
@@ -178,7 +158,7 @@
       document.getElementById("products-table-container").innerHTML = html;
     }
 
-    // --- Modal Produto ---
+    // --- Modal Produto
     window.openProductModal = () => {
       const modal = document.createElement("div");
       modal.className = "modal";
@@ -203,7 +183,7 @@
 
     async function uploadFile(file, progressId) {
       return new Promise((resolve, reject) => {
-        const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+        const storageRef = ref(getStorage(app), `uploads/${Date.now()}_${file.name}`);
         const task = uploadBytesResumable(storageRef, file);
         task.on("state_changed", snap => {
           document.getElementById(progressId).style.width = (snap.bytesTransferred / snap.totalBytes * 100) + "%";
@@ -229,7 +209,7 @@
       });
       document.querySelector(".modal").remove();
       renderProductsTable();
-      showToast("✅ Produto adicionado com sucesso!");
+      showToast("✅ Produto adicionado!");
     };
 
     // --- Auth + Chat
@@ -240,7 +220,7 @@
     });
     window.logout = ()=>signOut(auth);
 
-    // --- CHAT ---
+    // --- CHAT
     let selectedSession = null;
 
     async function loadSessions() {
@@ -304,7 +284,7 @@
         body:JSON.stringify({ session_id:selectedSession, text, sender:"admin" })
       });
       document.getElementById("chat-text").value = "";
-      await loadMessages();  // ✅ CORRIGIDO: atualiza na hora
+      loadMessages();
     }
 
     setInterval(() => { loadSessions(); loadMessages(); }, 3000);
