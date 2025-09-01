@@ -136,9 +136,9 @@
       const user = auth.currentUser;
       const idToken = await user.getIdToken();
 
-      const res = await fetch(`/api/get_messages/${selectedSession}`, {
-        headers: { "Authorization": "Bearer " + idToken }
-      });
+      const res = await fetch(`/api/get_messages?sessionId=${selectedSession}`, {
+  headers: { "Authorization": "Bearer " + idToken }
+});
       const msgs = await res.json();
       const box = document.getElementById("chat-messages");
       box.innerHTML = "";
