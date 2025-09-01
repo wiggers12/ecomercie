@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Conversas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:#3498db; --dark1:#2c3e50; --light1:#f4f4f4; --white:#fff;
+    }
+    body {
+      margin:0; font-family:'Poppins',sans-serif; background:var(--light1); display:flex; height:100vh;
+    }
+    /* Sidebar com lista de sessões */
+    .sidebar {
+      width:280px; background:var(--dark1); color:var(--white);
+      display:flex; flex-direction:column; padding:15px; overflow-y:auto;
+    }
+    .sidebar h2 {
+      font-size:18px; margin:0 0 15px; text-align:center;
+    }
+    .session {
+      background:#34495e; padding:10px; border-radius:6px; margin-bottom:8px; cursor:pointer;
+      transition:0.3s;
+    }
+    .session:hover { background:#3d566e; }
+    .session.active { background:var(--primary); }
+
+    /* Área principal */
+    .content {
+      flex:1; display:flex; flex-direction:column; background:var(--white);
+    }
+    .chat-header {
+      background:var(--primary); color:var(--white);
+      padding:15px; font-weight:600; display:flex; justify-content:space-between; align-items:center;
+    }
+    .chat-messages {
+      flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column;
+    }
+    .msg {
+      max-width:70%; padding:10px 14px; border-radius:12px; margin-bottom:10px; word-wrap:break-word;
+    }
+    .msg.user { background:#ecf0f1; align-self:flex-start; }
+    .msg.admin { background:var(--primary); color:#fff; align-self:flex-end; }
+    .chat-input {
+      display:flex; border-top:1px solid #ddd; padding:10px;
+    }
+    .chat-input input {
+      flex:1; border:1px solid #ccc; border-radius:8px; padding:10px; font-size:14px;
+    }
+    .chat-input button {
+      margin-left:8px; background:var(--primary); color:#fff;
+      border:none; border-radius:8px; padding:10px 18px; cursor:pointer; font-weight:600;
+    }
+
+    /* Responsividade */
+    @media (max-width:768px) {
+      body { flex-direction:column; }
+      .sidebar { width:100%; height:200px; flex-direction:row; overflow-x:auto; }
+      .session { min-width:180px; margin-right:10px; }
+      .content { flex:1; height:calc(100vh - 200px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar com sessões -->
+  <div class="sidebar">
+    <h2>Conversas</h2>
+    <div id="sessions">Carregando...</div>
+  </div>
+
+  <!-- Área principal de chat -->
+  <div class="content">
+    <div class="chat-header" id="chat-header">Selecione uma conversa</div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input">
+      <input type="text" id="chat-text" placeholder="Digite sua mensagem..." disabled>
+      <button onclick="sendMessage()" id="send-btn" disabled>Enviar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
+      authDomain: "ecomercie-vendas.firebaseapp.com",
+      projectId: "ecomercie-vendas",
+      storageBucket: "ecomercie-vendas.firebasestorage.app",
+      messagingSenderId: "1054540261609",
+      appId: "1:1054540261609:web:90042b823220b4c73f6878",
+      measurementId: "G-TNC5M9G89H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    let selectedSession = null;
+
+    // Carregar sessões
+    async function loadSessions() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const idToken = await user.getIdToken();
+
+      const res = await fetch("/api/sessions", {
+        headers: { "Authorization": "Bearer " + idToken }
+      });
+      const sessions = await res.json();
+      const list = document.getElementById("sessions");
+      list.innerHTML = "";
+      sessions.forEach(s => {
+        const div = document.createElement("div");
+        div.className = "session" + (s.id === selectedSession ? " active" : "");
+        div.textContent = `Sessão: ${s.id.substring(0,6)}...`;
+        div.onclick = () => selectSession(s.id);
+        list.appendChild(div);
+      });
+    }
+
+    // Selecionar conversa
+    async function selectSession(id) {
+      selectedSession = id;
+      document.getElementById("chat-header").textContent = "Conversando com: " + id;
+      document.getElementById("chat-text").disabled = false;
+      document.getElementById("send-btn").disabled = false;
+      loadMessages();
+    }
+
+    // Carregar mensagens
+    async function loadMessages() {
+      if (!selectedSession) return;
+      const user = auth.currentUser;
+      const idToken = await user.getIdToken();
+
+      const res = await fetch(`/api/get_messages/${selectedSession}`, {
+        headers: { "Authorization": "Bearer " + idToken }
+      });
+      const msgs = await res.json();
+      const box = document.getElementById("chat-messages");
+      box.innerHTML = "";
+      msgs.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "msg " + (m.sender === "user" ? "user" : "admin");
+        div.textContent = m.text;
+        box.appendChild(div);
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Enviar mensagem
+    async function sendMessage() {
+      const text = document.getElementById("chat-text").value.trim();
+      if (!text || !selectedSession) return;
+      await fetch("/api/send_message", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ session_id:selectedSession, text, sender:"admin" })
+      });
+      document.getElementById("chat-text").value = "";
+      loadMessages();
+    }
+
+    // Inicialização
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { window.location.href="/login"; return; }
+      loadSessions();
+      setInterval(() => { loadSessions(); loadMessages(); }, 3000);
+    });
+  </script>
+</body>
+</html>
