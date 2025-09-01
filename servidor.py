@@ -232,14 +232,29 @@ def send_message():
         session_id = data.get("sessionId")
         sender = data.get("sender", "user")
         text = data.get("text")
+        # >>> INÍCIO DA CORREÇÃO <<<
+        # Recebe o ID do dono do catálogo (enviado pelo frontend)
+        owner_uid = data.get("ownerUid")
+
         if not session_id or not text:
             return jsonify({"error": "Dados incompletos"}), 400
 
-        db.collection("sessions").document(session_id).set({
+        # Prepara os dados para salvar/atualizar no documento da sessão
+        session_data = {
             "last_message": text,
             "updated_at": firestore.SERVER_TIMESTAMP
-        }, merge=True)
+        }
+        
+        # Se o owner_uid foi enviado, o adicionamos ao documento da sessão.
+        # Isso é crucial para que o lojista possa encontrar esta sessão depois.
+        if owner_uid:
+            session_data["owner_uid"] = owner_uid
 
+        # Salva ou atualiza o documento da sessão usando merge=True
+        db.collection("sessions").document(session_id).set(session_data, merge=True)
+        # >>> FIM DA CORREÇÃO <<<
+
+        # Adiciona a nova mensagem na subcoleção "messages"
         db.collection("sessions").document(session_id).collection("messages").add({
             "sender": sender,
             "text": text,
@@ -254,6 +269,7 @@ def send_message():
 @check_token
 def get_sessions(user_uid):
     try:
+        # Esta query agora funciona, pois o campo "owner_uid" existe nos documentos de sessão
         sessions_ref = db.collection("sessions").where(
             filter=FieldFilter("owner_uid", "==", user_uid)
         ).stream()
