@@ -22,7 +22,7 @@
 
   <style>
     body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; }
-    .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; }
+    .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
     h1 { margin:0; }
     .btn { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; }
     .btn-primary { background:#3498db; color:#fff; }
@@ -41,6 +41,7 @@
   <div class="header">
     <h1>Painel Admin</h1>
     <div>
+      <button id="btnNotificacao" class="btn btn-primary">🔔 Ativar Notificações</button>
       <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
       <button class="btn btn-danger" onclick="logout()">Sair</button>
     </div>
@@ -56,14 +57,14 @@
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
-  authDomain: "ecomercie-vendas.firebaseapp.com",
-  projectId: "ecomercie-vendas",
-  storageBucket: "ecomercie-vendas.firebasestorage.app",
-  messagingSenderId: "1054540261609",
-  appId: "1:1054540261609:web:90042b823220b4c73f6878",
-  measurementId: "G-TNC5M9G89H"
-};
+      apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
+      authDomain: "ecomercie-vendas.firebaseapp.com",
+      projectId: "ecomercie-vendas",
+      storageBucket: "ecomercie-vendas.firebasestorage.app",
+      messagingSenderId: "1054540261609",
+      appId: "1:1054540261609:web:90042b823220b4c73f6878",
+      measurementId: "G-TNC5M9G89H"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -167,6 +168,21 @@
       renderProductsTable();
     });
     window.logout = ()=>signOut(auth);
+  </script>
+
+  <script>
+    // Botão para pedir permissão do OneSignal
+    document.getElementById("btnNotificacao").addEventListener("click", () => {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        const result = await OneSignal.Notifications.requestPermission();
+        if (result === "granted") {
+          alert("✅ Notificações ativadas!");
+        } else {
+          alert("⚠️ Permissão negada.");
+        }
+      });
+    });
   </script>
 </body>
 </html>
