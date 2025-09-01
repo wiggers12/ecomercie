@@ -1,4 +1,4 @@
-# servidor.py - VERSÃO CORRIGIDA E LIMPA
+# servidor.py - VERSÃO FINAL COM CHAT + CÓDIGO ORIGINAL INTACTO
 
 import os
 from flask import Flask, render_template, request, jsonify, send_from_directory
@@ -6,6 +6,7 @@ from functools import wraps
 import firebase_admin
 from firebase_admin import credentials, firestore, auth, messaging
 from google.cloud.firestore_v1.base_query import FieldFilter
+import uuid
 
 print(">>> [DEBUG] servidor.py carregando <<<")
 
@@ -144,9 +145,18 @@ def notify_visit():
         data = request.json
         owner_id = data.get("ownerId")
 
+        # cria sessão de chat automaticamente
+        session_id = str(uuid.uuid4())
+        db.collection("sessions").document(session_id).set({
+            "owner_uid": owner_id,
+            "created_at": firestore.SERVER_TIMESTAMP,
+            "last_message": "Novo visitante entrou no catálogo"
+        })
+
         db.collection("visits").add({
             "timestamp": firestore.SERVER_TIMESTAMP,
-            "owner_uid": owner_id or "unknown"
+            "owner_uid": owner_id or "unknown",
+            "session_id": session_id
         })
 
         tokens_ref = db.collection("users").document(owner_id).collection("tokens").stream()
@@ -166,7 +176,7 @@ def notify_visit():
             except Exception as e:
                 print(f"[ERRO] Falha no token {token[:20]}: {e}")
 
-        return jsonify({"success": True}), 200
+        return jsonify({"success": True, "session_id": session_id}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -202,6 +212,58 @@ def subscribe_topic(user_uid):
         response = messaging.subscribe_to_topic([token], topic)
         print(f"[DEBUG] Token inscrito no tópico {topic}: {response.success_count} sucesso(s)")
         return jsonify({"success": True, "topic": topic}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# --- CHAT ---
+@app.route("/api/sessions", methods=["GET"])
+@check_token
+def get_sessions(user_uid):
+    try:
+        sessions_ref = db.collection("sessions").where(
+            filter=FieldFilter("owner_uid", "==", user_uid)
+        ).stream()
+        sessions = [s.to_dict() | {"id": s.id} for s in sessions_ref]
+        return jsonify(sessions), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/get_messages/<session_id>", methods=["GET"])
+@check_token
+def get_messages(user_uid, session_id):
+    try:
+        msgs_ref = db.collection("sessions").document(session_id).collection("messages")\
+            .order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+        messages = [m.to_dict() | {"id": m.id} for m in msgs_ref]
+        return jsonify(messages), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/send_message", methods=["POST"])
+def send_message():
+    try:
+        data = request.json
+        session_id = data.get("session_id")
+        sender = data.get("sender", "user")
+        text = data.get("text")
+
+        if not session_id or not text:
+            return jsonify({"error": "Dados incompletos"}), 400
+
+        msg_ref = db.collection("sessions").document(session_id).collection("messages").add({
+            "sender": sender,
+            "text": text,
+            "timestamp": firestore.SERVER_TIMESTAMP
+        })
+
+        db.collection("sessions").document(session_id).update({
+            "last_message": text
+        })
+
+        return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
