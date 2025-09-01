@@ -211,15 +211,16 @@
   chatBtn.onclick=()=>{chatBox.style.display=chatBox.style.display==="flex"?"none":"flex";};
 
   async function sendMessage(){
-    const text=document.getElementById("chat-text").value.trim();
-    if(!text) return;
-    await fetch('/api/send_message', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ sessionId, sender: "user", text })
-    document.getElementById("chat-text").value="";
-    loadMessages();
-  }
+  const text=document.getElementById("chat-text").value.trim();
+  if(!text) return;
+  await fetch('/api/send_message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, sender: "user", text })
+  });
+  document.getElementById("chat-text").value="";
+  loadMessages();
+}
 
   async function loadMessages(){
   const res = await fetch(`/api/get_messages?sessionId=${sessionId}`);
