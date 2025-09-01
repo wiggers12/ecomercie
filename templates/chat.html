@@ -152,16 +152,19 @@
     }
 
     // Enviar mensagem
-    async function sendMessage() {
-      const text = document.getElementById("chat-text").value.trim();
-      if (!text || !selectedSession) return;
-      await fetch("/api/send_message", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ sessionId:selectedSession, text, sender:"admin" })
-      document.getElementById("chat-text").value = "";
-      loadMessages();
-    }
+async function sendMessage() {
+  const text = document.getElementById("chat-text").value.trim();
+  if (!text || !selectedSession) return;
+
+  await fetch("/api/send_message", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sessionId: selectedSession, text, sender: "admin" })
+  });
+
+  document.getElementById("chat-text").value = "";
+  loadMessages();
+}
 
     // Inicialização
     onAuthStateChanged(auth, (user) => {
