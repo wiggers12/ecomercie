@@ -47,24 +47,7 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
-      authDomain: "ecomercie-vendas.firebaseapp.com",
-      projectId: "ecomercie-vendas",
-      storageBucket: "ecomercie-vendas.firebasestorage.app",
-      messagingSenderId: "1054540261609",
-      appId: "1:1054540261609:web:90042b823220b4c73f6878",
-      measurementId: "G-TNC5M9G89H"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    let selectedSession = null;
-
+    // Função utilitária para chamadas à API sem Auth
     async function apiJson(url, options = {}) {
       try {
         const res = await fetch(url, {
@@ -88,10 +71,12 @@
       }
     }
 
+    let selectedSession = null;
+
     // Carregar sessões
     async function loadSessions() {
       try {
-        const sessions = await apiJson("/api/sessions");
+        const sessions = await apiJson("/sessions");
         const list = document.getElementById("sessions");
         list.innerHTML = "";
 
@@ -124,7 +109,7 @@
     async function loadMessages() {
       if (!selectedSession) return;
       try {
-        const data = await apiJson(`/api/get_messages?sessionId=${encodeURIComponent(selectedSession)}`);
+        const data = await apiJson(`/get_messages?sessionId=${encodeURIComponent(selectedSession)}`);
         const msgs = Array.isArray(data) ? data : (data?.messages || []);
         const box = document.getElementById("chat-messages");
         box.innerHTML = "";
@@ -188,11 +173,9 @@
     }
     window.sendMessage = sendMessage;
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) { window.location.href="/login"; return; }
-      loadSessions();
-      setInterval(() => { loadSessions(); loadMessages(); }, 3000);
-    });
+    // Inicialização simples (sem Firebase Auth)
+    loadSessions();
+    setInterval(() => { loadSessions(); loadMessages(); }, 3000);
   </script>
 </body>
 </html>
