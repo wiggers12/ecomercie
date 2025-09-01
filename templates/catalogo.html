@@ -223,7 +223,7 @@
   }
 
   async function loadMessages(){
-    const res=await fetch(`/api/get_messages?sessionId=${sessionId}`);
+    const res = await fetch(`/api/get_messages/${sessionId}`);
     const msgs=await res.json();
     const box=document.getElementById("chat-messages");
     box.innerHTML="";
