@@ -230,7 +230,7 @@ def send_message():
     try:
         data = request.json
         session_id = data.get("sessionId")
-        sender = data.get("from", "user")
+        sender = data.get("sender", "user")
         text = data.get("text")
         if not session_id or not text:
             return jsonify({"error": "Dados incompletos"}), 400
