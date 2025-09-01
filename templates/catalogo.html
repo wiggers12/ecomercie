@@ -8,34 +8,32 @@
   <style>
     :root { --primary:#3498db; --dark1:#2c3e50; --light1:#ecf0f1; }
     body { font-family:'Poppins',sans-serif; background:var(--light1); margin:0; }
-    .header { background:var(--dark1); color:#fff; padding:20px 50px; text-align:center; }
-    h1 { margin:0; font-weight:600; }
+    .header { background:var(--dark1); color:#fff; padding:20px; text-align:center; }
+    h1 { margin:0; font-weight:600; font-size:22px; }
     .container { max-width:1200px; margin:30px auto; padding:0 20px; }
-    .search-bar { width:100%; padding:15px; font-size:16px; border:2px solid #ddd; border-radius:8px; margin-bottom:25px; box-sizing:border-box; }
+    .search-bar { width:100%; padding:12px; font-size:16px; border:2px solid #ddd; border-radius:8px; margin-bottom:20px; box-sizing:border-box; }
     .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:20px; }
     .product-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:.3s; cursor:pointer; }
     .product-card:hover { transform:translateY(-5px); box-shadow:0 8px 25px rgba(0,0,0,0.15); }
     .product-card img { width:100%; height:180px; object-fit:cover; }
-    .product-info { padding:15px; text-align:center; }
-    .product-info h3 { margin:0 0 10px; color:var(--dark1); font-size:1em; }
-    .product-info p { font-size:18px; font-weight:600; color:var(--primary); margin:0; }
-
+    .product-info { padding:12px; text-align:center; }
+    .product-info h3 { margin:0 0 8px; color:var(--dark1); font-size:15px; }
+    .product-info p { font-size:17px; font-weight:600; color:var(--primary); margin:0; }
     /* Modal Produto */
     .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; visibility:hidden; transition:.3s; }
     .modal.active { opacity:1; visibility:visible; }
-    .modal-content { background:#fff; padding:25px; border-radius:10px; max-width:600px; width:90%; box-shadow:0 5px 20px rgba(0,0,0,.4); transform:scale(.95); transition:.3s; max-height:90vh; overflow-y:auto; }
+    .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:600px; width:90%; box-shadow:0 5px 20px rgba(0,0,0,.4); transform:scale(.95); transition:.3s; max-height:90vh; overflow-y:auto; }
     .modal.active .modal-content { transform:scale(1); }
     .modal-content img { width:100%; border-radius:8px; }
-    .modal-content h2 { margin:15px 0 10px; color:var(--dark1); }
-    .modal-price { font-size:22px; font-weight:bold; color:var(--primary); margin:10px 0; }
-    .modal-description { margin:10px 0; line-height:1.6; color:#555; }
-    .modal-video { width:100%; aspect-ratio:16/9; border:none; border-radius:8px; background:#000; margin-top:15px; }
-    .close-btn { background:var(--dark1); color:#fff; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:15px; }
-
+    .modal-content h2 { margin:10px 0; color:var(--dark1); font-size:20px; }
+    .modal-price { font-size:20px; font-weight:bold; color:var(--primary); margin:10px 0; }
+    .modal-description { margin:10px 0; line-height:1.6; color:#555; font-size:14px; }
+    .modal-video { width:100%; aspect-ratio:16/9; border:none; border-radius:8px; background:#000; margin-top:12px; }
+    .close-btn { background:var(--dark1); color:#fff; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; margin-top:12px; }
     /* Chat */
     #chat-btn { position:fixed; bottom:90px; right:20px; background:#3498db; color:#fff; border:none; border-radius:50%; width:55px; height:55px; font-size:22px; cursor:pointer; z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); }
     #chat-box { position:fixed; bottom:160px; right:20px; width:300px; max-height:400px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,.2); display:none; flex-direction:column; z-index:1200; }
-    #chat-header { background:#3498db; color:#fff; padding:10px; border-radius:10px 10px 0 0; font-weight:600; }
+    #chat-header { background:#3498db; color:#fff; padding:10px; border-radius:10px 10px 0 0; font-weight:600; font-size:14px; }
     #chat-messages { flex:1; padding:10px; overflow-y:auto; font-size:14px; display:flex; flex-direction:column; }
     .msg { margin:6px 0; padding:8px 12px; border-radius:10px; max-width:80%; word-wrap:break-word; }
     .msg.user { background:#ecf0f1; align-self:flex-end; }
@@ -43,9 +41,12 @@
     #chat-input { display:flex; border-top:1px solid #ddd; }
     #chat-input input { flex:1; border:none; padding:10px; font-size:14px; }
     #chat-input button { background:#3498db; color:#fff; border:none; padding:10px 15px; cursor:pointer; }
-
-    footer { background:#2c3e50; color:#fff; text-align:center; padding:20px; margin-top:40px; }
+    footer { background:#2c3e50; color:#fff; text-align:center; padding:15px; margin-top:40px; font-size:14px; }
     footer a { color:#ffcc00; margin:0 5px; text-decoration:none; }
+    @media(max-width:768px){
+      .product-card img{height:150px;}
+      #chat-box{width:90%; right:5%; bottom:100px;}
+    }
   </style>
 </head>
 <body>
@@ -74,7 +75,7 @@
 </footer>
 
 <script>
-  const ownerId = "{{ owner_id }}";  // vindo do servidor Flask
+  const ownerId = "{{ owner_id }}";  
   const sessionId = localStorage.getItem("sessionId") || crypto.randomUUID();
   localStorage.setItem("sessionId", sessionId);
   let allProducts = [];
@@ -152,14 +153,14 @@
     await fetch('/api/send_message',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({session_id:sessionId, text, sender:"user"})
+      body:JSON.stringify({ session_id:sessionId, text, sender:"user" })
     });
     document.getElementById("chat-text").value="";
     loadMessages();
   }
 
   async function loadMessages(){
-    const res=await fetch(`/api/get_messages/${sessionId}`);
+    const res=await fetch(`/api/get_messages?sessionId=${sessionId}`);
     const msgs=await res.json();
     const box=document.getElementById("chat-messages");
     box.innerHTML="";
