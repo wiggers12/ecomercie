@@ -216,8 +216,7 @@
     await fetch('/api/send_message', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ session_id: sessionId, sender: "user", text })
-});
+  body: JSON.stringify({ sessionId, sender: "user", text })
     document.getElementById("chat-text").value="";
     loadMessages();
   }
