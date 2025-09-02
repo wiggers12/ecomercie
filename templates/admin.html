@@ -111,22 +111,38 @@
       });
   }
 
-  // --- Token FCM ---
-  async function gerarToken() {
-    try {
-      const token = await getToken(messaging, {
-        vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg"
-      });
-      if (token) {
-        console.log("🔥 Token FCM:", token);
-      } else {
-        console.warn("⚠️ Usuário não deu permissão para notificações.");
+ // --- Token FCM ---
+async function gerarToken() {
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg"
+    });
+    if (token) {
+      console.log("🔥 Token FCM:", token);
+
+      // 🔥 Salvar no backend para vincular ao usuário logado
+      const user = auth.currentUser;
+      if (user) {
+        const idToken = await user.getIdToken();
+        await fetch("/api/save_token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + idToken
+          },
+          body: JSON.stringify({ token })
+        });
       }
-    } catch (err) {
-      console.error("❌ Erro ao gerar token:", err);
+
+    } else {
+      console.warn("⚠️ Usuário não deu permissão para notificações.");
     }
+  } catch (err) {
+    console.error("❌ Erro ao gerar token:", err);
   }
-  gerarToken();
+}
+gerarToken();
+
 
   // --- Listener de mensagens ---
   onMessage(messaging, (payload) => {
