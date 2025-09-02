@@ -2,29 +2,37 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Teste OneSignal</title>
+  <title>Admin - Ecomercie</title>
+
+  <!-- Manifest e ícones PWA -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#2c3e50">
+  <link rel="icon" href="/static/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/icon-512.png">
+
+  <!-- SDK OneSignal -->
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
-</head>
-<body>
-  <h2>Teste de Notificação Push</h2>
-  <p>Clique no botão abaixo para ativar notificações:</p>
-  <button id="btnNotify">Ativar Notificações</button>
-
   <script>
-    // 🔑 substitua pelo App ID do seu projeto no painel OneSignal
-    const ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b117167053f7";
-
     window.OneSignal = window.OneSignal || [];
     OneSignal.push(function() {
       OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
+        appId: "2525d779-4ba0-490c-9ac7-b117167053f7",
+        notifyButton: { enable: true }
+      });
+
+      // Detecta quando o usuário se inscreveu com sucesso
+      OneSignal.on('subscriptionChange', function (isSubscribed) {
+        if (isSubscribed) {
+          alert("✅ Notificações ativadas com sucesso! Você já está inscrito.");
+        } else {
+          alert("⚠️ Você desativou as notificações.");
+        }
       });
     });
-
-    document.getElementById("btnNotify").addEventListener("click", () => {
-      OneSignal.showSlidedownPrompt(); // pede permissão
-    });
   </script>
+</head>
+<body>
+  <h1>Painel Admin</h1>
+  <p>Aqui você poderá gerenciar produtos e receber notificações push.</p>
 </body>
 </html>
-
