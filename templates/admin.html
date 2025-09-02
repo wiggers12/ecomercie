@@ -111,9 +111,19 @@
       });
   }
 
- // --- Token FCM ---
+// --- Token FCM ---
 async function gerarToken() {
   try {
+    // Primeiro pede permissão
+    const permission = await Notification.requestPermission();
+    console.log("🔍 Permissão:", permission);
+
+    if (permission !== "granted") {
+      alert("⚠️ Você precisa permitir notificações no navegador.");
+      return;
+    }
+
+    // Só então busca token
     const token = await getToken(messaging, {
       vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg"
     });
@@ -133,7 +143,6 @@ async function gerarToken() {
           body: JSON.stringify({ token })
         });
       }
-
     } else {
       console.warn("⚠️ Usuário não deu permissão para notificações.");
     }
@@ -141,7 +150,10 @@ async function gerarToken() {
     console.error("❌ Erro ao gerar token:", err);
   }
 }
+
+// Chama ao carregar
 gerarToken();
+
 
 
   // --- Listener de mensagens ---
