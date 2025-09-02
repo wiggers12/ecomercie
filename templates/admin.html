@@ -88,8 +88,16 @@
 
 <!-- Firebase Messaging -->
 <script type="module">
-  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { 
+    getAuth, onAuthStateChanged, signOut 
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { 
+    getStorage, ref, uploadBytesResumable, getDownloadURL 
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { getMessaging, getToken, onMessage } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
@@ -101,18 +109,21 @@
     measurementId: "G-TNC5M9G89H"
   };
 
+  // Inicializa Firebase
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
   const messaging = getMessaging(app);
 
-  // Gera token FCM
+  // --- Notificações FCM ---
   async function gerarToken() {
     try {
       const token = await getToken(messaging, {
-        vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" // 🔑 copie do console Firebase (Configurações > Cloud Messaging)
+        vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" // 🔑 pega no Firebase Console > Cloud Messaging
       });
       if (token) {
         console.log("🔥 Token FCM:", token);
-        // aqui você pode salvar esse token no Firestore se quiser
       } else {
         console.warn("⚠️ Usuário não deu permissão para notificações.");
       }
@@ -121,14 +132,17 @@
     }
   }
 
-  // Recebe notificações quando o admin está aberto
   onMessage(messaging, (payload) => {
-    console.log("📩 Notificação recebida em primeiro plano:", payload);
+    console.log("📩 Notificação recebida:", payload);
     alert(`🔔 ${payload.notification?.title}\n${payload.notification?.body}`);
   });
 
-  // Executa ao abrir painel
   gerarToken();
+
+  // agora `auth`, `onAuthStateChanged`, `signOut`, `storage`, `ref`, etc. 
+  // já estão disponíveis e vão funcionar no restante do código.
+</script>
+
   
 
     // --- Toast helper
