@@ -13,10 +13,10 @@ if not os.path.exists("static"):
 # Monta rota para servir arquivos estáticos (css, js, imagens)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Rota principal -> carrega index.html
+# Rota principal -> carrega admin.html
 @app.get("/")
 async def serve_index():
-    file_path = os.path.join("templates", "index.html")
+    file_path = os.path.join("templates", "admin.html")
     return FileResponse(file_path)
 
 # Rota de saúde -> Render usa para checar se o servidor está ok
