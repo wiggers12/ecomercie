@@ -1,8 +1,10 @@
-// Importa Firebase compatível para SW
+// firebase-messaging-sw.js
+
+// Importando libs compatíveis
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
 
-// Config do Firebase
+// Configuração do Firebase
 firebase.initializeApp({
   apiKey: "AIzaSyB-rnG4cIZzEb1w_h_qmif3XPSx28ZIdaM",
   authDomain: "ecomercie-vendas.firebaseapp.com",
@@ -13,16 +15,17 @@ firebase.initializeApp({
   measurementId: "G-TNC5M9G89H"
 });
 
-// Inicializa o Messaging
+// Inicializa o messaging
 const messaging = firebase.messaging();
 
-// Listener de mensagens em segundo plano
+// Listener para notificações em segundo plano
 messaging.onBackgroundMessage((payload) => {
-  console.log("📩 [SW] Mensagem recebida em segundo plano:", payload);
-  const notificationTitle = payload.notification?.title || "Nova notificação";
-  const notificationOptions = {
-    body: payload.notification?.body || "Você recebeu uma nova mensagem",
-    icon: "/icon-192.png"
-  };
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  console.log("[firebase-messaging-sw.js] Mensagem recebida em segundo plano:", payload);
+  self.registration.showNotification(
+    payload.notification.title,
+    {
+      body: payload.notification.body,
+      icon: "/icon-192.png"
+    }
+  );
 });
