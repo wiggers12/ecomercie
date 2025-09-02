@@ -14,16 +14,16 @@
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
-        appId: "2525d779-4ba0-490c-9ac7-b117167053f7", // seu App ID do OneSignal
-        notifyButton: { enable: false } // vamos usar botão customizado
+        appId: "2525d779-4ba0-490c-9ac7-b117167053f7", // Seu App ID do OneSignal
+        notifyButton: { enable: false } // botão padrão desativado, usamos o customizado
       });
 
-      // Checa o estado da permissão
-      const permission = await OneSignal.Notifications.permission;
+      // Checa o estado da permissão (SDK v16)
+      const permission = await OneSignal.Notifications.getPermissionStatus();
       console.log("🔍 Estado da permissão:", permission);
 
       if (permission === "denied") {
-        alert("⚠️ Permissão negada para notificações. Vá em Ajustes > Safari/Chrome > Notificações e habilite manualmente.");
+        alert("⚠️ Permissão negada para notificações. Vá em Ajustes > Navegador > Notificações e habilite manualmente.");
       }
     });
 
