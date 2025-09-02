@@ -28,20 +28,31 @@
     });
 
     async function ativarNotificacoes() {
-      const OneSignal = window.OneSignal;
-      try {
-        const result = await OneSignal.Notifications.requestPermission();
-        console.log("🔔 Resultado permissão:", result);
-        if (result === "granted") {
-          alert("✅ Notificações ativadas com sucesso!");
-        } else {
-          alert("⚠️ Você negou as notificações. Ative manualmente nas configurações do navegador.");
-        }
-      } catch (e) {
-        console.error("Erro ao pedir permissão:", e);
-        alert("❌ Erro ao tentar ativar notificações.");
-      }
+  const OneSignal = window.OneSignal;
+  try {
+    // Pede a permissão ao usuário
+    const permission = await OneSignal.Notifications.requestPermission();
+    
+    console.log("🔔 Resultado da permissão:", permission);
+
+    if (permission === "granted") {
+      // Caso 1: Usuário PERMITIU
+      alert("✅ Notificações ativadas com sucesso!");
+
+    } else if (permission === "denied") {
+      // Caso 2: Usuário BLOQUEOU
+      alert("⚠️ Você bloqueou as notificações. Para ativá-las, será preciso ir nas configurações do navegador.");
+
+    } else {
+      // Caso 3: Usuário FECHOU A CAIXA (estado 'default')
+      alert("ℹ️ A permissão não foi concedida. Tente novamente quando quiser receber notificações.");
     }
+
+  } catch (e) {
+    console.error("Erro ao pedir permissão:", e);
+    alert("❌ Erro ao tentar ativar notificações.");
+  }
+}
   </script>
 
   <style>
