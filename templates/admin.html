@@ -1,1 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste OneSignal</title>
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+</head>
+<body>
+  <h2>Teste de Notificação Push</h2>
+  <p>Clique no botão abaixo para ativar notificações:</p>
+  <button id="btnNotify">Ativar Notificações</button>
+
+  <script>
+    // 🔑 substitua pelo App ID do seu projeto no painel OneSignal
+    const ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b117167053f7";
+
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+      OneSignal.init({
+        appId: ONESIGNAL_APP_ID,
+      });
+    });
+
+    document.getElementById("btnNotify").addEventListener("click", () => {
+      OneSignal.showSlidedownPrompt(); // pede permissão
+    });
+  </script>
+</body>
+</html>
 
