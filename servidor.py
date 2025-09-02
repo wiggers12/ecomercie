@@ -141,6 +141,25 @@ def delete_product(user_uid, product_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# --- Salvar Token FCM ---
+@app.route("/api/save_token", methods=["POST"])
+@check_token
+def save_token(user_uid):
+    try:
+        data = request.json
+        token = data.get("token")
+        if not token:
+            return jsonify({"error": "Token inválido"}), 400
+
+        # Salva ou atualiza o token no Firestore
+        db.collection("fcm_tokens").document(user_uid).set(
+            {"token": token}, merge=True
+        )
+
+        print(f"[DEBUG] Token salvo para {user_uid}: {token}")
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # --- Notificações (OneSignal) ---
 @app.route("/api/notify_visit", methods=["POST"])
