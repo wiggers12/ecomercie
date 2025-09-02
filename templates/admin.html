@@ -108,7 +108,7 @@
   async function gerarToken() {
     try {
       const token = await getToken(messaging, {
-        vapidKey: "SUA_VAPID_KEY_AQUI" // 🔑 copie do console Firebase (Configurações > Cloud Messaging)
+        vapidKey: "BNZLoKzBHSC6kWGUpglcgyo1_xkmS_zmO2ux_VDBEvn5Qai3NJeZfN2u612WVEvMyEao0e1V3rPeReBZVV2nNJg" // 🔑 copie do console Firebase (Configurações > Cloud Messaging)
       });
       if (token) {
         console.log("🔥 Token FCM:", token);
@@ -129,7 +129,6 @@
 
   // Executa ao abrir painel
   gerarToken();
-</script>
   
 
     // --- Toast helper
