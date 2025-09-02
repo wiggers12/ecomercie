@@ -18,15 +18,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def home():
-    return FileResponse("templates/index.html")
-
-@app.get("/admin")
-async def admin():
     return FileResponse("templates/admin.html")
 
-@app.get("/catalogo")
-async def catalogo():
-    return FileResponse("templates/catalogo.html")
+
 
 @app.get("/health")
 async def health_check():
