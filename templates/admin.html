@@ -15,17 +15,42 @@
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "2525d779-4ba0-490c-9ac7-b117167053f7", // seu App ID do OneSignal
-        notifyButton: { enable: true } // mostra o sininho
+        notifyButton: { enable: false } // vamos usar botão customizado
       });
+
+      // Checa o estado da permissão
+      const permission = await OneSignal.Notifications.permission;
+      console.log("🔍 Estado da permissão:", permission);
+
+      if (permission === "denied") {
+        alert("⚠️ Permissão negada para notificações. Vá em Ajustes > Safari/Chrome > Notificações e habilite manualmente.");
+      }
     });
+
+    async function ativarNotificacoes() {
+      const OneSignal = window.OneSignal;
+      try {
+        const result = await OneSignal.Notifications.requestPermission();
+        console.log("🔔 Resultado permissão:", result);
+        if (result === "granted") {
+          alert("✅ Notificações ativadas com sucesso!");
+        } else {
+          alert("⚠️ Você negou as notificações. Ative manualmente nas configurações do navegador.");
+        }
+      } catch (e) {
+        console.error("Erro ao pedir permissão:", e);
+        alert("❌ Erro ao tentar ativar notificações.");
+      }
+    }
   </script>
 
   <style>
     body { margin:0; font-family:Poppins,sans-serif; background:#f4f4f4; }
-    .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .header { background:#2c3e50; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; }
     h1 { margin:0; }
-    .btn { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; }
+    .btn { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; margin-right:10px; }
     .btn-primary { background:#3498db; color:#fff; }
+    .btn-success { background:#198754; color:#fff; }
     .btn-danger { background:#e74c3c; color:#fff; }
     .table { width:100%; margin-top:20px; border-collapse:collapse; background:#fff; }
     .table th,.table td { padding:12px; border:1px solid #ddd; text-align:left; }
@@ -41,7 +66,7 @@
   <div class="header">
     <h1>Painel Admin</h1>
     <div>
-      <button id="btnNotificacao" class="btn btn-primary">🔔 Ativar Notificações</button>
+      <button class="btn btn-success" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
       <button class="btn btn-primary" onclick="openProductModal()">+ Novo Produto</button>
       <button class="btn btn-danger" onclick="logout()">Sair</button>
     </div>
@@ -168,21 +193,6 @@
       renderProductsTable();
     });
     window.logout = ()=>signOut(auth);
-  </script>
-
-  <script>
-    // Botão para pedir permissão do OneSignal
-    document.getElementById("btnNotificacao").addEventListener("click", () => {
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        const result = await OneSignal.Notifications.requestPermission();
-        if (result === "granted") {
-          alert("✅ Notificações ativadas!");
-        } else {
-          alert("⚠️ Permissão negada.");
-        }
-      });
-    });
   </script>
 </body>
 </html>
