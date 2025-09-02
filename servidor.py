@@ -1,104 +1,151 @@
-# servidor.py
-from fastapi import FastAPI
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-import logging
-import requests
 import os
+import threading
+import logging
+from typing import Optional
 
-# =========================
-# CONFIG
-# =========================
-ONESIGNAL_APP_ID  = "2525d779-4ba0-490c-9ac7-b117167053f7"  # seu App ID
-ONESIGNAL_API_KEY = "ZGY2YmE2NjItMzEyZi00OTMwLTk4ZTUtMTkxNTdlMzI4ZjYx"  # sua REST API Key
+import requests
+from flask import Flask, jsonify, redirect, send_from_directory, url_for
 
+# -------------------------------------------------
+# Configuração básica
+# -------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+app = Flask(__name__, static_folder="static")
+
+# Log mais verboso no Render
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("ecomercie")
+logger = app.logger
 
-app = FastAPI(title="Ecomercie", version="1.0.0")
+# OneSignal (v2)
+ONESIGNAL_APP_ID = os.getenv("2525d779-4ba0-490c-9ac7-b117167053f7", "").strip()
+ONESIGNAL_API_KEY = os.getenv("os_v2_app_eus5o6klubeqzgwhwelrm4ct65566bcsffnuzqvqsbq3mutv6xslnbka2wxtt6znkniq3tqdmmopgvdalfhsytwltvp3hct7vf2hmiy", "").strip()
 
-# Garante pasta static
-os.makedirs("static", exist_ok=True)
+ONESIGNAL_API_URL = "https://api.onesignal.com/notifications"
 
-# Servir /static/*
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# =========================
-# PÁGINAS
-# =========================
-@app.get("/")
-async def home():
+# -------------------------------------------------
+# Helpers
+# -------------------------------------------------
+def _post_onesignal(title: str, message: str, url: Optional[str] = None) -> requests.Response:
     """
-    Home -> abre admin por padrão (caso você ainda não tenha index.html)
+    Envia push para devices com tag role=admin.
+    Usa OneSignal API v2 (Authorization: Key <os_v2_...>).
     """
-    index = "templates/index.html"
-    return FileResponse(index) if os.path.exists(index) else FileResponse("templates/admin.html")
+    if not ONESIGNAL_APP_ID or not ONESIGNAL_API_KEY:
+        # Não quebre a requisição; apenas logue e devolva um "mock" de 500
+        class _Mock:
+            status_code = 500
+            text = "ONESIGNAL_APP_ID/ONESIGNAL_API_KEY ausentes"
+            ok = False
+        logger.error("OneSignal: variáveis de ambiente ausentes")
+        return _Mock()  # type: ignore
 
-@app.get("/admin")
-async def admin():
-    return FileResponse("templates/admin.html")
-
-@app.get("/catalogo")
-async def catalogo():
-    """
-    Sempre que o catálogo for acessado, enviamos uma notificação ao ADMIN (tag role=admin).
-    """
-    send_admin_notification()
-    return FileResponse("templates/catalogo.html")
-
-# =========================
-# ONESIGNAL SERVICE WORKERS NA RAIZ
-# (o OneSignal busca esses caminhos diretamente na /)
-# =========================
-@app.get("/OneSignalSDKWorker.js")
-async def onesignal_worker():
-    return FileResponse("static/OneSignalSDKWorker.js")
-
-@app.get("/OneSignalSDKUpdaterWorker.js")
-async def onesignal_updater_worker():
-    return FileResponse("static/OneSignalSDKUpdaterWorker.js")
-
-# =========================
-# HEALTH & TEST
-# =========================
-@app.get("/health")
-async def health():
-    return {"status": "ok", "service": "ecomercie", "version": "1.0.0"}
-
-@app.get("/test-notify")
-def test_notify():
-    ok = send_admin_notification()
-    return JSONResponse({"sent": ok})
-
-# =========================
-# FUNÇÃO DE NOTIFICAÇÃO
-# =========================
-def send_admin_notification() -> bool:
-    """
-    Envia push para quem tiver a TAG role=admin no OneSignal.
-    Retorna True se a API aceitou o envio.
-    """
-    url = "https://onesignal.com/api/v1/notifications"
-    headers = {
-        "Content-Type": "application/json; charset=utf-8",
-        "Authorization": f"Basic {ONESIGNAL_API_KEY}",
-    }
     payload = {
         "app_id": ONESIGNAL_APP_ID,
-        # Somente ADMIN:
-        "filters": [
-            {"field": "tag", "key": "role", "relation": "=", "value": "admin"}
-        ],
-        "headings": {"en": "Novo acesso ao catálogo"},
-        "contents": {"en": "Alguém acabou de abrir o catálogo do Ecomercie."},
-        # Ao clicar, abrir o admin
-        "url": "https://ecomercie.onrender.com/admin",
+        "headings": {"pt": title, "en": title},
+        "contents": {"pt": message, "en": message},
+        # Envia apenas para quem tiver a tag role=admin
+        "filters": [{"field": "tag", "key": "role", "relation": "=", "value": "admin"}],
+    }
+    if url:
+        payload["url"] = url
+
+    headers = {
+        # v2
+        "Authorization": f"Key {ONESIGNAL_API_KEY}",
+        "Content-Type": "application/json; charset=utf-8",
     }
 
     try:
-        r = requests.post(url, headers=headers, json=payload, timeout=10)
-        log.info("OneSignal response %s: %s", r.status_code, r.text)
-        return r.ok
-    except Exception as e:
-        log.exception("Erro ao enviar notificação OneSignal: %s", e)
-        return False
+        r = requests.post(ONESIGNAL_API_URL, headers=headers, json=payload, timeout=15)
+        logger.info(f"OneSignal: {r.status_code} {r.text}")
+        return r
+    except Exception as exc:
+        class _Mock:
+            status_code = 500
+            text = f"Exception: {exc}"
+            ok = False
+        logger.exception("Falha ao chamar OneSignal")
+        return _Mock()  # type: ignore
+
+
+def notify_admins_async(title: str, message: str, url: Optional[str] = None) -> None:
+    """Dispara o push em background para não travar a resposta http."""
+    threading.Thread(target=_post_onesignal, args=(title, message, url), daemon=True).start()
+
+
+# -------------------------------------------------
+# Rotas de páginas
+# -------------------------------------------------
+@app.get("/")
+def home():
+    # Atalho: entra direto no painel do admin
+    return redirect(url_for("admin"))
+
+@app.get("/admin")
+def admin():
+    return send_from_directory(TEMPLATES_DIR, "admin.html")
+
+@app.get("/catalogo")
+def catalogo():
+    # Renderiza o catálogo e dispara aviso para admins
+    notify_admins_async("Catálogo acessado", "Alguém acabou de abrir o catálogo.", url=None)
+    return send_from_directory(TEMPLATES_DIR, "catalogo.html")
+
+
+# -------------------------------------------------
+# Teste de envio (servidor -> OneSignal)
+# -------------------------------------------------
+@app.get("/test-notify")
+def test_notify():
+    r = _post_onesignal("Teste do servidor", "Push de teste enviado pelo backend.")
+    return jsonify({"sent": bool(getattr(r, "ok", False)), "status": getattr(r, "status_code", None)})
+
+
+# -------------------------------------------------
+# Service Workers do OneSignal na RAIZ
+# (o SDK web procura exatamente nessas URLs)
+# -------------------------------------------------
+@app.get("/OneSignalSDKWorker.js")
+def onesignal_worker():
+    return send_from_directory(STATIC_DIR, "OneSignalSDKWorker.js")
+
+@app.get("/OneSignalSDKUpdaterWorker.js")
+def onesignal_updater():
+    return send_from_directory(STATIC_DIR, "OneSignalSDKUpdaterWorker.js")
+
+
+# -------------------------------------------------
+# Manifest e favicon (evita 404 nos logs)
+# -------------------------------------------------
+@app.get("/manifest.json")
+def manifest_root():
+    # Se o teu HTML aponta para /static/manifest.json, esta rota é opcional.
+    return send_from_directory(STATIC_DIR, "manifest.json")
+
+@app.get("/favicon.ico")
+def favicon():
+    # Usa o ícone 192 como fallback
+    icon_192 = os.path.join(STATIC_DIR, "icon-192.png")
+    if os.path.exists(icon_192):
+        return send_from_directory(STATIC_DIR, "icon-192.png")
+    # Sem ícone? retorna 204 para não poluir logs
+    return ("", 204)
+
+
+# -------------------------------------------------
+# Saúde / ping
+# -------------------------------------------------
+@app.get("/healthz")
+def healthz():
+    return jsonify({"ok": True})
+
+
+# -------------------------------------------------
+# Execução local
+# -------------------------------------------------
+if __name__ == "__main__":
+    # Para desenvolvimento local
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8000")), debug=True)
