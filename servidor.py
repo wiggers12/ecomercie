@@ -3,23 +3,43 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
 
-# Cria app FastAPI
-app = FastAPI()
+app = FastAPI(title="Ecomercie", version="1.0.0")
 
 # Garante que a pasta "static" existe
 if not os.path.exists("static"):
     os.makedirs("static")
 
-# Monta rota para servir arquivos estáticos (css, js, imagens)
+# Monta rota para arquivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Rota principal -> carrega admin.html
-@app.get("/")
-async def serve_index():
-    file_path = os.path.join("templates", "admin.html")
-    return FileResponse(file_path)
+# =========================
+# Rotas principais
+# =========================
 
-# Rota de saúde -> Render usa para checar se o servidor está ok
+@app.get("/")
+async def home():
+    return FileResponse("templates/index.html")
+
+@app.get("/admin")
+async def admin():
+    return FileResponse("templates/admin.html")
+
+@app.get("/catalogo")
+async def catalogo():
+    return FileResponse("templates/catalogo.html")
+
 @app.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "service": "ecomercie", "version": "1.0.0"}
+
+# =========================
+# Rotas para OneSignal
+# =========================
+
+@app.get("/OneSignalSDKWorker.js")
+async def onesignal_worker():
+    return FileResponse("static/OneSignalSDKWorker.js")
+
+@app.get("/OneSignalSDKUpdaterWorker.js")
+async def onesignal_updater_worker():
+    return FileResponse("static/OneSignalSDKUpdaterWorker.js")
