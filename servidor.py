@@ -189,11 +189,6 @@ def icon_192():
 def icon_512():
     return send_from_directory("static", "icon-512.png")
 
-@app.route("/firebase-messaging-sw.js")
-def sw():
-    return send_from_directory(
-        "static", "firebase-messaging-sw.js", mimetype="application/javascript"
-    )
 
 # --- OneSignal Service Workers ---
 @app.route("/OneSignalSDKWorker.js")
