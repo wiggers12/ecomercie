@@ -19,7 +19,7 @@
       });
 
       // Checa o estado da permissão (SDK v16)
-  const permission = await OneSignal.Notifications.getPermission();
+  const permission = OneSignal.Notifications.permission;
       console.log("🔍 Estado da permissão:", permission);
 
       if (permission === "denied") {
