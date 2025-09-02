@@ -1,4 +1,4 @@
-# servidor.py - VERSÃO CORRIGIDA E LIMPA (OneSignal + Produtos + Sessions/Chat)
+# servidor.py - VERSÃO CORRIGIDA E LIMPA (OneSignal + Produtos + Sessions/Chat + Firebase SW)
 
 import os
 import requests
@@ -25,7 +25,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static", stati
 
 # OneSignal config
 ONESIGNAL_APP_ID = "2525d779-4ba0-490c-9ac7-b117167053f7"
-ONESIGNAL_API_KEY = "ZGY2YmE2NjItMzEyZi00OTMwLTk4ZTUtMTkxNTdlMzI4ZjYx"  # coloque aqui a REST API KEY do OneSignal
+ONESIGNAL_API_KEY = "ZGY2YmE2NjItMzEyZi00OTMwLTk4ZTUtMTkxNTdlMzI4ZjYx"  # REST API KEY do OneSignal
 
 
 # --- Decorador de autenticação ---
@@ -189,6 +189,10 @@ def icon_192():
 def icon_512():
     return send_from_directory("static", "icon-512.png")
 
+# --- Firebase Messaging SW (para FCM funcionar) ---
+@app.route("/firebase-messaging-sw.js")
+def firebase_sw():
+    return send_from_directory("static", "firebase-messaging-sw.js", mimetype="application/javascript")
 
 # --- OneSignal Service Workers ---
 @app.route("/OneSignalSDKWorker.js")
