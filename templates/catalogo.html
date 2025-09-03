@@ -59,6 +59,7 @@
         .search-container {
             flex-grow: 1;
             max-width: 500px;
+            min-width: 250px; /* Garante que a barra não fique muito pequena */
         }
 
         #search-input {
@@ -141,8 +142,8 @@
         /* 4. CARRINHO DE COMPRAS FLUTUANTE */
         .cart-icon {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px; /* Ajustado para mobile */
+            right: 20px; /* Ajustado para mobile */
             width: 60px;
             height: 60px;
             background-color: var(--cor-primaria);
@@ -155,6 +156,11 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
             z-index: 1010;
+            transition: transform 0.3s;
+        }
+
+        .cart-icon:hover {
+            transform: scale(1.1);
         }
         
         .cart-count {
@@ -192,90 +198,67 @@
             right: 0;
         }
         
-        .cart-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
+        .cart-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .cart-header h2 { font-size: 1.5em; }
-        
         .close-cart-btn { font-size: 2em; cursor: pointer; background: none; border: none; }
-        
-        #cart-items {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        .cart-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
+        #cart-items { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .cart-item { display: flex; align-items: center; margin-bottom: 20px; }
         .cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--border-radius); margin-right: 15px; }
         .cart-item-info { flex-grow: 1; }
         .cart-item-info h4 { margin-bottom: 5px; }
         .cart-item-info p { color: var(--cor-primaria); font-weight: 600; }
         .remove-item-btn { color: var(--cor-perigo); background: none; border: none; font-size: 1.5em; cursor: pointer; }
-
         #cart-empty-message { text-align: center; color: #888; margin-top: 50px; }
-        
-        .cart-footer {
-            padding: 20px;
-            border-top: 1px solid #eee;
-        }
-
+        .cart-footer { padding: 20px; border-top: 1px solid #eee; }
         .cart-total { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: 600; margin-bottom: 15px; }
-        
         .payment-methods { text-align: center; margin-bottom: 15px; }
         .payment-methods img { height: 25px; margin: 0 5px; opacity: 0.7; }
-
-        .checkout-btn {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--cor-sucesso);
-            color: var(--cor-branca);
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-        }
+        .checkout-btn { width: 100%; padding: 15px; background-color: var(--cor-sucesso); color: var(--cor-branca); border: none; border-radius: var(--border-radius); font-size: 1.1em; font-weight: 600; cursor: pointer; }
 
         /* 5. BOTÕES SOCIAIS FLUTUANTES */
-        .social-buttons {
-            position: fixed;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .social-btn {
-            width: 45px;
-            height: 45px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--cor-branca);
-            font-size: 24px;
-            text-decoration: none;
-            border-top-right-radius: var(--border-radius);
-            border-bottom-right-radius: var(--border-radius);
-            transition: transform 0.3s ease;
-        }
-
+        .social-buttons { position: fixed; top: 50%; left: 0; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 5px; }
+        .social-btn { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; color: var(--cor-branca); font-size: 24px; text-decoration: none; border-top-right-radius: var(--border-radius); border-bottom-right-radius: var(--border-radius); transition: transform 0.3s ease; }
         .social-btn:hover { transform: translateX(5px); }
         .whatsapp { background-color: #25D366; }
         .instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%); }
         .facebook { background-color: #1877F2; }
+
+        /* --- NOVO: REGRAS DE RESPONSIVIDADE PARA CELULARES --- */
+        @media (max-width: 600px) {
+            main {
+                padding: 20px 15px;
+            }
+
+            header {
+                padding: 15px;
+                gap: 15px;
+                justify-content: center; /* Centraliza o título e a busca */
+            }
+
+            h1 {
+                font-size: 1.5em;
+                width: 100%;
+                text-align: center;
+            }
+
+            .grid {
+                /* Força duas colunas nos celulares para melhor navegação */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .card h3 {
+                font-size: 1em; /* Fonte um pouco menor no card */
+            }
+
+            .card .price {
+                font-size: 1.2em;
+            }
+
+            .cart-sidebar {
+                max-width: 100%; /* Barra lateral do carrinho ocupa a tela toda */
+            }
+        }
 
     </style>
 </head>
@@ -375,7 +358,6 @@
         const checkoutBtn = document.getElementById('checkout-btn');
 
         // --- FUNÇÕES ---
-
         // Função para renderizar os produtos na tela
         function renderProducts(productsToRender) {
             productGrid.innerHTML = '';
@@ -441,7 +423,6 @@
         }
         
         // --- EVENT LISTENERS ---
-        
         // Filtrar produtos na busca
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
