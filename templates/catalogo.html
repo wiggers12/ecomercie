@@ -2,70 +2,84 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Catálogo Moderno - Ecomercie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Catálogo — Ecomercie</title>
 
-  <!-- fonte -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --cor-primaria:#007BFF; --cor-secundaria:#1a3d5f; --cor-sucesso:#28a745; --cor-perigo:#dc3545;
-      --cor-fundo:#f4f6f9; --cor-texto:#333; --cor-branca:#fff; --sombra:0 4px 12px rgba(0,0,0,.08);
-      --radius:10px; --font:'Poppins',sans-serif;
+      --pri:#007BFF; --sec:#1a3d5f; --ok:#28a745; --err:#dc3545;
+      --bg:#f4f6f9; --fg:#333; --card:#fff; --shadow:0 4px 12px rgba(0,0,0,.08);
+      --r:12px; --font:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     }
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:var(--font);background:var(--cor-fundo);color:var(--cor-texto)}
-    header{background:var(--cor-branca);padding:20px 5%;box-shadow:var(--sombra);display:flex;gap:20px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000;flex-wrap:wrap}
-    h1{font-size:1.8em;color:var(--cor-primaria);font-weight:700}
-    .search-container{flex-grow:1;max-width:500px;min-width:250px}
-    #search-input{width:100%;padding:12px 20px;border:1px solid #ddd;border-radius:var(--radius);font-size:16px}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font)}
+    header{background:#fff;padding:20px 5%;box-shadow:var(--shadow);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;position:sticky;top:0;z-index:1000}
+    h1{margin:0;color:var(--pri);font-size:1.8rem;font-weight:700}
+    .search-container{flex:1;min-width:240px;max-width:520px}
+    #search-input{width:100%;padding:12px 16px;border:1px solid #e5e7eb;border-radius:10px;font:inherit}
+
     main{padding:30px 5%}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:25px}
-    .card{background:var(--cor-branca);border-radius:var(--radius);box-shadow:var(--sombra);transition:.3s;overflow:hidden;display:flex;flex-direction:column}
-    .card:hover{transform:translateY(-8px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
-    .card img{width:100%;height:180px;object-fit:cover}
-    .card-content{padding:15px;display:flex;flex-direction:column;flex-grow:1}
-    .card h3{font-size:1.1em;font-weight:600;margin-bottom:5px}
-    .price{font-size:1.2em;font-weight:700;color:var(--cor-primaria);margin:auto 0 12px}
-    .add-to-cart-btn{background:var(--cor-primaria);color:#fff;border:none;padding:10px;border-radius:var(--radius);cursor:pointer;font-size:1em;font-weight:500;transition:.3s}
-    .add-to-cart-btn:hover{background:var(--cor-secundaria)}
+    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:.25s transform,.25s box-shadow}
+    .card:hover{transform:translateY(-6px);box-shadow:0 10px 20px rgba(0,0,0,.12)}
+    .hero{width:100%;height:180px;object-fit:cover}
+    .noimg{height:180px;display:flex;align-items:center;justify-content:center;background:#eef2f6;color:#6b7280;font-weight:600}
+    .card-content{padding:14px;display:flex;flex-direction:column;gap:8px}
+    .card h3{margin:0;font-size:1.05rem}
+    .desc{color:#636b74;font-size:.92rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .price{font-size:1.25rem;font-weight:700;color:var(--pri);margin-top:auto}
+    .row{display:flex;gap:8px}
+    .btn{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
+    .btn.pri{background:var(--pri);color:#fff}
+    .btn.sec{background:#eef3ff;color:#0b1220}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+    .pill.out{background:#ffe8e8;color:#b42318;font-weight:700}
 
-    .cart-icon{position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:var(--cor-primaria);color:#fff;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(0,123,255,.4);z-index:1010;transition:transform .3s}
-    .cart-icon:hover{transform:scale(1.1)}
-    .cart-count{position:absolute;top:-5px;right:-5px;background:var(--cor-perigo);color:#fff;font-size:12px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+    /* Carrinho flutuante (ESQUERDA) */
+    .cart-icon{position:fixed;left:20px;bottom:20px;width:60px;height:60px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;box-shadow:0 8px 20px rgba(0,123,255,.35);z-index:1010;transition:.2s transform}
+    .cart-icon:hover{transform:scale(1.06)}
+    .cart-count{position:absolute;right:-6px;top:-6px;background:var(--err);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
 
-    .cart-sidebar{position:fixed;top:0;right:-100%;width:100%;max-width:400px;height:100%;background:#fff;box-shadow:-5px 0 20px rgba(0,0,0,.15);transition:right .4s;z-index:1020;display:flex;flex-direction:column}
+    .cart-sidebar{position:fixed;top:0;right:-100%;width:100%;max-width:400px;height:100%;background:#fff;box-shadow:-6px 0 20px rgba(0,0,0,.15);transition:right .35s ease;z-index:1020;display:flex;flex-direction:column}
     .cart-sidebar.open{right:0}
-    .cart-header{padding:20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
-    .cart-header h2{font-size:1.4em}
-    .close-cart-btn{font-size:2em;cursor:pointer;background:none;border:none}
-    #cart-items{flex-grow:1;overflow-y:auto;padding:20px}
-    .cart-item{display:flex;align-items:center;margin-bottom:20px}
-    .cart-item img{width:80px;height:80px;object-fit:cover;border-radius:var(--radius);margin-right:15px}
-    .cart-item-info{flex-grow:1}
-    .cart-item-info h4{margin-bottom:5px}
-    .cart-item-info p{color:var(--cor-primaria);font-weight:600}
-    .remove-item-btn{color:var(--cor-perigo);background:none;border:none;font-size:1.5em;cursor:pointer}
-    #cart-empty-message{text-align:center;color:#888;margin-top:50px}
-    .cart-footer{padding:20px;border-top:1px solid #eee}
-    .cart-total{display:flex;justify-content:space-between;font-size:1.1em;font-weight:600;margin-bottom:15px}
-    .payment-methods{text-align:center;margin-bottom:15px}
-    .payment-methods img{height:25px;margin:0 5px;opacity:.7}
-    .checkout-btn{width:100%;padding:15px;background:var(--cor-sucesso);color:#fff;border:none;border-radius:var(--radius);font-size:1.05em;font-weight:600;cursor:pointer}
+    .cart-header{padding:18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+    .close-cart-btn{background:none;border:0;font-size:2rem;cursor:pointer}
+    #cart-items{flex:1;overflow-y:auto;padding:18px}
+    .cart-item{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+    .cart-item img{width:80px;height:80px;border-radius:10px;object-fit:cover}
+    .cart-item-info h4{margin:0 0 4px 0}
+    .qty{font-size:.95rem;color:#64748b}
+    .remove-item-btn{background:none;border:0;color:var(--err);font-size:1.6rem;cursor:pointer}
+    .cart-footer{padding:18px;border-top:1px solid #eee}
+    .cart-total{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:700;margin-bottom:12px}
+    .checkout-btn{width:100%;padding:14px;background:var(--ok);border:0;border-radius:10px;color:#fff;font-weight:700;cursor:pointer}
 
-    .pill{background:#eef2f7;color:#1f2430;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-left:8px}
+    /* Modal Detalhes */
+    .overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:1100}
+    .overlay.open{display:flex}
+    .modal{background:#fff;border-radius:14px;box-shadow:var(--shadow);width:min(860px,94vw);max-height:94vh;overflow:auto}
+    .modal header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #eee}
+    .modal .content{padding:16px}
+    .gallery{display:flex;gap:8px;flex-wrap:wrap}
+    .gimg{width:140px;height:140px;border-radius:10px;object-fit:cover}
+    video{max-width:100%;border-radius:10px;background:#000}
+
+    /* Botões sociais (esquerda, meio) */
+    .social-buttons{position:fixed;left:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:1000}
+    .social-btn{width:46px;height:46px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;border-top-right-radius:12px;border-bottom-right-radius:12px;transition:transform .2s}
+    .social-btn:hover{transform:translateX(4px)}
+    .whatsapp{background:#25D366}
+    .instagram{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
+    .facebook{background:#1877F2}
 
     @media (max-width:600px){
-      main{padding:20px 15px}
-      header{padding:15px;gap:15px;justify-content:center}
-      h1{font-size:1.5em;width:100%;text-align:center}
-      .grid{grid-template-columns:repeat(2,1fr);gap:15px}
-      .card h3{font-size:1em}
-      .price{font-size:1.1em}
+      main{padding:22px 14px}
+      .grid{grid-template-columns:repeat(2,1fr);gap:14px}
       .cart-sidebar{max-width:100%}
     }
   </style>
@@ -73,51 +87,60 @@
 <body>
 
   <header>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <h1>Meu Catálogo</h1>
-      <span id="tenant-pill" class="pill">Loja: —</span>
-    </div>
+    <h1>Meu Catálogo</h1>
     <div class="search-container">
-      <input type="text" id="search-input" placeholder="O que você está procurando?">
+      <input id="search-input" type="text" placeholder="O que você está procurando?">
     </div>
   </header>
 
   <main>
-    <div class="grid" id="product-grid"></div>
+    <div id="product-grid" class="grid">
+      <!-- NENHUM item fixo. Tudo vem do Firestore. -->
+    </div>
   </main>
 
-  <!-- Social -->
-  <div class="social-buttons" style="position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:1000;display:flex;flex-direction:column;gap:5px;">
-    <a href="#" class="social-btn whatsapp" aria-label="WhatsApp" style="width:45px;height:45px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:24px;text-decoration:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#25D366">W</a>
-    <a href="#" class="social-btn instagram" aria-label="Instagram" style="width:45px;height:45px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:24px;text-decoration:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)">I</a>
-    <a href="#" class="social-btn facebook" aria-label="Facebook" style="width:45px;height:45px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:24px;text-decoration:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#1877F2">f</a>
+  <!-- Botões sociais -->
+  <div class="social-buttons">
+    <a class="social-btn whatsapp"  target="_blank" rel="noopener" href="https://wa.me/5551989378751" aria-label="WhatsApp">WA</a>
+    <a class="social-btn instagram" target="_blank" rel="noopener" href="https://instagram.com/analise_desenvolvimento_web" aria-label="Instagram">IG</a>
+    <a class="social-btn facebook"  target="_blank" rel="noopener" href="https://facebook.com/" aria-label="Facebook">FB</a>
   </div>
 
-  <!-- Carrinho -->
-  <div class="cart-icon" id="cart-icon">🛒 <span class="cart-count" id="cart-count">0</span></div>
-  <div class="cart-sidebar" id="cart-sidebar">
+  <!-- Botão + Sidebar do carrinho -->
+  <div class="cart-icon" id="cart-icon">🛒 <span id="cart-count" class="cart-count">0</span></div>
+
+  <div id="cart-sidebar" class="cart-sidebar">
     <div class="cart-header">
       <h2>Meu Carrinho</h2>
-      <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+      <button id="close-cart-btn" class="close-cart-btn">&times;</button>
     </div>
-    <div id="cart-items"><p id="cart-empty-message">Seu carrinho está vazio.</p></div>
+    <div id="cart-items"><p id="cart-empty-message" style="text-align:center;color:#888;margin-top:40px">Seu carrinho está vazio.</p></div>
     <div class="cart-footer">
-      <div class="cart-total">
-        <span>Total:</span><span id="cart-total">R$ 0,00</span>
-      </div>
-      <div class="payment-methods">
-        <p style="font-size:14px;color:#888;margin-bottom:10px;">Formas de Pagamento:</p>
-        <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa">
-        <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard">
-        <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal">
-        <img src="https://i.imgur.com/aO3l4p2.png" alt="Pix" style="height:25px;">
-      </div>
-      <button class="checkout-btn" id="checkout-btn">Finalizar Compra</button>
+      <div class="cart-total"><span>Total:</span><span id="cart-total">R$ 0,00</span></div>
+      <button id="checkout-btn" class="checkout-btn">Finalizar Compra</button>
     </div>
   </div>
 
-  <!-- Tawk.to (opcional) -->
-  <script>
+  <!-- Modal de detalhes -->
+  <div id="dlg" class="overlay">
+    <div class="modal">
+      <header><b id="dlgTitle">Detalhes</b><button id="dlgClose" class="close-cart-btn" aria-label="Fechar">&times;</button></header>
+      <div class="content">
+        <div class="gallery" id="dlgGallery"></div>
+        <div id="dlgVideoWrap" style="margin-top:12px;display:none">
+          <video id="dlgVideo" controls playsinline></video>
+        </div>
+        <p id="dlgDesc" style="margin-top:12px;color:#4b5563"></p>
+        <div class="row" style="margin-top:12px">
+          <span id="dlgPrice" class="price"></span>
+          <button id="dlgAdd" class="btn pri" style="margin-left:auto">Adicionar ao carrinho</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tawk.to -->
+  <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
       var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -126,189 +149,203 @@
     })();
   </script>
 
-  <!-- Firebase (SEUS arquivos locais) -->
-  <script src="/static/firebase-config.js"></script>
-  <script src="/static/firebase-init.js"></script>
+  <!-- Firebase + catálogo -->
+  <script type="module">
+    import { db } from "/static/firebase-init.js";
+    import {
+      collection, onSnapshot, query, where, orderBy, addDoc,
+      serverTimestamp, doc, updateDoc, increment
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    /* ========= util ========= */
-    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
-    const PLACEHOLDER = 'https://via.placeholder.com/600x400/eeeeee/888888?text=Produto';
-
-    function getTenant(){
-      const parts = location.pathname.split('/').filter(Boolean);
-      // espera: /<tenant>/catalogo  -> tenant é o primeiro segmento
-      return parts.length >= 2 ? parts[0] : 'default';
-    }
-    const TENANT = getTenant();
-    document.getElementById('tenant-pill').textContent = `Loja: ${TENANT}`;
-
-    /* ========= estado ========= */
-    let products = [];   // [{id,name,price,image}]
-    let cart = [];
-
-    /* ========= DOM ========= */
-    const productGrid = document.getElementById('product-grid');
+    // ---------- Utils ----------
+    const grid = document.getElementById('product-grid');
     const searchInput = document.getElementById('search-input');
-    const cartIcon = document.getElementById('cart-icon');
-    const cartSidebar = document.getElementById('cart-sidebar');
-    const closeCartBtn = document.getElementById('close-cart-btn');
-    const cartItemsContainer = document.getElementById('cart-items');
-    const cartCount = document.getElementById('cart-count');
-    const cartTotal = document.getElementById('cart-total');
-    const cartEmptyMessage = document.getElementById('cart-empty-message');
-    const checkoutBtn = document.getElementById('checkout-btn');
-
-    /* ========= render ========= */
-    function productCard(p){
-      return `
-        <div class="card">
-          <img src="${p.image || PLACEHOLDER}" alt="${p.name}">
-          <div class="card-content">
-            <h3>${p.name}</h3>
-            <p class="price">${BRL.format(p.price || 0)}</p>
-            <button class="add-to-cart-btn" data-id="${p.id}">Adicionar</button>
-          </div>
-        </div>`;
+    const fmtBRL = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    function tenant(){
+      const p = location.pathname.split('/').filter(Boolean);
+      return (p.length>=2 && ['admin','catalogo','estoque','financeiro'].includes(p[1])) ? p[0] : 'default';
     }
-    function renderProducts(list){
-      productGrid.innerHTML = list.map(productCard).join('') || '<p style="opacity:.7">Nenhum produto disponível.</p>';
-    }
-    function renderCart(){
-      if (cart.length === 0){
-        cartItemsContainer.innerHTML = '<p id="cart-empty-message">Seu carrinho está vazio.</p>';
-      } else {
-        cartItemsContainer.innerHTML = cart.map(item => `
-          <div class="cart-item">
-            <img src="${item.image || PLACEHOLDER}" alt="${item.name}">
-            <div class="cart-item-info">
-              <h4>${item.name}</h4>
-              <p>${BRL.format(item.price || 0)}</p>
-            </div>
-            <button class="remove-item-btn" data-id="${item.id}">&times;</button>
-          </div>
-        `).join('');
-      }
-      cartCount.textContent = cart.length;
-      const total = cart.reduce((s, i) => s + (Number(i.price)||0), 0);
-      cartTotal.textContent = BRL.format(total);
-    }
+    const TENANT = tenant();
 
-    /* ========= actions ========= */
-    function addToCart(productId){
-      const p = products.find(x => x.id === productId);
-      if (p){ cart.push(p); renderCart(); }
-    }
-    function removeFromCart(productId){
-      const ix = cart.findIndex(x => x.id === productId);
-      if (ix > -1){ cart.splice(ix,1); renderCart(); }
-    }
+    // ---------- Modal ----------
+    const dlg = document.getElementById('dlg');
+    const dlgTitle = document.getElementById('dlgTitle');
+    const dlgGallery = document.getElementById('dlgGallery');
+    const dlgVideoWrap = document.getElementById('dlgVideoWrap');
+    const dlgVideo = document.getElementById('dlgVideo');
+    const dlgDesc = document.getElementById('dlgDesc');
+    const dlgPrice = document.getElementById('dlgPrice');
+    const dlgAdd = document.getElementById('dlgAdd');
+    document.getElementById('dlgClose').onclick = ()=> dlg.classList.remove('open');
+    let dlgProduct = null;
 
-    /* ========= eventos ========= */
-    searchInput.addEventListener('input', e => {
-      const q = e.target.value.trim().toLowerCase();
-      const filtered = products.filter(p => (p.name||'').toLowerCase().includes(q));
-      renderProducts(filtered);
-    });
-
-    productGrid.addEventListener('click', e => {
-      const btn = e.target.closest('.add-to-cart-btn');
-      if (!btn) return;
-      addToCart(parseInt(btn.dataset.id, 10));
-    });
-
-    cartItemsContainer.addEventListener('click', e => {
-      const btn = e.target.closest('.remove-item-btn');
-      if (!btn) return;
-      removeFromCart(parseInt(btn.dataset.id, 10));
-    });
-
-    cartIcon.addEventListener('click', () => cartSidebar.classList.add('open'));
-    closeCartBtn.addEventListener('click', () => cartSidebar.classList.remove('open'));
-
-    checkoutBtn.addEventListener('click', async () => {
-      if (cart.length === 0){ alert('Seu carrinho está vazio!'); return; }
-      try{
-        // se Firebase disponível, grava ordem
-        if (window.db && window.firebaseFns){
-          const { addDoc, collection, serverTimestamp } = window.firebaseFns;
-          const total = cart.reduce((s, i) => s + (Number(i.price)||0), 0);
-          await addDoc(collection(window.db, 'tenants', TENANT, 'orders'), {
-            items: cart.map(x => ({ id: x.id, name: x.name, price: Number(x.price)||0, image: x.image||null })),
-            total,
-            status: 'pending',
-            createdAt: serverTimestamp()
-          });
-        }
-        alert('Obrigado por sua compra! (Simulação — pedido registrado).');
-        cart = [];
-        renderCart();
-        cartSidebar.classList.remove('open');
-      }catch(err){
-        console.error(err);
-        alert('Não foi possível registrar o pedido agora.');
-      }
-    });
-
-    /* ========= dados ========= */
-    async function loadProductsFromFirestore(){
-      if (!window.db || !window.firebaseFns) throw new Error('Firebase indisponível no front');
-      const { getDocs, collection, query, orderBy } = window.firebaseFns;
-      const q = query(collection(window.db, 'tenants', TENANT, 'products'), orderBy('createdAt','desc'));
-      const snap = await getDocs(q);
-      const list = [];
-      let autoId = 1;
-      snap.forEach(doc => {
-        const d = doc.data() || {};
-        // aceita diferentes esquemas: images[], imageUrl, coverUrl
-        const image = (d.images && d.images[0]) || d.imageUrl || d.coverUrl || PLACEHOLDER;
-        list.push({
-          id: d.sku || d.id || autoId++,
-          name: d.name || d.title || 'Produto sem nome',
-          price: Number(d.price) || 0,
-          image
-        });
+    function openDlg(p){
+      dlgProduct = p;
+      dlgTitle.textContent = p.name || 'Detalhes';
+      dlgGallery.innerHTML = '';
+      (p.images||[]).forEach(u=>{
+        const im = document.createElement('img');
+        im.src=u; im.className='gimg';
+        dlgGallery.appendChild(im);
       });
-      return list;
-    }
-
-    async function init(){
-      try{
-        if (window.db && window.firebaseFns){
-          products = await loadProductsFromFirestore();
-          if (!products.length){
-            // fallback visual se coleção estiver vazia
-            products = [
-              { id: 1, name:'Exemplo 1', price: 199.90, image: PLACEHOLDER },
-              { id: 2, name:'Exemplo 2', price: 399.00, image: PLACEHOLDER },
-              { id: 3, name:'Exemplo 3', price: 89.50,  image: PLACEHOLDER }
-            ];
-          }
-        } else {
-          // fallback total sem Firebase
-          products = [
-            { id: 1, name:'Smartphone Pro', price:2999.90, image:'https://via.placeholder.com/600x400/007BFF/FFFFFF?text=Smartphone' },
-            { id: 2, name:'Fone Bluetooth',  price:399.00,  image:'https://via.placeholder.com/600x400/6C757D/FFFFFF?text=Fone' },
-            { id: 3, name:'Smartwatch 2',    price:899.50,  image:'https://via.placeholder.com/600x400/28A745/FFFFFF?text=Rel%C3%B3gio' },
-            { id: 4, name:'Notebook Gamer',  price:7499.00, image:'https://via.placeholder.com/600x400/DC3545/FFFFFF?text=Notebook' }
-          ];
-        }
-      }catch(err){
-        console.error('Falha ao carregar do Firestore:', err);
-        // fallback se erro
-        products = [
-          { id: 1, name:'Exemplo 1', price:199.90, image: PLACEHOLDER },
-          { id: 2, name:'Exemplo 2', price:399.00, image: PLACEHOLDER },
-          { id: 3, name:'Exemplo 3', price:89.50,  image: PLACEHOLDER }
-        ];
+      if (p.video){
+        dlgVideo.src = p.video;
+        dlgVideoWrap.style.display = '';
+      }else{
+        dlgVideo.removeAttribute('src');
+        dlgVideoWrap.style.display = 'none';
       }
-      renderProducts(products);
-      renderCart();
+      dlgDesc.textContent = p.desc || '';
+      dlgPrice.textContent = fmtBRL(p.price||0);
+      dlg.classList.add('open');
+    }
+    dlgAdd.onclick = ()=>{
+      if (!dlgProduct) return;
+      addToCartFromProduct(dlgProduct);
+      dlg.classList.remove('open');
+    };
+
+    // ---------- Render dos produtos do Firestore ----------
+    function renderProductCard(p){
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.dataset.name = (p.name||'').toLowerCase();
+
+      const hasImg = Array.isArray(p.images) && p.images.length>0;
+      const imgHtml = hasImg ? `<img class="hero" src="${p.images[0]}" alt="${p.name||''}">`
+                             : `<div class="noimg">Sem imagem</div>`;
+
+      el.innerHTML = `
+        ${imgHtml}
+        <div class="card-content">
+          <h3>${p.name||''}</h3>
+          ${p.desc ? `<div class="desc">${p.desc}</div>` : ``}
+          ${p.stock > 0 ? `<div class="price">${fmtBRL(p.price||0)}</div>` : `<span class="pill out">Esgotado</span>`}
+          <div class="row">
+            <button class="btn sec" data-action="detalhes">Detalhes</button>
+            <button class="btn pri" data-action="add" ${p.stock>0?'':'disabled'}>Adicionar</button>
+          </div>
+        </div>
+      `;
+      // listeners de card
+      el.querySelector('[data-action="detalhes"]').onclick = ()=> openDlg(p);
+      el.querySelector('[data-action="add"]').onclick = ()=> addToCartFromProduct(p);
+      return el;
     }
 
-    init();
-  });
+    const qProducts = query(
+      collection(db, `tenants/${TENANT}/products`),
+      where('active','==', true),
+      orderBy('name', 'asc')
+    );
+
+    let PRODUCTS = []; // cache p/ busca
+    onSnapshot(qProducts, snap=>{
+      PRODUCTS = [];
+      grid.innerHTML = ''; // limpa tudo (garante que nada fixo apareça)
+      snap.forEach(d=>{
+        const p = { id: d.id, ...d.data() };
+        // se existir campo stock, esconda os com 0
+        if (typeof p.stock === 'number' && p.stock <= 0) return;
+        PRODUCTS.push(p);
+        grid.appendChild(renderProductCard(p));
+      });
+    });
+
+    // ---------- Busca nos cards ----------
+    searchInput.addEventListener('input', e=>{
+      const term = e.target.value.trim().toLowerCase();
+      grid.querySelectorAll('.card').forEach(card=>{
+        const name = card.dataset.name || '';
+        card.style.display = name.includes(term) ? '' : 'none';
+      });
+    });
+
+    // ---------- Carrinho ----------
+    const cartIcon   = document.getElementById('cart-icon');
+    const cartSidebar= document.getElementById('cart-sidebar');
+    const closeCart  = document.getElementById('close-cart-btn');
+    const cartItems  = document.getElementById('cart-items');
+    const cartCount  = document.getElementById('cart-count');
+    const cartTotal  = document.getElementById('cart-total');
+    const emptyMsg   = document.getElementById('cart-empty-message');
+    const checkout   = document.getElementById('checkout-btn');
+
+    const cart = new Map(); // id -> {id,name,price,image,qty}
+
+    function renderCart(){
+      cartItems.innerHTML = '';
+      const items = Array.from(cart.values());
+      if (!items.length){
+        emptyMsg.style.display = 'block';
+      }else{
+        emptyMsg.style.display = 'none';
+        for (const it of items){
+          const el = document.createElement('div');
+          el.className='cart-item';
+          el.innerHTML = `
+            <img src="${it.image||''}" alt="${it.name}">
+            <div class="cart-item-info">
+              <h4>${it.name}</h4>
+              <div class="qty">Qtd: ${it.qty}</div>
+              <p>${fmtBRL(it.price)}</p>
+            </div>
+            <button class="remove-item-btn" title="Remover" data-id="${it.id}">&times;</button>
+          `;
+          cartItems.appendChild(el);
+        }
+      }
+      const totalQty = items.reduce((s,i)=>s+i.qty,0);
+      cartCount.textContent = totalQty;
+      const totalVal = items.reduce((s,i)=>s + (i.price*i.qty),0);
+      cartTotal.textContent = fmtBRL(totalVal);
+    }
+
+    function addToCartFromProduct(p){
+      const id = p.id;
+      const item = {
+        id,
+        name:  p.name || 'Produto',
+        price: Number(p.price||0),
+        image: (p.images && p.images[0]) || ''
+      };
+      const cur = cart.get(id);
+      cart.set(id, {...item, qty: (cur?.qty||0)+1});
+      renderCart();
+      cartSidebar.classList.add('open');
+    }
+
+    cartItems.addEventListener('click', (e)=>{
+      if (!e.target.classList.contains('remove-item-btn')) return;
+      const id = e.target.dataset.id;
+      cart.delete(id);
+      renderCart();
+    });
+
+    cartIcon.addEventListener('click', ()=>cartSidebar.classList.add('open'));
+    closeCart.addEventListener('click', ()=>cartSidebar.classList.remove('open'));
+
+    // ---------- Finalizar compra (salva pedido e decrementa estoque) ----------
+    checkout.addEventListener('click', async ()=>{
+      const items = Array.from(cart.values());
+      if (!items.length){ alert('Seu carrinho está vazio.'); return; }
+      const total = items.reduce((s,i)=>s + i.price*i.qty, 0);
+
+      await addDoc(collection(db, `tenants/${TENANT}/orders`), {
+        items, total, status:'new', createdAt: serverTimestamp()
+      });
+
+      for (const it of items){
+        try{ await updateDoc(doc(db, `tenants/${TENANT}/products/${it.id}`), { stock: increment(-it.qty) }); }catch(_){}
+      }
+
+      alert('Pedido registrado! (simulação)');
+      cart.clear();
+      renderCart();
+      cartSidebar.classList.remove('open');
+    });
+
+    renderCart();
   </script>
 </body>
 </html>
