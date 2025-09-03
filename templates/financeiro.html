@@ -261,7 +261,20 @@ $("btnCSV").onclick = ()=>{
   a.href = URL.createObjectURL(blob);
   a.download = `financeiro_${TENANT}.csv`;
   a.click();
-};
+<!-- Botão Voltar (fora do módulo) -->
+<script>
+  function getTenantFromPath(){
+    const p = location.pathname.split('/').filter(Boolean);
+    return (p.length>=2 && ['admin','catalogo','estoque','financeiro'].includes(p[1])) ? p[0] : null;
+  }
+  function adminUrl(){ const t=getTenantFromPath(); return t ? `/${t}/admin` : '/admin'; }
+  function goBack(){
+    try{
+      const ref=document.referrer;
+      if(ref && new URL(ref).origin===location.origin){ history.back(); return; }
+    }catch(_){}
+    location.href=adminUrl();
+  }
 </script>
 </body>
 </html>
