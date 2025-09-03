@@ -148,7 +148,35 @@ def catalogo():
     # dispara aviso ao abrir o catálogo (para role=admin)
     notify_admins_async("Catálogo acessado", "Alguém acabou de abrir o catálogo.")
     return send_from_directory(TEMPLATES_DIR, "catalogo.html")
+# --- rotas multi-tenant (cada loja) ---
+@app.get("/<tenant>/admin")
+def admin_tenant(tenant):
+    # usa o mesmo template para qualquer loja; o JS lê o tenant da URL
+    return send_from_directory(TEMPLATES_DIR, "admin.html")
 
+@app.get("/<tenant>/catalogo")
+def catalogo_tenant(tenant):
+    # se o seu notify_admins_async ainda não recebe tenant, mantenha sem filtrar por enquanto
+    # (depois a gente segmenta o push por loja)
+    notify_admins_async("Catálogo acessado", f"Alguém abriu o catálogo da loja {tenant}.")
+    return send_from_directory(TEMPLATES_DIR, "catalogo.html")
+
+@app.get("/<tenant>/estoque")
+def estoque_tenant(tenant):
+    return send_from_directory(TEMPLATES_DIR, "estoque.html")
+
+@app.get("/<tenant>/financeiro")
+def financeiro_tenant(tenant):
+    return send_from_directory(TEMPLATES_DIR, "financeiro.html")
+
+# --- rotas default (opcionais para testes rápidos, sem tenant na URL) ---
+@app.get("/estoque")
+def estoque_default():
+    return send_from_directory(TEMPLATES_DIR, "estoque.html")
+
+@app.get("/financeiro")
+def financeiro_default():
+    return send_from_directory(TEMPLATES_DIR, "financeiro.html")
 # -------------------------------------------------
 # Rotas de teste/diagnóstico
 # -------------------------------------------------
