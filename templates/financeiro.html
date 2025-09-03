@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Financeiro — Ecomercie</title>
 
-<!-- Chart.js + dayjs time scale -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
 
 <style>
   :root{
@@ -17,7 +16,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f6f7fb;color:#111}
-  header{background:var(--bg);color:var(--fg);padding:18px 20px;display:flex;align-items:center;justify-content:space-between}
+  header{background:var(--bg);color:var(--fg);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
   header h1{font-size:18px;margin:0}
   main{max-width:1200px;margin:24px auto;padding:0 16px}
   .row{display:flex;gap:14px;flex-wrap:wrap}
@@ -32,12 +31,8 @@
   table{width:100%;border-collapse:collapse}
   th,td{padding:12px;border-bottom:1px solid var(--line);font-size:14px}
   tr:hover{background:#fafbff}
-  .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
-  .pill.p{background:#e7f9ef;color:#0e8a4b}
-  .pill.n{background:#fff2da;color:#92400e}
-  .pill.c{background:#ffe8e8;color:#b42318}
   .right{margin-left:auto}
-/* Botão Voltar */
+  /* Botão Voltar */
   .back-btn{display:inline-flex;align-items:center;gap:8px;background:#eef3ff;color:#1f2430;border:0;cursor:pointer;padding:10px 14px;border-radius:10px;font-weight:700;font-size:14px}
   .back-btn:hover{background:#e1e9ff}
   .back-btn svg{width:18px;height:18px}
@@ -69,7 +64,7 @@
     <div class="card kpi"><div class="lbl">Receita (bruta)</div><div class="val" id="k_rev">R$ 0,00</div></div>
     <div class="card kpi"><div class="lbl">Pedidos</div><div class="val" id="k_orders">0</div></div>
     <div class="card kpi"><div class="lbl">Ticket médio</div><div class="val" id="k_aov">R$ 0,00</div></div>
-    <div class="card kpi"><div class="lbl">Pago vs Pendente</div><div class="val" id="k_status">0 / 0</div></div>
+    <div class="card kpi"><div class="lbl">Pago / Pendente</div><div class="val" id="k_status">0 / 0</div></div>
   </section>
 
   <!-- Charts -->
@@ -100,27 +95,55 @@
 
 <script type="module">
 import { db } from "/static/firebase-init.js";
-import {
-  collection, onSnapshot, orderBy, query, doc, updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { collection, onSnapshot, orderBy, query, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-/* ------------- Helpers ------------- */
+/* ---------- Helpers ---------- */
 const $ = id => document.getElementById(id);
 const brl = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 function tenant(){ const p=location.pathname.split('/').filter(Boolean); return p.length>=2 ? p[0] : 'default'; }
 const TENANT = tenant();
 const colOrders = () => collection(db, `tenants/${TENANT}/orders`);
 
-let ORDERS = []; // cache total
-let FILTERED = []; // após filtros de data
+let ORDERS = [];       // pedidos completos do Firestore
+let FILTERED = [];     // pedidos após filtro de data
+let LINES = [];        // linhas (itens) para tabela/gráficos
 
-/* ------------- Data realtime ------------- */
+// Total do pedido (suporta orders com items[] ou price/qty)
+function orderTotal(o){
+  if (Array.isArray(o.items) && o.items.length){
+    return o.items.reduce((s,it)=> s + Number(it.price||0)*Number(it.qty||1), 0);
+  }
+  return Number(o.price||0)*Number(o.qty||1);
+}
+
+// Expande um pedido em linhas de itens (para tabela/top produtos)
+function orderToLines(o){
+  const dt = o.createdAt?.toDate?.() || new Date();
+  const st = (o.status === 'new') ? 'pending' : (o.status||'pending');
+  if (Array.isArray(o.items) && o.items.length){
+    return o.items.map(it => ({
+      orderId: o.id,
+      createdAt: dt,
+      productName: it.name || it.productName || '(sem nome)',
+      qty: Number(it.qty||1),
+      price: Number(it.price||0),
+      status: st
+    }));
+  }
+  return [{
+    orderId: o.id,
+    createdAt: dt,
+    productName: o.productName || '(sem nome)',
+    qty: Number(o.qty||1),
+    price: Number(o.price||0),
+    status: st
+  }];
+}
+
+/* ---------- Realtime ---------- */
 onSnapshot(query(colOrders(), orderBy("createdAt","desc")), snap=>{
   ORDERS = [];
-  snap.forEach(d=>{
-    const o = { id:d.id, ...d.data() };
-    ORDERS.push(o);
-  });
+  snap.forEach(d=> ORDERS.push({ id:d.id, ...d.data() }));
   applyFilters();
 });
 
@@ -130,17 +153,18 @@ function applyFilters(){
   const d2 = $("d2").value ? new Date($("d2").value) : null;
 
   let from = null;
-  if (r !== "all"){
-    const days = Number(r);
-    from = new Date(); from.setDate(from.getDate()-days);
-  }
+  if (r !== "all"){ from = new Date(); from.setDate(from.getDate()-Number(r)); }
+
   FILTERED = ORDERS.filter(o=>{
     const dt = o.createdAt?.toDate?.() || new Date();
     if (from && dt < from) return false;
     if (d1 && dt < d1) return false;
-    if (d2 && dt > new Date(d2.getTime()+24*60*60*1000)) return false; // incluir dia final
+    if (d2 && dt > new Date(d2.getTime()+24*60*60*1000)) return false; // inclui dia final
     return true;
   });
+
+  // gera linhas p/ tabela e top produtos
+  LINES = FILTERED.flatMap(orderToLines);
 
   renderKPIs();
   drawCharts();
@@ -151,12 +175,12 @@ $("range").onchange = applyFilters;
 $("d1").onchange = applyFilters;
 $("d2").onchange = applyFilters;
 
-/* ------------- KPIs ------------- */
+/* ---------- KPIs ---------- */
 function renderKPIs(){
-  const total = FILTERED.reduce((s,o)=>s + Number(o.price||0)*Number(o.qty||1), 0);
+  const total = FILTERED.reduce((s,o)=> s + orderTotal(o), 0);
   const count = FILTERED.length;
-  const paid = FILTERED.filter(o=> (o.status||'pending') === 'paid').length;
-  const pend = FILTERED.filter(o=> (o.status||'pending') === 'pending').length;
+  const paid = FILTERED.filter(o=> (o.status||'pending')==='paid').length;
+  const pend = FILTERED.filter(o=> (o.status||'pending')==='pending' || o.status==='new').length;
   const aov = count ? (total / count) : 0;
 
   $("k_rev").textContent = brl(total);
@@ -165,37 +189,35 @@ function renderKPIs(){
   $("k_status").textContent = `${paid} / ${pend}`;
 }
 
-/* ------------- Charts ------------- */
+/* ---------- Charts ---------- */
 let chartRev, chartTop;
 
 function drawCharts(){
-  // Revenue by day
-  const map = new Map();
+  // Receita por dia (por pedido)
+  const byDay = new Map();
   for(const o of FILTERED){
     const dt = (o.createdAt?.toDate?.() || new Date());
     const key = dt.toISOString().slice(0,10);
-    const val = Number(o.price||0)*Number(o.qty||1);
-    map.set(key, (map.get(key)||0) + val);
+    byDay.set(key, (byDay.get(key)||0) + orderTotal(o));
   }
-  const labels = Array.from(map.keys()).sort();
-  const data = labels.map(k=> Number(map.get(k).toFixed(2)));
+  const labels = Array.from(byDay.keys()).sort();
+  const data   = labels.map(k => Number(byDay.get(k).toFixed(2)));
 
   if(chartRev) chartRev.destroy();
-  chartRev = new Chart(document.getElementById('chartRev'), {
+  chartRev = new Chart(document.getElementById('chartRev'),{
     type:'line',
     data:{ labels, datasets:[{ label:'Receita', data }] },
     options:{
       responsive:true,
-      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{label:c=>'R$ '+c.parsed.y.toLocaleString('pt-BR')}}},
-      scales:{ y:{ ticks:{ callback:v=>'R$ '+Number(v).toLocaleString('pt-BR')} } }
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'R$ '+c.parsed.y.toLocaleString('pt-BR')}}},
+      scales:{ y:{ ticks:{ callback:v=>'R$ '+Number(v).toLocaleString('pt-BR') } } }
     }
   });
 
-  // Top products
+  // Top produtos (pelas linhas)
   const byProd = new Map();
-  for(const o of FILTERED){
-    const name = o.productName || '(sem nome)';
-    byProd.set(name, (byProd.get(name)||0) + Number(o.price||0)*Number(o.qty||1));
+  for(const ln of LINES){
+    byProd.set(ln.productName, (byProd.get(ln.productName)||0) + ln.price*ln.qty);
   }
   const arr = Array.from(byProd.entries()).map(([name,val])=>({name,val}))
                    .sort((a,b)=>b.val-a.val).slice(0,8);
@@ -203,43 +225,40 @@ function drawCharts(){
   const D = arr.map(x=>Number(x.val.toFixed(2)));
 
   if(chartTop) chartTop.destroy();
-  chartTop = new Chart(document.getElementById('chartTop'), {
+  chartTop = new Chart(document.getElementById('chartTop'),{
     type:'bar',
     data:{ labels:L, datasets:[{ label:'Receita', data:D }] },
     options:{
       indexAxis:'y',
-      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{label:c=>'R$ '+c.parsed.x.toLocaleString('pt-BR')}}},
-      scales:{ x:{ ticks:{ callback:v=>'R$ '+Number(v).toLocaleString('pt-BR')} } }
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'R$ '+c.parsed.x.toLocaleString('pt-BR')}}},
+      scales:{ x:{ ticks:{ callback:v=>'R$ '+Number(v).toLocaleString('pt-BR') } } }
     }
   });
 }
 
-/* ------------- Tabela ------------- */
+/* ---------- Tabela ---------- */
 const tb = $("tbody");
 function renderTable(){
   tb.innerHTML = "";
-  for(const o of FILTERED){
-    const dt = o.createdAt?.toDate?.() || new Date();
-    const qtd = Number(o.qty||1);
-    const val = Number(o.price||0) * qtd;
-    const st  = (o.status||'pending');
+  for(const ln of LINES){
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${dt.toLocaleString('pt-BR')}</td>
-      <td><code>${o.id.slice(0,8)}</code></td>
-      <td>${o.productName||''}</td>
-      <td>${qtd}</td>
-      <td>${brl(val)}</td>
+      <td>${ln.createdAt.toLocaleString('pt-BR')}</td>
+      <td><code>${ln.orderId.slice(0,8)}</code></td>
+      <td>${ln.productName}</td>
+      <td>${ln.qty}</td>
+      <td>${brl(ln.price*ln.qty)}</td>
       <td>
-        <select data-id="${o.id}">
-          <option value="pending" ${st==='pending'?'selected':''}>Pendente</option>
-          <option value="paid" ${st==='paid'?'selected':''}>Pago</option>
-          <option value="canceled" ${st==='canceled'?'selected':''}>Cancelado</option>
+        <select data-id="${ln.orderId}">
+          <option value="pending" ${(ln.status==='pending' || ln.status==='new')?'selected':''}>Pendente</option>
+          <option value="paid" ${ln.status==='paid'?'selected':''}>Pago</option>
+          <option value="canceled" ${ln.status==='canceled'?'selected':''}>Cancelado</option>
         </select>
       </td>
     `;
     tb.appendChild(tr);
   }
+
   tb.querySelectorAll("select").forEach(sel=>{
     sel.onchange = async (e)=>{
       const id = e.target.getAttribute("data-id");
@@ -248,12 +267,19 @@ function renderTable(){
   });
 }
 
-/* ------------- CSV ------------- */
+/* ---------- CSV ---------- */
 $("btnCSV").onclick = ()=>{
-  const rows = [["id","createdAt","productName","qty","price","status"]];
-  for(const o of FILTERED){
-    const dt = (o.createdAt?.toDate?.() || new Date()).toISOString();
-    rows.push([o.id, dt, o.productName||"", Number(o.qty||1), Number(o.price||0), o.status||'pending']);
+  const rows = [["orderId","createdAt","productName","qty","price","lineTotal","status"]];
+  for(const ln of LINES){
+    rows.push([
+      ln.orderId,
+      ln.createdAt.toISOString(),
+      ln.productName,
+      ln.qty,
+      ln.price,
+      (ln.price*ln.qty).toFixed(2),
+      ln.status
+    ]);
   }
   const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
   const blob = new Blob([csv],{type:"text/csv;charset=utf-8"});
@@ -261,6 +287,9 @@ $("btnCSV").onclick = ()=>{
   a.href = URL.createObjectURL(blob);
   a.download = `financeiro_${TENANT}.csv`;
   a.click();
+};
+</script>
+
 <!-- Botão Voltar (fora do módulo) -->
 <script>
   function getTenantFromPath(){
