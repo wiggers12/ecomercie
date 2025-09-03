@@ -3,11 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Estoque — Ecomercie</<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Estoque — Ecomercie</title>
 
 <!-- Chart.js + time scale (dayjs) -->
@@ -21,8 +16,7 @@
   :root{
     --bg:#0b1220; --fg:#e8eefc; --muted:#667085;
     --card:#ffffff; --shadow:0 10px 30px rgba(15,23,42,.08);
-    --pri:#2c7be5; --ok:#12b981; --warn:#f59e0b; --err:#ef4444;
-    --line:#eef2f7;
+    --pri:#2c7be5; --ok:#12b981; --warn:#f59e0b; --err:#ef4444; --line:#eef2f7;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f6f7fb;color:#111}
@@ -60,27 +54,18 @@
   .muted{color:var(--muted)}
   .progress{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden}
   .progress>i{display:block;height:100%;width:0;background:var(--pri)}
-
-  /* === Botão Voltar === */
-  .back-btn{
-    display:inline-flex; align-items:center; gap:8px;
-    background:#eef3ff; color:#1f2430; border:0; cursor:pointer;
-    padding:10px 14px; border-radius:10px; font-weight:700; font-size:14px;
-  }
-  .back-btn:hover{ background:#e1e9ff; }
-  .back-btn svg{ width:18px; height:18px; }
+  /* Botão Voltar */
+  .back-btn{display:inline-flex;align-items:center;gap:8px;background:#eef3ff;color:#1f2430;border:0;cursor:pointer;padding:10px 14px;border-radius:10px;font-weight:700;font-size:14px}
+  .back-btn:hover{background:#e1e9ff}
+  .back-btn svg{width:18px;height:18px}
 </style>
 </head>
 <body>
 <header>
-  <!-- Botão Voltar (INSERIDO AQUI) -->
   <button class="back-btn" onclick="goBack()" title="Voltar para o Admin">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M15.5 19a1 1 0 0 1-.7-.29l-6-6a1 1 0 0 1 0-1.42l6-6a1 1 0 1 1 1.4 1.42L10.9 12l5.3 5.29A1 1 0 0 1 15.5 19z"/>
-    </svg>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 19a1 1 0 0 1-.7-.29l-6-6a1 1 0 0 1 0-1.42l6-6a1 1 0 1 1 1.4 1.42L10.9 12l5.3 5.29A1 1 0 0 1 15.5 19z"/></svg>
     Voltar
   </button>
-
   <h1>Estoque — Ecomercie</h1>
   <div class="toolbar">
     <input id="q" placeholder="Buscar por nome ou SKU…" />
@@ -90,7 +75,6 @@
 </header>
 
 <main>
-  <!-- KPIs -->
   <section class="row">
     <div class="card kpi"><div class="lbl">Produtos</div><div class="val" id="k_total">0</div></div>
     <div class="card kpi"><div class="lbl">Unidades em estoque</div><div class="val" id="k_units">0</div></div>
@@ -98,7 +82,6 @@
     <div class="card kpi"><div class="lbl">Baixo estoque (&lt;= 5)</div><div class="val" id="k_low">0</div></div>
   </section>
 
-  <!-- Charts -->
   <section class="row">
     <div class="card" style="flex:2 1 420px">
       <div class="lbl">Top 10 por valor (preço x estoque)</div>
@@ -110,7 +93,6 @@
     </div>
   </section>
 
-  <!-- Tabela -->
   <section class="card">
     <table>
       <thead>
@@ -123,7 +105,7 @@
   </section>
 </main>
 
-<!-- Modal de produto -->
+<!-- Modal -->
 <div class="overlay" id="dlg">
   <div class="modal">
     <header style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
@@ -136,24 +118,12 @@
     </header>
     <div class="form">
       <div class="grid">
-        <div>
-          <label>Nome</label><input id="f_name" />
-        </div>
-        <div>
-          <label>SKU</label><input id="f_sku" />
-        </div>
-        <div>
-          <label>Categoria</label><input id="f_cat" />
-        </div>
-        <div>
-          <label>Preço (R$)</label><input id="f_price" type="number" step="0.01" />
-        </div>
-        <div>
-          <label>Custo (R$)</label><input id="f_cost" type="number" step="0.01" />
-        </div>
-        <div>
-          <label>Estoque</label><input id="f_stock" type="number" step="1" />
-        </div>
+        <div><label>Nome</label><input id="f_name" /></div>
+        <div><label>SKU</label><input id="f_sku" /></div>
+        <div><label>Categoria</label><input id="f_cat" /></div>
+        <div><label>Preço (R$)</label><input id="f_price" type="number" step="0.01" /></div>
+        <div><label>Custo (R$)</label><input id="f_cost" type="number" step="0.01" /></div>
+        <div><label>Estoque</label><input id="f_stock" type="number" step="1" /></div>
       </div>
 
       <label style="margin-top:10px;display:block">Descrição</label>
@@ -185,31 +155,23 @@
   </div>
 </div>
 
-<!-- SEU SCRIPT PRINCIPAL (module) -->
+<!-- Script principal -->
 <script type="module">
 import { db, storage } from "/static/firebase-init.js";
-import {
-  collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDocs,
-  onSnapshot, query, orderBy, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-import {
-  ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+import { collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
 
-/* ------------------ Helpers ------------------ */
 const $ = id => document.getElementById(id);
 const brl = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 function tenant(){ const p=location.pathname.split('/').filter(Boolean); return p.length>=2 ? p[0] : 'default'; }
 const TENANT = tenant();
 const colProducts = () => collection(db, `tenants/${TENANT}/products`);
 
-let PRODUCTS = []; // cache para filtros/CSV
-
-/* ------------------ KPI + Tabela realtime ------------------ */
+let PRODUCTS = [];
 const tb = $("tbody");
-const unsub = onSnapshot(query(colProducts(), orderBy("createdAt","desc")), snap=>{
-  PRODUCTS = [];
-  tb.innerHTML = "";
+
+onSnapshot(query(colProducts(), orderBy("createdAt","desc")), snap=>{
+  PRODUCTS = []; tb.innerHTML = "";
   let units=0,value=0,low=0;
   snap.forEach(d=>{
     const p = { id:d.id, ...d.data() };
@@ -238,85 +200,73 @@ const unsub = onSnapshot(query(colProducts(), orderBy("createdAt","desc")), snap
   drawCharts(PRODUCTS);
 });
 
-/* ------------------ Busca ------------------ */
 $("q").addEventListener("input", e=>{
   const term = e.target.value.trim().toLowerCase();
   Array.from(tb.children).forEach(tr=>{
-    const txt = tr.textContent.toLowerCase();
-    tr.style.display = txt.includes(term) ? "" : "none";
+    tr.style.display = tr.textContent.toLowerCase().includes(term) ? "" : "none";
   });
 });
 
-/* ------------------ CSV ------------------ */
 $("btnExport").onclick = ()=>{
   const rows = [["id","name","sku","category","price","cost","stock","active"]];
   for (const p of PRODUCTS){
     rows.push([p.id,p.name||"",p.sku||"",p.category||"",Number(p.price||0),Number(p.cost||0),Number(p.stock||0),p.active?1:0]);
   }
   const csv = rows.map(r=>r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
   a.download = `estoque_${TENANT}.csv`;
   a.click();
 };
 
-/* ------------------ Modal CRUD ------------------ */
-let CURRENT = null; // doc em edição
-
+let CURRENT=null;
 function openDlg(p=null){
-  CURRENT = p;
+  CURRENT=p;
   $("dlgTitle").textContent = p ? `Editar: ${p.name}` : "Novo produto";
   $("btnDelete").style.display = p ? "inline-block" : "none";
   $("f_name").value  = p?.name  || "";    $("f_sku").value   = p?.sku   || "";
   $("f_cat").value   = p?.category || ""; $("f_price").value = p?.price ?? "";
   $("f_cost").value  = p?.cost  ?? "";    $("f_stock").value = p?.stock ?? "";
   $("f_desc").value  = p?.desc  || "";    $("f_active").checked = p?.active ?? true;
-  $("f_imgs").value = ""; $("f_video").value="";
-  $("p_imgs").style.width = "0%"; $("t_imgs").textContent="0%";
-  $("p_video").style.width = "0%"; $("t_video").textContent="0%";
+  $("f_imgs").value=""; $("f_video").value="";
+  $("p_imgs").style.width="0%"; $("t_imgs").textContent="0%";
+  $("p_video").style.width="0%"; $("t_video").textContent="0%";
   renderGallery(p?.images||[]);
-  $("dlg").style.display = "flex";
+  $("dlg").style.display="flex";
 }
-window.openDlg = openDlg;
+window.openDlg=openDlg;
 
-function closeDlg(){ $("dlg").style.display = "none"; CURRENT = null; }
-$("btnClose").onclick = closeDlg;
+function closeDlg(){ $("dlg").style.display="none"; CURRENT=null; }
+$("btnClose").onclick=closeDlg;
 
-$("btnNew").onclick = ()=>openDlg();
+$("btnNew").onclick=()=>openDlg();
 
-$("btnDelete").onclick = async ()=>{
+$("btnDelete").onclick=async ()=>{
   if(!CURRENT) return;
-  if(!confirm("Excluir produto? (imagens em Storage não serão removidas automaticamente)")) return;
+  if(!confirm("Excluir produto? (as imagens no Storage não serão removidas automaticamente)")) return;
   await deleteDoc(doc(db, `tenants/${TENANT}/products/${CURRENT.id}`));
   closeDlg();
 };
 
 function renderGallery(arr){
-  const g = $("gallery"); g.innerHTML="";
-  (arr||[]).forEach(u=>{
-    const img = document.createElement("img");
-    img.src = u; img.className="thumb"; g.appendChild(img);
-  });
+  const g=$("gallery"); g.innerHTML="";
+  (arr||[]).forEach(u=>{ const img=document.createElement("img"); img.src=u; img.className="thumb"; g.appendChild(img); });
 }
 
 async function uploadAll(refBase, files, progressBar, progressText){
   if(!files || files.length===0) return [];
-  const urls = [];
-  let done = 0;
+  const urls=[]; let done=0;
   for(const f of files){
-    const r = ref(storage, `${refBase}/${Date.now()}_${f.name}`);
-    const task = uploadBytesResumable(r, f);
+    const r=ref(storage, `${refBase}/${Date.now()}_${f.name}`);
+    const task=uploadBytesResumable(r,f);
     await new Promise((res,rej)=>{
-      task.on("state_changed", snap=>{
-        const pct = Math.round((snap.bytesTransferred/snap.totalBytes)*100);
-        progressBar.style.width = pct+"%";
-        progressText.textContent = pct+"%";
+      task.on("state_changed", s=>{
+        const pct=Math.round((s.bytesTransferred/s.totalBytes)*100);
+        progressBar.style.width=pct+"%"; progressText.textContent=pct+"%";
       }, rej, async ()=>{
         urls.push(await getDownloadURL(task.snapshot.ref));
-        done++; const pct = Math.round((done/files.length)*100);
-        progressBar.style.width = pct+"%";
-        progressText.textContent = pct+"%";
+        done++; const pct=Math.round((done/files.length)*100);
+        progressBar.style.width=pct+"%"; progressText.textContent=pct+"%";
         res();
       });
     });
@@ -324,73 +274,54 @@ async function uploadAll(refBase, files, progressBar, progressText){
   return urls;
 }
 
-$("btnSave").onclick = async ()=>{
-  const payload = {
-    name: $("f_name").value.trim(),
-    sku: $("f_sku").value.trim(),
-    category: $("f_cat").value.trim(),
-    price: Number($("f_price").value||0),
-    cost: Number($("f_cost").value||0),
-    stock: parseInt($("f_stock").value||0),
-    desc: $("f_desc").value.trim(),
-    active: $("f_active").checked,
-    updatedAt: serverTimestamp()
+$("btnSave").onclick=async ()=>{
+  const payload={
+    name:$("f_name").value.trim(),
+    sku:$("f_sku").value.trim(),
+    category:$("f_cat").value.trim(),
+    price:Number($("f_price").value||0),
+    cost:Number($("f_cost").value||0),
+    stock:parseInt($("f_stock").value||0),
+    desc:$("f_desc").value.trim(),
+    active:$("f_active").checked,
+    updatedAt:serverTimestamp()
   };
   if(!payload.name){ alert("Informe o nome"); return; }
 
   let refDoc;
-  if(CURRENT){
-    refDoc = doc(db, `tenants/${TENANT}/products/${CURRENT.id}`);
-    await updateDoc(refDoc, payload);
-  }else{
-    refDoc = await addDoc(colProducts(), { ...payload, images:[], video:null, createdAt: serverTimestamp() });
-  }
+  if(CURRENT){ refDoc=doc(db, `tenants/${TENANT}/products/${CURRENT.id}`); await updateDoc(refDoc,payload); }
+  else{ refDoc=await addDoc(colProducts(), { ...payload, images:[], video:null, createdAt:serverTimestamp() }); }
 
-  // uploads
-  const base = `tenants/${TENANT}/products/${refDoc.id}`;
-  const imgUrls = await uploadAll(`${base}/images`, $("f_imgs").files, $("p_imgs"), $("t_imgs"));
-  let vidUrl = null;
-  if ($("f_video").files.length){
-    const [v] = await uploadAll(`${base}/video`, $("f_video").files, $("p_video"), $("t_video"));
-    vidUrl = v || null;
+  const base=`tenants/${TENANT}/products/${refDoc.id}`;
+  const imgUrls=await uploadAll(`${base}/images`, $("f_imgs").files, $("p_imgs"), $("t_imgs"));
+  let vidUrl=null;
+  if($("f_video").files.length){
+    const [v]=await uploadAll(`${base}/video`, $("f_video").files, $("p_video"), $("t_video"));
+    vidUrl=v||null;
   }
-  const toMerge = {};
-  if(imgUrls.length) toMerge.images = (CURRENT?.images||[]).concat(imgUrls);
-  if(vidUrl!==null)  toMerge.video  = vidUrl;
-
-  if(Object.keys(toMerge).length){
-    await updateDoc(refDoc, toMerge);
-  }
+  const toMerge={};
+  if(imgUrls.length) toMerge.images=(CURRENT?.images||[]).concat(imgUrls);
+  if(vidUrl!==null)  toMerge.video=vidUrl;
+  if(Object.keys(toMerge).length) await updateDoc(refDoc,toMerge);
   closeDlg();
 };
 
-/* ------------------ Charts ------------------ */
+/* Charts */
 let chartTop, chartStatus;
 function drawCharts(items){
-  // Top por valor (preço x estoque)
-  const arr = items.map(p=>({
-    name: p.name || "(sem nome)",
-    value: (Number(p.price||0) * Number(p.stock||0)) || 0
-  })).sort((a,b)=>b.value-a.value).slice(0,10);
-  const labels = arr.map(a=>a.name);
-  const data   = arr.map(a=>Number(a.value.toFixed(2)));
-
+  const arr = items.map(p=>({name:p.name||"(sem nome)", value:(Number(p.price||0)*Number(p.stock||0))||0}))
+                   .sort((a,b)=>b.value-a.value).slice(0,10);
+  const labels=arr.map(a=>a.name);
+  const data=arr.map(a=>Number(a.value.toFixed(2)));
   if(chartTop) chartTop.destroy();
-  chartTop = new Chart(document.getElementById('chartTop'), {
+  chartTop=new Chart(document.getElementById('chartTop'),{
     type:'bar',
     data:{labels,datasets:[{label:'R$ inventário',data}]},
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>('R$ '+c.parsed.y.toLocaleString('pt-BR'))}}},
-      scales:{y:{ticks:{callback:v=>'R$ '+Number(v).toLocaleString('pt-BR')}}}
-    }
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.parsed.y.toLocaleString('pt-BR')}}},scales:{y:{ticks:{callback:v=>'R$ '+Number(v).toLocaleString('pt-BR')}}}}
   });
-
-  // Status
-  const on  = items.filter(p=>p.active).length;
-  const off = items.length - on;
+  const on=items.filter(p=>p.active).length, off=items.length-on;
   if(chartStatus) chartStatus.destroy();
-  chartStatus = new Chart(document.getElementById('chartStatus'), {
+  chartStatus=new Chart(document.getElementById('chartStatus'),{
     type:'doughnut',
     data:{labels:['Ativos','Inativos'],datasets:[{data:[on,off]}]},
     options:{plugins:{legend:{position:'bottom'}}}
@@ -398,402 +329,20 @@ function drawCharts(items){
 }
 </script>
 
-<!-- Script separado para o botão Voltar (fora do type="module") -->
+<!-- Botão Voltar (fora do módulo) -->
 <script>
   function getTenantFromPath(){
-    const parts = location.pathname.split('/').filter(Boolean);
-    if (parts.length >= 2 && ['admin','catalogo','estoque','financeiro'].includes(parts[1])) {
-      return parts[0];
-    }
-    return null;
+    const p = location.pathname.split('/').filter(Boolean);
+    return (p.length>=2 && ['admin','catalogo','estoque','financeiro'].includes(p[1])) ? p[0] : null;
   }
-  function adminUrl(){
-    const t = getTenantFromPath();
-    return t ? `/${t}/admin` : '/admin';
-  }
+  function adminUrl(){ const t=getTenantFromPath(); return t ? `/${t}/admin` : '/admin'; }
   function goBack(){
     try{
-      const ref = document.referrer;
-      if (ref && new URL(ref).origin === location.origin) {
-        history.back();
-        return;
-      }
+      const ref=document.referrer;
+      if(ref && new URL(ref).origin===location.origin){ history.back(); return; }
     }catch(_){}
-    location.href = adminUrl();
+    location.href=adminUrl();
   }
-</script>
-</body>
-</html>
-
-
-<!-- Chart.js + time scale (dayjs) -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/plugin/utc.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/plugin/timezone.js"></script>
-<script>dayjs.extend(dayjs_plugin_utc);dayjs.extend(dayjs_plugin_timezone);</script>
-
-<style>
-  :root{
-    --bg:#0b1220; --fg:#e8eefc; --muted:#667085;
-    --card:#ffffff; --shadow:0 10px 30px rgba(15,23,42,.08);
-    --pri:#2c7be5; --ok:#12b981; --warn:#f59e0b; --err:#ef4444;
-    --line:#eef2f7;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f6f7fb;color:#111}
-  header{background:var(--bg);color:var(--fg);padding:18px 20px;display:flex;align-items:center;justify-content:space-between}
-  header h1{font-size:18px;margin:0}
-  main{max-width:1200px;margin:24px auto;padding:0 16px}
-  .row{display:flex;gap:14px;flex-wrap:wrap}
-  .card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:16px}
-  .kpi{flex:1 1 220px}
-  .kpi .lbl{color:var(--muted);font-size:12px}
-  .kpi .val{font-size:24px;font-weight:800;margin-top:6px}
-  .toolbar{display:flex;gap:10px;align-items:center}
-  .toolbar input{border:1px solid #d0d5dd;border-radius:10px;padding:10px 12px;width:260px}
-  .btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn.pri{background:var(--pri);color:#fff}
-  .btn.ghost{background:#eef3ff;color:#0b1220}
-  .btn.danger{background:#ffe8e8;color:#b42318}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:12px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
-  th{color:#334155;text-align:left}
-  tr:hover{background:#fafbff}
-  .thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;background:#f0f3f7}
-  .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
-  .pill.on{background:#e7f9ef;color:#0e8a4b}
-  .pill.off{background:#ffe8e8;color:#b42318}
-  .right{margin-left:auto}
-  /* Modal */
-  .overlay{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;z-index:30}
-  .modal{background:#fff;border-radius:14px;box-shadow:var(--shadow);width:min(760px,92vw);max-height:92vh;overflow:auto}
-  .modal header{background:#fff;color:#111;border-bottom:1px solid var(--line);border-radius:14px 14px 0 0}
-  .form{padding:16px}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media(max-width:760px){.grid{grid-template-columns:1fr}}
-  .form input,.form textarea,.form select{border:1px solid #d0d5dd;border-radius:10px;padding:10px 12px;font:inherit;width:100%}
-  .muted{color:var(--muted)}
-  .progress{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden}
-  .progress>i{display:block;height:100%;width:0;background:var(--pri)}
-</style>
-</head>
-<body>
-<header>
-  <h1>Estoque — Ecomercie</h1>
-  <div class="toolbar">
-    <input id="q" placeholder="Buscar por nome ou SKU…" />
-    <button class="btn ghost" id="btnExport">Exportar CSV</button>
-    <button class="btn pri" id="btnNew">+ Novo produto</button>
-  </div>
-</header>
-
-<main>
-  <!-- KPIs -->
-  <section class="row">
-    <div class="card kpi"><div class="lbl">Produtos</div><div class="val" id="k_total">0</div></div>
-    <div class="card kpi"><div class="lbl">Unidades em estoque</div><div class="val" id="k_units">0</div></div>
-    <div class="card kpi"><div class="lbl">Valor de inventário</div><div class="val" id="k_value">R$ 0,00</div></div>
-    <div class="card kpi"><div class="lbl">Baixo estoque (&lt;= 5)</div><div class="val" id="k_low">0</div></div>
-  </section>
-
-  <!-- Charts -->
-  <section class="row">
-    <div class="card" style="flex:2 1 420px">
-      <div class="lbl">Top 10 por valor (preço x estoque)</div>
-      <canvas id="chartTop"></canvas>
-    </div>
-    <div class="card" style="flex:1 1 320px">
-      <div class="lbl">Distribuição por status</div>
-      <canvas id="chartStatus"></canvas>
-    </div>
-  </section>
-
-  <!-- Tabela -->
-  <section class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>Imagem</th><th>Nome</th><th>SKU</th><th>Preço</th><th>Estoque</th><th>Status</th><th class="right">Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </section>
-</main>
-
-<!-- Modal de produto -->
-<div class="overlay" id="dlg">
-  <div class="modal">
-    <header style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
-      <b id="dlgTitle">Novo produto</b>
-      <div class="toolbar">
-        <button class="btn danger" id="btnDelete" style="display:none">Excluir</button>
-        <button class="btn ghost" id="btnClose">Fechar</button>
-        <button class="btn pri" id="btnSave">Salvar</button>
-      </div>
-    </header>
-    <div class="form">
-      <div class="grid">
-        <div>
-          <label>Nome</label><input id="f_name" />
-        </div>
-        <div>
-          <label>SKU</label><input id="f_sku" />
-        </div>
-        <div>
-          <label>Categoria</label><input id="f_cat" />
-        </div>
-        <div>
-          <label>Preço (R$)</label><input id="f_price" type="number" step="0.01" />
-        </div>
-        <div>
-          <label>Custo (R$)</label><input id="f_cost" type="number" step="0.01" />
-        </div>
-        <div>
-          <label>Estoque</label><input id="f_stock" type="number" step="1" />
-        </div>
-      </div>
-
-      <label style="margin-top:10px;display:block">Descrição</label>
-      <textarea id="f_desc" rows="3"></textarea>
-
-      <div class="row" style="margin-top:12px">
-        <label style="display:flex;align-items:center;gap:8px">
-          <input id="f_active" type="checkbox" checked /> Ativo no catálogo
-        </label>
-      </div>
-
-      <div class="row" style="margin-top:14px">
-        <div class="card" style="flex:1 1 300px">
-          <div class="lbl">Imagens (múltiplas)</div>
-          <input id="f_imgs" type="file" accept="image/*" multiple />
-          <div class="progress" style="margin-top:8px"><i id="p_imgs"></i></div>
-          <div class="muted" id="t_imgs">0%</div>
-        </div>
-        <div class="card" style="flex:1 1 300px">
-          <div class="lbl">Vídeo (opcional)</div>
-          <input id="f_video" type="file" accept="video/*" />
-          <div class="progress" style="margin-top:8px"><i id="p_video"></i></div>
-          <div class="muted" id="t_video">0%</div>
-        </div>
-      </div>
-
-      <div id="gallery" class="row" style="margin-top:12px"></div>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-import { db, storage } from "/static/firebase-init.js";
-import {
-  collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDocs,
-  onSnapshot, query, orderBy, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-import {
-  ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
-
-/* ------------------ Helpers ------------------ */
-const $ = id => document.getElementById(id);
-const brl = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-function tenant(){ const p=location.pathname.split('/').filter(Boolean); return p.length>=2 ? p[0] : 'default'; }
-const TENANT = tenant();
-const colProducts = () => collection(db, `tenants/${TENANT}/products`);
-
-let PRODUCTS = []; // cache para filtros/CSV
-
-/* ------------------ KPI + Tabela realtime ------------------ */
-const tb = $("tbody");
-const unsub = onSnapshot(query(colProducts(), orderBy("createdAt","desc")), snap=>{
-  PRODUCTS = [];
-  tb.innerHTML = "";
-  let units=0,value=0,low=0;
-  snap.forEach(d=>{
-    const p = { id:d.id, ...d.data() };
-    PRODUCTS.push(p);
-    units += Number(p.stock||0);
-    value += Number(p.price||0) * Number(p.stock||0);
-    if ((p.stock||0) <= 5) low++;
-    const tr = document.createElement("tr");
-    const img = (p.images && p.images[0]) ? `<img class="thumb" src="${p.images[0]}">` : `<span class="pill off">sem</span>`;
-    tr.innerHTML = `
-      <td>${img}</td>
-      <td>${p.name||""}</td>
-      <td>${p.sku||""}</td>
-      <td>${brl(p.price||0)}</td>
-      <td>${p.stock??0}</td>
-      <td>${p.active ? '<span class="pill on">ativo</span>' : '<span class="pill off">inativo</span>'}</td>
-      <td class="right">
-        <button class="btn ghost" onclick='(${openDlg})(JSON.parse(this.dataset.p))' data-p='${JSON.stringify(p)}'>Editar</button>
-      </td>`;
-    tb.appendChild(tr);
-  });
-  $("k_total").textContent = PRODUCTS.length;
-  $("k_units").textContent = units;
-  $("k_value").textContent = brl(value);
-  $("k_low").textContent = low;
-  drawCharts(PRODUCTS);
-});
-
-/* ------------------ Busca ------------------ */
-$("q").addEventListener("input", e=>{
-  const term = e.target.value.trim().toLowerCase();
-  Array.from(tb.children).forEach(tr=>{
-    const txt = tr.textContent.toLowerCase();
-    tr.style.display = txt.includes(term) ? "" : "none";
-  });
-});
-
-/* ------------------ CSV ------------------ */
-$("btnExport").onclick = ()=>{
-  const rows = [["id","name","sku","category","price","cost","stock","active"]];
-  for (const p of PRODUCTS){
-    rows.push([p.id,p.name||"",p.sku||"",p.category||"",Number(p.price||0),Number(p.cost||0),Number(p.stock||0),p.active?1:0]);
-  }
-  const csv = rows.map(r=>r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `estoque_${TENANT}.csv`;
-  a.click();
-};
-
-/* ------------------ Modal CRUD ------------------ */
-let CURRENT = null; // doc em edição
-
-function openDlg(p=null){
-  CURRENT = p;
-  $("dlgTitle").textContent = p ? `Editar: ${p.name}` : "Novo produto";
-  $("btnDelete").style.display = p ? "inline-block" : "none";
-  $("f_name").value  = p?.name  || "";    $("f_sku").value   = p?.sku   || "";
-  $("f_cat").value   = p?.category || ""; $("f_price").value = p?.price ?? "";
-  $("f_cost").value  = p?.cost  ?? "";    $("f_stock").value = p?.stock ?? "";
-  $("f_desc").value  = p?.desc  || "";    $("f_active").checked = p?.active ?? true;
-  $("f_imgs").value = ""; $("f_video").value="";
-  $("p_imgs").style.width = "0%"; $("t_imgs").textContent="0%";
-  $("p_video").style.width = "0%"; $("t_video").textContent="0%";
-  renderGallery(p?.images||[]);
-  $("dlg").style.display = "flex";
-}
-window.openDlg = openDlg;
-
-function closeDlg(){ $("dlg").style.display = "none"; CURRENT = null; }
-$("btnClose").onclick = closeDlg;
-
-$("btnNew").onclick = ()=>openDlg();
-
-$("btnDelete").onclick = async ()=>{
-  if(!CURRENT) return;
-  if(!confirm("Excluir produto? (imagens em Storage não serão removidas automaticamente)")) return;
-  await deleteDoc(doc(db, `tenants/${TENANT}/products/${CURRENT.id}`));
-  closeDlg();
-};
-
-function renderGallery(arr){
-  const g = $("gallery"); g.innerHTML="";
-  (arr||[]).forEach(u=>{
-    const img = document.createElement("img");
-    img.src = u; img.className="thumb"; g.appendChild(img);
-  });
-}
-
-async function uploadAll(refBase, files, progressBar, progressText){
-  if(!files || files.length===0) return [];
-  const urls = [];
-  let done = 0;
-  for(const f of files){
-    const r = ref(storage, `${refBase}/${Date.now()}_${f.name}`);
-    const task = uploadBytesResumable(r, f);
-    await new Promise((res,rej)=>{
-      task.on("state_changed", snap=>{
-        const pct = Math.round((snap.bytesTransferred/snap.totalBytes)*100);
-        progressBar.style.width = pct+"%";
-        progressText.textContent = pct+"%";
-      }, rej, async ()=>{
-        urls.push(await getDownloadURL(task.snapshot.ref));
-        done++; const pct = Math.round((done/files.length)*100);
-        progressBar.style.width = pct+"%";
-        progressText.textContent = pct+"%";
-        res();
-      });
-    });
-  }
-  return urls;
-}
-
-$("btnSave").onclick = async ()=>{
-  const payload = {
-    name: $("f_name").value.trim(),
-    sku: $("f_sku").value.trim(),
-    category: $("f_cat").value.trim(),
-    price: Number($("f_price").value||0),
-    cost: Number($("f_cost").value||0),
-    stock: parseInt($("f_stock").value||0),
-    desc: $("f_desc").value.trim(),
-    active: $("f_active").checked,
-    updatedAt: serverTimestamp()
-  };
-  if(!payload.name){ alert("Informe o nome"); return; }
-
-  let refDoc;
-  if(CURRENT){
-    refDoc = doc(db, `tenants/${TENANT}/products/${CURRENT.id}`);
-    await updateDoc(refDoc, payload);
-  }else{
-    refDoc = await addDoc(colProducts(), { ...payload, images:[], video:null, createdAt: serverTimestamp() });
-  }
-
-  // uploads
-  const base = `tenants/${TENANT}/products/${refDoc.id}`;
-  const imgUrls = await uploadAll(`${base}/images`, $("f_imgs").files, $("p_imgs"), $("t_imgs"));
-  let vidUrl = null;
-  if ($("f_video").files.length){
-    const [v] = await uploadAll(`${base}/video`, $("f_video").files, $("p_video"), $("t_video"));
-    vidUrl = v || null;
-  }
-  const toMerge = {};
-  if(imgUrls.length) toMerge.images = (CURRENT?.images||[]).concat(imgUrls);
-  if(vidUrl!==null)  toMerge.video  = vidUrl;
-
-  if(Object.keys(toMerge).length){
-    await updateDoc(refDoc, toMerge);
-  }
-  closeDlg();
-};
-
-/* ------------------ Charts ------------------ */
-let chartTop, chartStatus;
-function drawCharts(items){
-  // Top por valor (preço x estoque)
-  const arr = items.map(p=>({
-    name: p.name || "(sem nome)",
-    value: (Number(p.price||0) * Number(p.stock||0)) || 0
-  })).sort((a,b)=>b.value-a.value).slice(0,10);
-  const labels = arr.map(a=>a.name);
-  const data   = arr.map(a=>Number(a.value.toFixed(2)));
-
-  if(chartTop) chartTop.destroy();
-  chartTop = new Chart(document.getElementById('chartTop'), {
-    type:'bar',
-    data:{labels,datasets:[{label:'R$ inventário',data}]},
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>('R$ '+c.parsed.y.toLocaleString('pt-BR'))}}},
-      scales:{y:{ticks:{callback:v=>'R$ '+Number(v).toLocaleString('pt-BR')}}}
-    }
-  });
-
-  // Status
-  const on  = items.filter(p=>p.active).length;
-  const off = items.length - on;
-  if(chartStatus) chartStatus.destroy();
-  chartStatus = new Chart(document.getElementById('chartStatus'), {
-    type:'doughnut',
-    data:{labels:['Ativos','Inativos'],datasets:[{data:[on,off]}]},
-    options:{plugins:{legend:{position:'bottom'}}}
-  });
-}
 </script>
 </body>
 </html>
