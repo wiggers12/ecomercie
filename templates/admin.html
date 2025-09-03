@@ -1,155 +1,140 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ecomercie — Admin</title>
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+<script>
+  // ==== UI helpers ====
+  function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.__t);window.__t=setTimeout(()=>t.style.display='none',3200);}
+  function setBadge(on){const b=document.getElementById('status-badge');b.textContent=on?'Push ativo':'Push desativado';b.className='badge ' + (on?'ok':'off');}
+  function setDiag(id,val){const el=document.getElementById(id); if(el) el.textContent=val;}
 
-  <!-- PWA -->
-  <link rel="manifest" href="/static/manifest.json" />
-  <meta name="theme-color" content="#2c3e50" />
-  <link rel="icon" href="/static/icon-192.png" type="image/png" />
-  <link rel="apple-touch-icon" href="/static/icon-512.png" />
+  const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isStandalone = ('standalone' in navigator) && navigator.standalone;
+  setDiag('d_pwa', isStandalone ? 'sim' : 'não');
 
-  <style>
-    :root { --bg:#0b1220; --fg:#e8eefc; --accent:#2ecc71; --warn:#ffb020; --err:#ff5a5f; }
-    body { margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f6f7fb; color:#1f2430;}
-    header { background:var(--bg); color:var(--fg); padding:18px 20px; display:flex; align-items:center; justify-content:space-between; }
-    header h1 { font-size:18px; margin:0; }
-    main { max-width:920px; margin:26px auto; padding:0 16px; }
-    .card { background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(15,23,42,.06); padding:18px; margin-bottom:16px; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; }
-    button { border:0; border-radius:10px; padding:12px 16px; cursor:pointer; font-weight:600; }
-    .primary { background:#2c7be5; color:#fff; }
-    .ghost { background:#eef3ff; color:#1f2430; }
-    .badge { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; }
-    .ok { background:#e7f9ef; color:#0e8a4b; }
-    .off { background:#ffe8e8; color:#b42318; }
-    .muted { color:#667085; font-size:14px; }
-    .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:22px; background:#111827; color:#fff; padding:12px 16px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.25); display:none; }
-    .diag { font-size:13px; background:#f8fafc; border-radius:10px; padding:10px; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Ecomercie — Painel do Admin</h1>
-    <span id="status-badge" class="badge off">Push desativado</span>
-  </header>
+  // Botão extra (opcional): re-instalar SW para limpar cache teimoso no iOS
+  // Adicione um botão no HTML se quiser: <button class="ghost" onclick="reinstalarSW()">Reinstalar SW</button>
+  async function reinstalarSW(){
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) { try { await r.unregister(); } catch(e){} }
+      toast('SW removido. Recarregando…'); setTimeout(()=>location.reload(), 600);
+    } else {
+      toast('Este navegador não tem serviceWorker.');
+    }
+  }
+  window.reinstalarSW = reinstalarSW;
 
-  <main>
-    <section class="card">
-      <h3>Notificações</h3>
-      <p class="muted">Ative para receber alertas quando o catálogo for acessado. Após a inscrição, este dispositivo recebe a tag <code>role=admin</code>.</p>
-      <div class="row" style="margin-top:10px">
-        <button class="primary" onclick="ativarPush()">Ativar notificações</button>
-        <button class="ghost"   onclick="testarPush()">Testar push (servidor)</button>
-      </div>
-      <div class="diag" style="margin-top:12px">
-        <div>SDK carregado: <b id="d_sdk">não</b></div>
-        <div>Modo PWA (standalone): <b id="d_pwa">não</b></div>
-        <div>Push habilitado: <b id="d_enabled">desconhecido</b></div>
-        <div>Última ação: <b id="d_last">—</b></div>
-      </div>
-      <p id="info" class="muted" style="margin-top:8px"></p>
-    </section>
+  // ==== Fluxo de ativação robusto (iOS PWA amigável) ====
+  async function ativarPush(){
+    setDiag('d_last','clicou: Ativar notificações');
 
-    <section class="card">
-      <h3>Dicas rápidas</h3>
-      <ul class="muted">
-        <li>iPhone (Safari): instale como app (Compartilhar → <b>Adicionar à Tela de Início</b>) e ative o push <b>dentro do app instalado</b>.</li>
-        <li>Se negou a permissão: Ajustes → Notificações → <i>Ecomercie Admin</i> → permitir.</li>
-      </ul>
-    </section>
-  </main>
-
-  <div id="toast" class="toast"></div>
-
-  <!-- SDK OneSignal depois do HTML -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
-
-  <script>
-    // utilidades UI
-    function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.__t);window.__t=setTimeout(()=>t.style.display='none',3000);}
-    function setBadge(on){const b=document.getElementById('status-badge');b.textContent=on?'Push ativo':'Push desativado';b.className='badge ' + (on?'ok':'off');}
-    function setDiag(id,val){document.getElementById(id).textContent=val;}
-
-    const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isStandalone = ('standalone' in navigator) && navigator.standalone;
-    setDiag('d_pwa', isStandalone ? 'sim' : 'não');
-
-    // botões
-    async function ativarPush(){
-      setDiag('d_last','clicou: Ativar notificações');
-      if (isiOS && !isStandalone) { toast('📲 No iPhone, instale como app (Tela de Início) para habilitar push.'); return; }
-      if (!window.OneSignal){ toast('⌛ SDK ainda carregando…'); return; }
-
-      try {
-        const already = await OneSignal.isPushNotificationsEnabled();
-        if (already){
-          // ✓ garante a TAG mesmo para quem já estava inscrito
-          try { await OneSignal.sendTag('role','admin'); } catch(e){ console.log(e); }
-          setBadge(true); setDiag('d_enabled','sim'); toast('✅ Já está ativado (marcado como ADMIN).');
-          return;
-        }
-
-        // abre o prompt
-        if (OneSignal.Slidedown?.promptPush) {
-          await OneSignal.Slidedown.promptPush();
-        } else if (OneSignal.Notifications?.requestPermission) {
-          await OneSignal.Notifications.requestPermission();
-        } else if (OneSignal.showSlidedownPrompt) {
-          await OneSignal.showSlidedownPrompt();
-        } else {
-          toast('❌ Não foi possível abrir o prompt. Verifique as permissões do sistema.');
-        }
-      } catch(e){ console.log(e); toast('❌ Erro ao solicitar permissão.'); }
+    // iOS exige PWA
+    if (isiOS && !isStandalone) {
+      toast('📲 No iPhone, instale como app: Compartilhar → Adicionar à Tela de Início.');
+      return;
     }
 
-    async function testarPush(){
-      setDiag('d_last','clicou: Testar push');
-      try {
-        const r = await fetch('/test-notify', { cache: 'no-store' });
-        const j = await r.json();
-        toast(j.sent ? '📨 Push de teste enviado!' : '❌ Falha ao enviar push.');
-      } catch { toast('❌ Erro ao chamar o servidor.'); }
+    // SDK carregado?
+    if (!window.OneSignal){ toast('⌛ SDK ainda carregando…'); return; }
+
+    // Suporte real do navegador (importante no iOS)
+    try {
+      const supported = await OneSignal.isPushNotificationsSupported();
+      setDiag('d_sdk', 'sim'); // SDK ok
+      if (!supported) {
+        setDiag('d_enabled','não'); 
+        toast('❌ Este ambiente não suporta Web Push.');
+        return;
+      }
+    } catch {
+      // segue o fluxo mesmo assim
     }
 
-    // inicialização OneSignal
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(async function () {
-      setDiag('d_sdk','sim');
+    try {
+      const already = await OneSignal.isPushNotificationsEnabled();
+      if (already){
+        try { await OneSignal.sendTag('role','admin'); } catch(e){ console.log(e); }
+        setBadge(true); setDiag('d_enabled','sim'); toast('✅ Já está ativado (marcado como ADMIN).');
+        return;
+      }
 
-      OneSignal.init({
-        appId: "2525d779-4ba0-490c-9ac7-b117167053f7",
-        notifyButton: { enable: true, position: "bottom-right", prenotify: true, showCredit: false }
-      });
+      // 1) Peça permissão nativa (recomendado em iOS PWA / SDK novo)
+      if (OneSignal.Notifications?.requestPermission) {
+        await OneSignal.Notifications.requestPermission();
+      }
 
-      // estado inicial
-      try {
-        const enabled = await OneSignal.isPushNotificationsEnabled();
-        setBadge(enabled);
-        setDiag('d_enabled', enabled ? 'sim' : 'não');
-        document.getElementById('info').textContent = enabled
-          ? 'Este dispositivo já está inscrito para receber push.'
-          : 'Clique em "Ativar notificações" para se inscrever.';
+      // 2) Força a inscrição (SDK novo)
+      if (OneSignal.User?.PushSubscription?.optIn) {
+        try { await OneSignal.User.PushSubscription.optIn(); } catch(e){ console.log('optIn falhou:', e); }
+      }
 
-        // ✓ garante TAG para inscritos antigos
-        if (enabled) {
-          try { await OneSignal.sendTag('role','admin'); } catch(e){ console.log(e); }
-        }
-      } catch {}
+      // 3) Fallback pro slidedown (SDK antigo)
+      if (OneSignal.Slidedown?.promptPush) {
+        await OneSignal.Slidedown.promptPush();
+      } else if (OneSignal.showSlidedownPrompt) {
+        await OneSignal.showSlidedownPrompt();
+      }
 
-      // quando a inscrição mudar
-      OneSignal.on('subscriptionChange', async (ok) => {
-        setBadge(ok); setDiag('d_enabled', ok ? 'sim' : 'não');
-        if (ok) {
-          try { await OneSignal.sendTag('role','admin'); toast('✅ Ativado e marcado como ADMIN.'); }
-          catch(e){ console.log(e); toast('⚠️ Ativado, mas falhou ao aplicar a tag.'); }
-        } else {
-          toast('🔕 Notificações desativadas.');
-        }
-      });
+      // Checa estado final
+      const enabledNow = await OneSignal.isPushNotificationsEnabled();
+      setBadge(enabledNow); setDiag('d_enabled', enabledNow ? 'sim' : 'não');
+      if (enabledNow) {
+        try { await OneSignal.sendTag('role','admin'); toast('✅ Ativado e marcado como ADMIN.'); }
+        catch(e){ console.log(e); toast('⚠️ Ativado, mas falhou ao aplicar a tag.'); }
+      } else {
+        toast('⚠️ Permissão não concluída. Verifique Ajustes → Notificações → Ecomercie Admin.');
+      }
+    } catch(e){
+      console.log(e);
+      toast('❌ Erro ao solicitar permissão.');
+    }
+  }
+  window.ativarPush = ativarPush;
+
+  async function testarPush(){
+    setDiag('d_last','clicou: Testar push');
+    try {
+      const r = await fetch('/test-notify', { cache: 'no-store' });
+      const j = await r.json();
+      toast(j.sent ? '📨 Push de teste enviado!' : '❌ Falha ao enviar push.');
+    } catch { toast('❌ Erro ao chamar o servidor.'); }
+  }
+  window.testarPush = testarPush;
+
+  // ==== Inicialização ====
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(async function () {
+    setDiag('d_sdk','sim');
+
+    OneSignal.init({
+      appId: "2525d779-4ba0-490c-9ac7-b117167053f7",
+      notifyButton: { enable: true, position: "bottom-right", prenotify: true, showCredit: false }
     });
-  </script>
-</body>
-</html>
+
+    // Mostra se há suporte real
+    try {
+      const supported = await OneSignal.isPushNotificationsSupported();
+      if (!supported) toast('⚠️ Este navegador não suporta Web Push.');
+    } catch {}
+
+    // Estado inicial + garante TAG para inscritos antigos
+    try {
+      const enabled = await OneSignal.isPushNotificationsEnabled();
+      setBadge(enabled);
+      setDiag('d_enabled', enabled ? 'sim' : 'não');
+      document.getElementById('info').textContent = enabled
+        ? 'Este dispositivo já está inscrito para receber push.'
+        : 'Clique em "Ativar notificações" para se inscrever.';
+      if (enabled) { try { await OneSignal.sendTag('role','admin'); } catch(e){} }
+    } catch {}
+
+    // Reage a mudanças de inscrição
+    OneSignal.on('subscriptionChange', async (ok) => {
+      setBadge(ok); setDiag('d_enabled', ok ? 'sim' : 'não');
+      if (ok) {
+        try { await OneSignal.sendTag('role','admin'); toast('✅ Ativado e marcado como ADMIN.'); }
+        catch(e){ console.log(e); toast('⚠️ Ativado, mas falhou ao aplicar a tag.'); }
+      } else {
+        toast('🔕 Notificações desativadas.');
+      }
+    });
+  });
+</script>
