@@ -8,7 +8,7 @@ export const firebaseConfig = {
   // ATENÇÃO ao storageBucket:
   // O valor correto costuma ser "<projectId>.appspot.com".
   // Se upload der erro com "firebasestorage.app", troque para a linha de baixo.
-  storageBucket: "ecomercie-vendas.appspot.com",
+  storageBucket: "ecomercie-vendas.firebasestorage.app",
   // storageBucket: "ecomercie-vendas.firebasestorage.app",
 
   messagingSenderId: "1054540261609",
