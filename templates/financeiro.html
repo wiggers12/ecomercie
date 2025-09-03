@@ -37,10 +37,18 @@
   .pill.n{background:#fff2da;color:#92400e}
   .pill.c{background:#ffe8e8;color:#b42318}
   .right{margin-left:auto}
+/* Botão Voltar */
+  .back-btn{display:inline-flex;align-items:center;gap:8px;background:#eef3ff;color:#1f2430;border:0;cursor:pointer;padding:10px 14px;border-radius:10px;font-weight:700;font-size:14px}
+  .back-btn:hover{background:#e1e9ff}
+  .back-btn svg{width:18px;height:18px}
 </style>
 </head>
 <body>
 <header>
+  <button class="back-btn" onclick="goBack()" title="Voltar para o Admin">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 19a1 1 0 0 1-.7-.29l-6-6a1 1 0 0 1 0-1.42l6-6a1 1 0 1 1 1.4 1.42L10.9 12l5.3 5.29A1 1 0 0 1 15.5 19z"/></svg>
+    Voltar
+  </button>
   <h1>Financeiro — Ecomercie</h1>
   <div class="toolbar">
     <select id="range">
