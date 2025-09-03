@@ -1,198 +1,489 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catálogo Profissional com Chat - Ecomercie</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-  <style>
-    /* 1. VARIÁVEIS GLOBAIS E RESET */
-    :root {
-      --cor-primaria: #007bff;
-      --cor-secundaria: #6c757d;
-      --cor-sucesso: #28a745;
-      --cor-fundo: #f8f9fa;
-      --cor-card: #ffffff;
-      --cor-texto: #343a40;
-      --cor-texto-claro: #555;
-      --sombra-padrao: 0 4px 15px rgba(0, 0, 0, 0.1);
-      --border-radius: 12px;
-      --font-principal: 'Poppins', sans-serif;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: var(--font-principal); background: var(--cor-fundo); color: var(--cor-texto); line-height: 1.6; }
-
-    /* 2. CABEÇALHO E NAVEGAÇÃO */
-    header { background: var(--cor-card); box-shadow: var(--sombra-padrao); padding: 20px 40px; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-    header h1 { font-size: 1.8em; color: var(--cor-primaria); margin: 0; }
-    .search-container { width: 100%; max-width: 400px; }
-    #search-input { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: var(--border-radius); font-size: 16px; transition: border-color 0.3s, box-shadow 0.3s; }
-    #search-input:focus { outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Moderno - Ecomercie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    /* 3. CONTEÚDO PRINCIPAL E GRID */
-    main { padding: 40px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
+    <style>
+        /* 1. CONFIGURAÇÕES GLOBAIS E CORES MODERNAS */
+        :root {
+            --cor-primaria: #007BFF;
+            --cor-secundaria: #1a3d5f;
+            --cor-sucesso: #28a745;
+            --cor-perigo: #dc3545;
+            --cor-fundo: #f4f6f9;
+            --cor-texto: #333;
+            --cor-branca: #ffffff;
+            --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 10px;
+            --font-principal: 'Poppins', sans-serif;
+        }
 
-    /* 4. CARD DE PRODUTO */
-    .card { background: var(--cor-card); border-radius: var(--border-radius); box-shadow: var(--sombra-padrao); transition: transform 0.3s ease, box-shadow 0.3s ease; overflow: hidden; display: flex; flex-direction: column; }
-    .card:hover { transform: translateY(-10px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
-    .card img { width: 100%; height: 180px; object-fit: cover; }
-    .card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
-    .card h3 { margin: 0 0 10px; font-size: 1.2em; font-weight: 600; }
-    .card p { margin: 0 0 15px; font-size: 14px; color: var(--cor-texto-claro); flex-grow: 1; }
-    .card .price { font-size: 1.4em; font-weight: 600; color: var(--cor-primaria); margin-bottom: 15px; }
-    .card .buy-button { background-color: var(--cor-sucesso); color: white; border: none; padding: 12px 15px; border-radius: var(--border-radius); cursor: pointer; font-size: 1em; font-weight: 500; text-align: center; transition: background-color 0.3s, transform 0.2s; }
-    .card .buy-button:hover { background-color: #218838; transform: scale(1.05); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* 5. RODAPÉ */
-    footer { text-align: center; padding: 20px; margin-top: 40px; background: #343a40; color: #f8f9fa; }
+        body {
+            font-family: var(--font-principal);
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+        }
 
-    /* 6. NOVO: ESTILOS DO CHAT WIDGET */
-    .chat-widget {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      z-index: 1010;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      opacity: 0; /* Começa invisível */
-      transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
+        /* 2. CABEÇALHO E BARRA DE BUSCA */
+        header {
+            background-color: var(--cor-branca);
+            padding: 20px 5%;
+            box-shadow: var(--sombra-suave);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-    .chat-widget.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+        h1 {
+            font-size: 1.8em;
+            color: var(--cor-primaria);
+            font-weight: 700;
+        }
 
-    .chat-message {
-      background: var(--cor-card);
-      padding: 15px 20px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--sombra-padrao);
-      margin-bottom: 10px;
-      max-width: 280px;
-      position: relative;
-    }
-    
-    .chat-message p {
-      margin: 0;
-      font-size: 15px;
-    }
-    
-    .chat-close-btn {
-      position: absolute;
-      top: 5px;
-      right: 8px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: var(--cor-secundaria);
-    }
-    
-    .chat-icon {
-      width: 60px;
-      height: 60px;
-      background: var(--cor-primaria);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: var(--sombra-padrao);
-    }
-    
-    .chat-icon svg {
-      width: 30px;
-      height: 30px;
-      fill: white;
-    }
+        .search-container {
+            flex-grow: 1;
+            max-width: 500px;
+        }
 
-  </style>
+        #search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-family: var(--font-principal);
+        }
+        
+        main {
+            padding: 30px 5%;
+        }
+        
+        /* 3. GRID DE PRODUTOS E CARDS */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--cor-branca);
+            border-radius: var(--border-radius);
+            box-shadow: var(--sombra-suave);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .card-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card h3 {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .card .price {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--cor-primaria);
+            margin: auto 0 15px 0;
+        }
+        
+        .add-to-cart-btn {
+            background-color: var(--cor-primaria);
+            color: var(--cor-branca);
+            border: none;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .add-to-cart-btn:hover {
+            background-color: var(--cor-secundaria);
+        }
+
+        /* 4. CARRINHO DE COMPRAS FLUTUANTE */
+        .cart-icon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--cor-primaria);
+            color: var(--cor-branca);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+            z-index: 1010;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--cor-perigo);
+            color: var(--cor-branca);
+            font-size: 12px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%; /* Começa escondido */
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            background-color: var(--cor-branca);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+            transition: right 0.4s ease-in-out;
+            z-index: 1020;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-sidebar.open {
+            right: 0;
+        }
+        
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-header h2 { font-size: 1.5em; }
+        
+        .close-cart-btn { font-size: 2em; cursor: pointer; background: none; border: none; }
+        
+        #cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--border-radius); margin-right: 15px; }
+        .cart-item-info { flex-grow: 1; }
+        .cart-item-info h4 { margin-bottom: 5px; }
+        .cart-item-info p { color: var(--cor-primaria); font-weight: 600; }
+        .remove-item-btn { color: var(--cor-perigo); background: none; border: none; font-size: 1.5em; cursor: pointer; }
+
+        #cart-empty-message { text-align: center; color: #888; margin-top: 50px; }
+        
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .cart-total { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: 600; margin-bottom: 15px; }
+        
+        .payment-methods { text-align: center; margin-bottom: 15px; }
+        .payment-methods img { height: 25px; margin: 0 5px; opacity: 0.7; }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--cor-sucesso);
+            color: var(--cor-branca);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 5. BOTÕES SOCIAIS FLUTUANTES */
+        .social-buttons {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .social-btn {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--cor-branca);
+            font-size: 24px;
+            text-decoration: none;
+            border-top-right-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+            transition: transform 0.3s ease;
+        }
+
+        .social-btn:hover { transform: translateX(5px); }
+        .whatsapp { background-color: #25D366; }
+        .instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%); }
+        .facebook { background-color: #1877F2; }
+
+    </style>
 </head>
 <body>
 
-  <header>
+    <header>
+        <h1>Meu Catálogo</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="O que você está procurando?">
+        </div>
     </header>
 
-  <main>
-    <div class="grid">
-      </div>
-  </main>
+    <main>
+        <div class="grid" id="product-grid">
+            </div>
+    </main>
 
-  <footer>
-    <p>&copy; 2025 Ecomercie. Todos os direitos reservados.</p>
-  </footer>
-
-  <div class="chat-widget" id="chat-widget">
-    <div class="chat-message" id="chat-message">
-       <button class="chat-close-btn" id="chat-close-btn">&times;</button>
-       <p id="greeting-message">Olá! Se precisar de ajuda, é só chamar.</p>
+    <div class="social-buttons">
+        <a href="#" class="social-btn whatsapp" aria-label="WhatsApp">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21c5.46 0 9.91-4.45 9.91-9.91c0-2.73-1.11-5.2-2.95-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18l-3.12.82l.83-3.04l-.2-.31a8.264 8.264 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24c2.2 0 4.27.86 5.82 2.42a8.183 8.183 0 0 1 2.41 5.83c.02 4.54-3.68 8.23-8.22 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.7-.82c-.22-.09-.38-.12-.54.12c-.16.25-.64.82-.79.98c-.15.16-.3.18-.54.06c-.25-.12-1.05-.39-2-1.23c-.74-.66-1.23-1.47-1.38-1.72c-.15-.25-.02-.38.11-.51c.11-.11.25-.29.37-.43c.12-.14.16-.25.25-.41c.09-.16.04-.3-.02-.43c-.06-.12-.54-1.3-.74-1.78c-.2-.48-.4-.42-.54-.42c-.14,0-.3,0-.46,0c-.16,0-.42.06-.64.31c-.22.25-.86.85-.86,2.07c0,1.22.88,2.4,1,2.56c.12.16,1.72,2.66,4.18,3.72c.59.26,1.05.41,1.41.52c.59.19,1.13.16,1.56.1c.48-.07,1.47-.6,1.67-1.18c.21-.58.21-1.07.15-1.18c-.06-.12-.22-.18-.47-.31z"/></svg>
+        </a>
+        <a href="#" class="social-btn instagram" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8A3.6 3.6 0 0 0 20 16.4V7.6A3.6 3.6 0 0 0 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></svg>
+        </a>
+        <a href="#" class="social-btn facebook" aria-label="Facebook">
+             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5"/></svg>
+        </a>
     </div>
-    <div class="chat-icon" id="chat-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-    </div>
-  </div>
 
-  <script>
-    // SCRIPT PARA FILTRO DE BUSCA
+    <div class="cart-icon" id="cart-icon">
+        🛒
+        <span class="cart-count" id="cart-count">0</span>
+    </div>
+
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>Meu Carrinho</h2>
+            <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        </div>
+        <div id="cart-items">
+             <p id="cart-empty-message">Seu carrinho está vazio.</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total">R$ 0,00</span>
+            </div>
+            <div class="payment-methods">
+                <p style="font-size: 14px; color: #888; margin-bottom: 10px;">Formas de Pagamento:</p>
+                <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa">
+                <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard">
+                <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal">
+                <img src="https://i.imgur.com/aO3l4p2.png" alt="Pix" style="height:25px;">
+            </div>
+            <button class="checkout-btn" id="checkout-btn">Finalizar Compra</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/68b7b09d721af15d8752e01d/1j46ojqe8';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('search-input');
-      const productCards = document.querySelectorAll('.card');
 
-      if (searchInput) {
-        searchInput.addEventListener('keyup', (event) => {
-          const searchTerm = event.target.value.toLowerCase();
-          productCards.forEach(card => {
-            const productName = card.querySelector('h3').textContent.toLowerCase();
-            card.style.display = productName.includes(searchTerm) ? 'flex' : 'none';
-          });
-        });
-      }
+        // --- BANCO DE DADOS DE PRODUTOS (SIMULADO) ---
+        const products = [
+            { id: 1, name: 'Smartphone Pro', price: 2999.90, image: 'https://via.placeholder.com/220x180/007BFF/FFFFFF?text=Fone' },
+            { id: 2, name: 'Fone Bluetooth', price: 399.00, image: 'https://via.placeholder.com/220x180/6C757D/FFFFFF?text=Fone' },
+            { id: 3, name: 'Smartwatch 2', price: 899.50, image: 'https://via.placeholder.com/220x180/28A745/FFFFFF?text=Relógio' },
+            { id: 4, name: 'Notebook Gamer', price: 7499.00, image: 'https://via.placeholder.com/220x180/DC3545/FFFFFF?text=Notebook' },
+            { id: 5, name: 'Câmera DSLR', price: 4500.00, image: 'https://via.placeholder.com/220x180/FFC107/FFFFFF?text=Câmera' },
+            { id: 6, name: 'Tênis de Corrida', price: 450.99, image: 'https://via.placeholder.com/220x180/17A2B8/FFFFFF?text=Tênis' },
+            { id: 7, name: 'Mochila Executiva', price: 299.90, image: 'https://via.placeholder.com/220x180/343A40/FFFFFF?text=Mochila' },
+            { id: 8, name: 'Caixa de Som BT', price: 599.00, image: 'https://via.placeholder.com/220x180/FD7E14/FFFFFF?text=Som' }
+        ];
 
-      // NOVO: SCRIPT PARA O CHAT WIDGET AUTOMÁTICO
-      const chatWidget = document.getElementById('chat-widget');
-      const chatMessage = document.getElementById('chat-message');
-      const greetingMessage = document.getElementById('greeting-message');
-      const chatCloseBtn = document.getElementById('chat-close-btn');
-      const chatIcon = document.getElementById('chat-icon');
+        let cart = [];
 
-      // 1. Define a saudação correta
-      const getGreeting = () => {
-        const currentHour = new Date().getHours();
-        if (currentHour >= 5 && currentHour < 12) {
-          return "Bom dia! ☀️ Bem-vindo(a) ao nosso catálogo. Posso ajudar?";
-        } else if (currentHour >= 12 && currentHour < 18) {
-          return "Boa tarde! 👋 Dê uma olhada nos nossos produtos. Se tiver dúvidas, estou aqui.";
-        } else {
-          return "Boa noite! 🌙 Que bom te ver por aqui. Sinta-se à vontade para explorar.";
+        // --- ELEMENTOS DO DOM ---
+        const productGrid = document.getElementById('product-grid');
+        const searchInput = document.getElementById('search-input');
+        const cartIcon = document.getElementById('cart-icon');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const closeCartBtn = document.getElementById('close-cart-btn');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartCount = document.getElementById('cart-count');
+        const cartTotal = document.getElementById('cart-total');
+        const cartEmptyMessage = document.getElementById('cart-empty-message');
+        const checkoutBtn = document.getElementById('checkout-btn');
+
+        // --- FUNÇÕES ---
+
+        // Função para renderizar os produtos na tela
+        function renderProducts(productsToRender) {
+            productGrid.innerHTML = '';
+            productsToRender.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="card-content">
+                        <h3>${product.name}</h3>
+                        <p class="price">R$ ${product.price.toFixed(2).replace('.', ',')}</p>
+                        <button class="add-to-cart-btn" data-id="${product.id}">Adicionar</button>
+                    </div>
+                `;
+                productGrid.appendChild(card);
+            });
         }
-      };
 
-      greetingMessage.textContent = getGreeting();
+        // Função para atualizar a exibição do carrinho
+        function updateCartDisplay() {
+            cartItemsContainer.innerHTML = '';
+            if (cart.length === 0) {
+                cartEmptyMessage.style.display = 'block';
+            } else {
+                cartEmptyMessage.style.display = 'none';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <p>R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <button class="remove-item-btn" data-id="${item.id}">&times;</button>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+            }
+            
+            // Atualiza contagem e total
+            cartCount.textContent = cart.length;
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+        
+        // Função para adicionar ao carrinho
+        function addToCart(productId) {
+            const productToAdd = products.find(p => p.id === productId);
+            if (productToAdd) {
+                cart.push(productToAdd);
+                updateCartDisplay();
+            }
+        }
+        
+        // Função para remover do carrinho
+        function removeFromCart(productId) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            if(itemIndex > -1) {
+                cart.splice(itemIndex, 1);
+                updateCartDisplay();
+            }
+        }
+        
+        // --- EVENT LISTENERS ---
+        
+        // Filtrar produtos na busca
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+            renderProducts(filteredProducts);
+        });
 
-      // 2. Mostra o widget após 2 segundos
-      setTimeout(() => {
-        chatWidget.classList.add('visible');
-      }, 2000);
+        // Adicionar ao carrinho (usando event delegation)
+        productGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-to-cart-btn')) {
+                const productId = parseInt(e.target.dataset.id);
+                addToCart(productId);
+            }
+        });
 
-      // 3. Lógica para fechar e abrir a mensagem
-      chatCloseBtn.addEventListener('click', () => {
-        chatMessage.style.display = 'none';
-      });
+        // Remover do carrinho (usando event delegation)
+        cartItemsContainer.addEventListener('click', (e) => {
+            if(e.target.classList.contains('remove-item-btn')) {
+                const productId = parseInt(e.target.dataset.id);
+                removeFromCart(productId);
+            }
+        });
+        
+        // Abrir e fechar o carrinho
+        cartIcon.addEventListener('click', () => cartSidebar.classList.add('open'));
+        closeCartBtn.addEventListener('click', () => cartSidebar.classList.remove('open'));
 
-      chatIcon.addEventListener('click', () => {
-        const isMessageVisible = window.getComputedStyle(chatMessage).display === 'block';
-        chatMessage.style.display = isMessageVisible ? 'none' : 'block';
-      });
+        // Botão de Finalizar Compra
+        checkoutBtn.addEventListener('click', () => {
+            if(cart.length > 0) {
+                alert('Obrigado por sua compra! (Isso é uma simulação, nenhum pagamento foi processado).');
+                cart = [];
+                updateCartDisplay();
+                cartSidebar.classList.remove('open');
+            } else {
+                alert('Seu carrinho está vazio!');
+            }
+        });
+
+        // --- INICIALIZAÇÃO ---
+        renderProducts(products);
     });
-  </script>
-
+    </script>
 </body>
 </html>
