@@ -147,6 +147,10 @@
           <input id="f_video" type="file" accept="video/*" />
           <div class="progress" style="margin-top:8px"><i id="p_video"></i></div>
           <div class="muted" id="t_video">0%</div>
+
+          <!-- PREVIEW DO VÍDEO -->
+          <video id="v_preview" controls playsinline
+                 style="display:none;width:100%;max-height:240px;margin-top:10px;background:#000;border-radius:10px"></video>
         </div>
       </div>
 
@@ -170,6 +174,15 @@ const colProducts = () => collection(db, `tenants/${TENANT}/products`);
 let PRODUCTS = [];
 const tb = $("tbody");
 
+/* === Delegação para o botão Editar === */
+tb.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button.edit');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const p  = PRODUCTS.find(x => x.id === id);
+  if (p) openDlg(p);
+});
+
 onSnapshot(query(colProducts(), orderBy("createdAt","desc")), snap=>{
   PRODUCTS = []; tb.innerHTML = "";
   let units=0,value=0,low=0;
@@ -189,7 +202,7 @@ onSnapshot(query(colProducts(), orderBy("createdAt","desc")), snap=>{
       <td>${p.stock??0}</td>
       <td>${p.active ? '<span class="pill on">ativo</span>' : '<span class="pill off">inativo</span>'}</td>
       <td class="right">
-        <button class="btn ghost" onclick='(${openDlg})(JSON.parse(this.dataset.p))' data-p='${JSON.stringify(p)}'>Editar</button>
+        <button class="btn ghost edit" data-id="${p.id}">Editar</button>
       </td>`;
     tb.appendChild(tr);
   });
@@ -232,9 +245,15 @@ function openDlg(p=null){
   $("p_imgs").style.width="0%"; $("t_imgs").textContent="0%";
   $("p_video").style.width="0%"; $("t_video").textContent="0%";
   renderGallery(p?.images||[]);
+
+  /* preview de vídeo na edição */
+  const vprev = $("v_preview");
+  if (p?.video) { vprev.src = p.video; vprev.style.display = ''; }
+  else { vprev.removeAttribute('src'); vprev.style.display = 'none'; }
+
   $("dlg").style.display="flex";
 }
-window.openDlg=openDlg;
+// (se quiser pode remover) window.openDlg=openDlg;
 
 function closeDlg(){ $("dlg").style.display="none"; CURRENT=null; }
 $("btnClose").onclick=closeDlg;
@@ -274,6 +293,20 @@ async function uploadAll(refBase, files, progressBar, progressText){
   return urls;
 }
 
+/* preview imediato ao escolher arquivo de vídeo */
+$("f_video").addEventListener('change', (e)=>{
+  const f = e.target.files?.[0];
+  const vprev = $("v_preview");
+  if (f){
+    vprev.src = URL.createObjectURL(f);
+    vprev.style.display = '';
+    vprev.onloadeddata = () => URL.revokeObjectURL(vprev.src);
+  }else{
+    vprev.removeAttribute('src');
+    vprev.style.display = 'none';
+  }
+});
+
 $("btnSave").onclick=async ()=>{
   const payload={
     name:$("f_name").value.trim(),
@@ -302,7 +335,12 @@ $("btnSave").onclick=async ()=>{
   const toMerge={};
   if(imgUrls.length) toMerge.images=(CURRENT?.images||[]).concat(imgUrls);
   if(vidUrl!==null)  toMerge.video=vidUrl;
+
   if(Object.keys(toMerge).length) await updateDoc(refDoc,toMerge);
+
+  /* se subiu vídeo agora, atualiza a prévia */
+  if (vidUrl){ $("v_preview").src = vidUrl; $("v_preview").style.display = ''; }
+
   closeDlg();
 };
 
